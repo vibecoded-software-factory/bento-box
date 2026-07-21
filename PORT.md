@@ -56,10 +56,22 @@ place, since it already speaks niri's IPC.
 
 ## Milestones
 
-- **M0** — it builds and runs a QML file in a plain window, with live reload.
+- **M0** ✅ — it builds and runs a QML file in a plain window, with live reload.
   Everything Linux-only switched off at the CMake level; nothing rewritten yet.
-- **M1** — `PanelWindow` + `WlrLayershell` semantics on AppKit: anchors,
-  exclusive zone, layers, per-screen instances (`Variants`).
+- **M1** ✅ — `PanelWindow` on AppKit. A cocoa `QsEnginePlugin` (`src/mac/`)
+  overlay-registers `PanelWindow` the same way the wayland/x11 plugins do, backed
+  by `MacPanelWindow : ProxyWindowBase`: anchors + margins pin the window to a
+  screen edge (the exact geometry rule from the X11 backend), `aboveWindows`
+  and `focusable` map to the NSWindow level and non-activating style, and one
+  Objective-C++ bridge (`bridge.mm`) sets `collectionBehavior` so the panel
+  shows on every Space. Per-screen instances come for free from quickshell's
+  `Variants`.
+  **Deferred, on purpose:** the exclusive zone. wlroots/X11 reserve space so
+  maximized windows avoid the panel; macOS exposes no public API for that (only
+  the system Dock and menu bar reserve space). The `exclusiveZone` /
+  `exclusionMode` properties exist because the interface requires them, but they
+  are no-ops on macOS. Revisiting needs private APIs, which the project's
+  public-APIs-only rule rules out.
 - **M2** — `Quickshell` core singleton against `NSScreen`, plus `Process`,
   `FileView` and `IpcHandler` working on macOS.
 - **M3** — the nigiri integration module, in the place `Quickshell.Hyprland`

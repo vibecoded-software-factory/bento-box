@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(quickshell VERSION "0.3.0" LANGUAGES CXX C)
 
+# The macOS backend has one Objective-C++ translation unit (the AppKit bridge).
+if (APPLE)
+	enable_language(OBJCXX)
+endif()
+
 set(UNRELEASED_FEATURES)
 
 set(QT_MIN_VERSION "6.6.0")
@@ -69,6 +74,7 @@ boption(SCREENCOPY_ICC "    Image Copy Capture" ON REQUIRES WAYLAND)
 boption(SCREENCOPY_WLR "    Wlroots Screencopy" ON REQUIRES WAYLAND)
 boption(SCREENCOPY_HYPRLAND_TOPLEVEL "    Hyprland Toplevel Export" ON REQUIRES WAYLAND)
 boption(X11 "X11" ON)
+boption(MAC "macOS AppKit backend" ${APPLE})
 boption(I3 "I3/Sway" ON)
 boption(I3_IPC "  I3/Sway IPC" ON REQUIRES I3)
 boption(SERVICE_STATUS_NOTIFIER "System Tray" ON)
