@@ -1,4 +1,5 @@
 #include "debuginfo.hpp"
+#include <qsystemdetection.h>
 #include <array>
 #include <cstring>
 #include <string_view>
@@ -13,7 +14,14 @@
 #include <qscopeguard.h>
 #include <qtversion.h>
 #include <unistd.h>
+
+// libdrm is Linux's graphics device interface, and the only thing this file
+// uses it for is listing GPUs in the diagnostics blob. macOS has no DRM
+// subsystem at all, so the whole enumeration is compiled out here rather than
+// stubbed per-call.
+#ifndef Q_OS_MACOS
 #include <xf86drm.h>
+#endif
 
 #include "build.hpp"
 
@@ -27,6 +35,14 @@ QString qsVersion() {
 
 QString qtVersion() { return qVersion() % QStringLiteral(" (built against " QT_VERSION_STR ")"); }
 
+#ifdef Q_OS_MACOS
+QString gpuInfo() {
+	// The equivalent enumeration on macOS is Metal's device list, which is
+	// not worth pulling an Objective-C++ dependency into the core module for
+	// a diagnostics line. Left explicit so it reads as ported, not forgotten.
+	return QStringLiteral("<not implemented on macOS>");
+}
+#else
 QString gpuInfo() {
 	auto deviceCount = drmGetDevices2(0, nullptr, 0);
 	if (deviceCount < 0) return "Failed to get DRM device count: " % QString::number(deviceCount);
@@ -96,6 +112,8 @@ QString gpuInfo() {
 
 	return info;
 }
+
+#endif
 
 QString systemInfo() {
 	QString info;

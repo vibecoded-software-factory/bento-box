@@ -64,8 +64,18 @@ QDir* QsPaths::baseRunDir() {
 	if (this->baseRunState == DirState::Unknown) {
 		auto runtimeDir = qEnvironmentVariable("XDG_RUNTIME_DIR");
 		if (runtimeDir.isEmpty()) {
+#ifdef Q_OS_MACOS
+			// macOS has no /run/user: the per-user, per-boot directory with
+			// the same lifetime and permissions is the one confstr(3) reports
+			// as _CS_DARWIN_USER_TEMP_DIR, which is what Qt returns for
+			// TempLocation. Sockets and pid files belong there.
+			runtimeDir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+			qCInfo(logPaths) << "XDG_RUNTIME_DIR was not set, using the per-user temp dir"
+			                 << runtimeDir;
+#else
 			runtimeDir = QString("/run/user/%1").arg(getuid());
 			qCInfo(logPaths) << "XDG_RUNTIME_DIR was not set, defaulting to" << runtimeDir;
+#endif
 		}
 
 		this->mBaseRunDir = QDir(runtimeDir);

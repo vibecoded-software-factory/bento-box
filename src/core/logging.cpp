@@ -1,4 +1,6 @@
 #include "logging.hpp"
+#include <qdir.h>
+#include <qsystemdetection.h>
 #include <array>
 #include <cerrno>
 #include <cstdio>
@@ -32,7 +34,10 @@
 #include <sys/sendfile.h>
 #include <sys/types.h>
 #endif
-#ifdef __FreeBSD__
+// Everything that is not Linux takes the read/write loop below, so the
+// declarations it needs belong to the same condition. Upstream only listed
+// FreeBSD here; macOS lands in the same branch.
+#if defined(__FreeBSD__) || defined(__APPLE__)
 #include <unistd.h>
 #endif
 
@@ -371,6 +376,23 @@ void LoggingThreadProxy::initInThread() {
 }
 
 void LoggingThreadProxy::initFs() { this->logging->initFs(); }
+
+#ifdef Q_OS_MACOS
+// memfd_create is Linux-only. The three things this code needs from it are: a
+// file descriptor, no path in the filesystem, and the ability to hand it to
+// another process. A temp file unlinked immediately after opening gives all
+// three - the inode stays alive as long as any fd refers to it, which is the
+// same lifetime memfd has.
+static int memfd_create(const char* name, unsigned int /*flags*/) {
+	auto path = QDir::tempPath() + QStringLiteral("/quickshell-XXXXXX");
+	auto bytes = path.toLocal8Bit();
+	auto fd = mkstemp(bytes.data());
+	if (fd == -1) return -1;
+	unlink(bytes.constData());
+	Q_UNUSED(name);
+	return fd;
+}
+#endif
 
 void ThreadLogging::init() {
 	auto logMfd = memfd_create("quickshell:logs", 0);
