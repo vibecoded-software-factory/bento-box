@@ -37,10 +37,15 @@ void configurePanelWindow(QWindow* window, bool aboveWindows) {
 
 	// Above ordinary windows sits at the status-bar level (over normal windows,
 	// below the system menu bar and Mission Control) - the closest macOS analogue
-	// to WlrLayer.Top. Below sits under everything, for background layers.
-	// Qt's WindowStaysOnTopHint already lifts it to the floating level; this
-	// overrides that with the level the panel actually wants.
-	nsWindow.level = aboveWindows ? NSStatusWindowLevel : kCGDesktopWindowLevel;
+	// to WlrLayer.Top. Qt's WindowStaysOnTopHint already lifts it to the floating
+	// level; this overrides that with the level the panel actually wants.
+	//
+	// Below: a background layer must sit UNDER every app window. kCGDesktopWindowLevel
+	// is ~INT_MIN and macOS clamps it back to the normal level (0) - a background
+	// panel then covered the windows it should hide behind. The desktop-icon level
+	// is a real, un-clamped level below ordinary windows, which is where a
+	// wallpaper belongs.
+	nsWindow.level = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
 }
 
 } // namespace qs::mac

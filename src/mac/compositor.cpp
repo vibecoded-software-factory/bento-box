@@ -40,21 +40,35 @@ void sendCompositorMessage(const QString& line) {
 	addr.sun_len = static_cast<unsigned char>(SUN_LEN(&addr));
 	auto addrLen = static_cast<socklen_t>(SUN_LEN(&addr));
 
-	auto fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd < 0) return;
-
-	if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), addrLen) == 0) {
-		auto payload = line.toUtf8();
-		if (!payload.endsWith('\n')) payload.append('\n');
-		// Best-effort: a short write or EPIPE just means the compositor went
-		// away mid-send, which is the same as it never being there.
-		auto written = ::write(fd, payload.constData(), payload.size());
-		Q_UNUSED(written);
-	} else {
-		qCDebug(logCompositor) << "no compositor listening at" << path << "-" << std::strerror(errno);
+	// The compositor's accept loop runs on its main thread; while it is busy
+	// (a relayout as our panels map) a connect can momentarily get
+	// ECONNREFUSED even though it is listening. A raw connect succeeds when it
+	// is idle, so retry a few times with a short backoff. A fresh socket per
+	// attempt: a fd whose connect() failed cannot be reconnected.
+	bool connected = false;
+	int lastErrno = 0;
+	for (int attempt = 0; attempt < 5 && !connected; attempt++) {
+		auto fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
+		if (fd < 0) return;
+		if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), addrLen) == 0) {
+			auto payload = line.toUtf8();
+			if (!payload.endsWith('\n')) payload.append('\n');
+			// Best-effort: a short write or EPIPE just means the compositor went
+			// away mid-send, which is the same as it never being there.
+			auto written = ::write(fd, payload.constData(), payload.size());
+			Q_UNUSED(written);
+			connected = true;
+		} else {
+			lastErrno = errno;
+		}
+		::close(fd);
+		if (!connected && lastErrno == ECONNREFUSED) usleep(20000); // 20ms
+		else if (!connected) break;
 	}
 
-	::close(fd);
+	if (!connected) {
+		qCDebug(logCompositor) << "no compositor listening at" << path << "-" << std::strerror(lastErrno);
+	}
 }
 
 } // namespace qs::mac
