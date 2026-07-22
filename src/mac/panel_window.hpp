@@ -103,6 +103,11 @@ private:
 	// times, then given up as "no compositor". Reset to zero on a clean send.
 	static constexpr int kMaxReservationRetries = 10;
 	int mReservationRetries = 0;
+	// Periodically re-asserts an active reservation, so a compositor that
+	// restarted (and lost its in-memory struts) picks it back up within a few
+	// seconds instead of leaving the panel overlapping the windows until it is
+	// itself restarted. Created lazily in connectWindow.
+	QTimer* mReservationHeartbeat = nullptr;
 
 	// clang-format off
 	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MacPanelWindow, bool, bAboveWindows, true, &MacPanelWindow::aboveWindowsChanged);
