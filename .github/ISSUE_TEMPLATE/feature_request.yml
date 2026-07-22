@@ -1,0 +1,37 @@
+name: Feature request
+description: A quickshell service or capability that is missing on macOS
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a port. The strongest request points at what upstream quickshell
+        (or the Linux service it exposes) already does, because that API is what
+        the macOS implementation has to match so existing configs run unchanged.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What should it do
+      description: Describe the behaviour and the QML API, not the implementation.
+    validations:
+      required: true
+
+  - type: input
+    id: upstream
+    attributes:
+      label: Where upstream does this
+      description: >
+        The quickshell type/service, or the Linux facility it wraps (D-Bus
+        MPRIS, UPower, PipeWire, ...). If nothing upstream does it, say so - it
+        is still worth discussing, it just changes the bar.
+      placeholder: "Quickshell.Services.Notifications, or org.freedesktop.Notifications"
+
+  - type: textarea
+    id: macos
+    attributes:
+      label: Anything you know about doing this on macOS
+      description: >
+        A public API that would allow it, or a reason it might not be possible
+        (many Linux facilities have no macOS equivalent). Optional, but usually
+        the hard part.
