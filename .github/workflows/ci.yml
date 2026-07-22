@@ -1,0 +1,37 @@
+name: build
+
+# The gate every change is held to, run by the machine instead of by trust: a
+# clean build of the macOS backend. This is the AppKit port of quickshell, so
+# the Linux backends (Wayland, X11, the compositor integrations that need them)
+# are switched off - they have no libraries on a macOS runner and nothing here
+# touches them. The flags mirror the working local configuration exactly.
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  build:
+    # Matches the environment the macOS backend is developed and verified on.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install qt ninja cli11
+
+      # The Linux backends and the D-Bus/Linux services each have a macOS
+      # replacement under src/mac/, so their originals are switched off - they
+      # have no libraries on a Mac and building them would only clash.
+      - name: Configure
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+          -DWAYLAND=OFF -DX11=OFF -DI3=OFF -DBLUETOOTH=OFF -DNETWORK=OFF
+          -DCRASH_HANDLER=OFF -DUSE_JEMALLOC=OFF
+          -DSERVICE_MPRIS=OFF -DSERVICE_PIPEWIRE=OFF -DSERVICE_UPOWER=OFF
+          -DSERVICE_STATUS_NOTIFIER=OFF -DSERVICE_NOTIFICATIONS=OFF
+          -DSERVICE_PAM=OFF -DSERVICE_POLKIT=OFF -DSERVICE_GREETD=OFF
+
+      - name: Build
+        run: cmake --build build

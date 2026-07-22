@@ -1,0 +1,66 @@
+name: Bug report
+description: A service or panel behaves differently than it should on macOS
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the macOS (AppKit) port of quickshell. Each service mirrors the
+        API of the Linux one it stands in for, so the most useful report says
+        which service or panel, what you expected, and what happened instead -
+        with enough detail to reproduce it on another Mac.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you got instead.
+      placeholder: |
+        1. Opened a config reading Mpris.players
+        2. Started playback in Music
+        3. Expected the track title; got an empty string
+    validations:
+      required: true
+
+  - type: input
+    id: area
+    attributes:
+      label: Which service or backend
+      description: >
+        e.g. Mpris, UPower (battery), Pipewire (audio), Bluetooth, the panel
+        window, the wallpaper. If you know the module, name it.
+      placeholder: Pipewire (audio)
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "26.1 (25B78)"
+    validations:
+      required: true
+
+  - type: input
+    id: qt
+    attributes:
+      label: Qt version
+      description: "`brew list --versions qt`, or however it was built."
+      placeholder: "6.11.1"
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log output
+      description: >
+        Run with the relevant logging category enabled (e.g.
+        `QT_LOGGING_RULES='quickshell.mac.*=true'`) and paste the lines around
+        the moment it happened. Redact anything you would rather not publish.
+      render: text
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Minimal config that reproduces it
+      description: The smallest QML that shows the problem, not your whole shell.
+      render: qml
