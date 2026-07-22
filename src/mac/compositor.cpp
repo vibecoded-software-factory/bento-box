@@ -4,6 +4,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstring>
 
 #include <qbytearray.h>
@@ -23,32 +24,55 @@ QByteArray socketPath() {
 }
 } // namespace
 
-void sendCompositorMessage(const QString& line) {
+bool sendCompositorMessage(const QString& line) {
 	auto path = socketPath();
 
 	sockaddr_un addr {};
 	addr.sun_family = AF_UNIX;
 	if (path.size() >= static_cast<int>(sizeof(addr.sun_path))) {
 		qCWarning(logCompositor) << "socket path too long:" << path;
-		return;
+		return false;
 	}
 	std::memcpy(addr.sun_path, path.constData(), path.size());
+	// macOS (BSD sockets) reads sun_len; connect with the exact address length,
+	// not sizeof(sockaddr_un). Passing the full struct size made connect() fail
+	// for a short path (the compositor looked "not listening" when it was).
+	addr.sun_len = static_cast<unsigned char>(SUN_LEN(&addr));
+	auto addrLen = static_cast<socklen_t>(SUN_LEN(&addr));
 
-	auto fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd < 0) return;
-
-	if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == 0) {
-		auto payload = line.toUtf8();
-		if (!payload.endsWith('\n')) payload.append('\n');
-		// Best-effort: a short write or EPIPE just means the compositor went
-		// away mid-send, which is the same as it never being there.
-		auto written = ::write(fd, payload.constData(), payload.size());
-		Q_UNUSED(written);
-	} else {
-		qCDebug(logCompositor) << "no compositor listening at" << path;
+	// The compositor's accept loop runs on its main thread; while it is busy
+	// (a relayout as our panels map) a connect momentarily gets ECONNREFUSED
+	// even though it is listening - and at startup a shell brings several panels
+	// up at once (bar, wallpaper, popups), each sending here, so the compositor's
+	// small listen backlog fills and refuses connections in bursts. A raw connect
+	// succeeds once it drains, so retry patiently (~600ms) with a short backoff;
+	// the wait only happens on the refused path, never on a clean connect. A
+	// fresh socket per attempt: a fd whose connect() failed cannot be reconnected.
+	bool connected = false;
+	int lastErrno = 0;
+	for (int attempt = 0; attempt < 30 && !connected; attempt++) {
+		auto fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
+		if (fd < 0) return false;
+		if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), addrLen) == 0) {
+			auto payload = line.toUtf8();
+			if (!payload.endsWith('\n')) payload.append('\n');
+			// Best-effort: a short write or EPIPE just means the compositor went
+			// away mid-send, which is the same as it never being there.
+			auto written = ::write(fd, payload.constData(), payload.size());
+			Q_UNUSED(written);
+			connected = true;
+		} else {
+			lastErrno = errno;
+		}
+		::close(fd);
+		if (!connected && lastErrno == ECONNREFUSED) usleep(20000); // 20ms
+		else if (!connected) break;
 	}
 
-	::close(fd);
+	if (!connected) {
+		qCDebug(logCompositor) << "no compositor listening at" << path << "-" << std::strerror(lastErrno);
+	}
+	return connected;
 }
 
 } // namespace qs::mac

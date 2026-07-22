@@ -4,6 +4,7 @@
 #include <qstring.h>
 
 #include "../core/plugin.hpp"
+#include "../windowmanager/windowmanager.hpp"
 #include "panel_window.hpp"
 
 namespace {
@@ -25,6 +26,14 @@ class MacPlugin: public QsEnginePlugin {
 		    "Quickshell._CocoaOverlay",
 		    QQmlModuleImportLatest
 		);
+
+		// The core Quickshell.WindowManager singleton resolves its instance
+		// through a provider a compositor plugin installs; on Wayland that is
+		// WaylandWindowManager. macOS has no foreign-toplevel source, so install
+		// a plain (empty-windowsets) instance - otherwise WindowManager::instance()
+		// invokes an unset std::function and the shell aborts the moment a config
+		// reads WindowManager.windowsets.
+		qs::wm::WindowManager::setProvider([]() { return new qs::wm::WindowManager(); });
 	}
 };
 

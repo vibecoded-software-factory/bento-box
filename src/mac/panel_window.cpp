@@ -85,6 +85,16 @@ void MacPanelWindow::connectWindow() {
 	    this,
 	    &MacPanelWindow::applyNativeConfig
 	);
+	// The layer (aboveWindows) can change AFTER the window is shown - a shell
+	// sets WlrLayershell.layer in a binding, and a background layer must drop to
+	// the desktop level. Reapply the native config on that change too, or the
+	// wallpaper stays above the windows and hides them (only their overlays show).
+	QObject::connect(
+	    this,
+	    &MacPanelWindow::aboveWindowsChanged,
+	    this,
+	    &MacPanelWindow::applyNativeConfig
+	);
 
 	this->applyNativeConfig();
 	// Send the initial reservation now that the panel is configured; later
@@ -212,7 +222,15 @@ void MacPanelWindow::applyNativeConfig() {
 	// win instead of being overwritten by Qt's flag application.
 	auto* window = this->window;
 	auto above = this->bAboveWindows.value();
-	QTimer::singleShot(0, this, [window, above]() { qs::mac::configurePanelWindow(window, above); });
+	// The WlrLayershell shim flags a shell's background (wallpaper) layer with a
+	// dynamic property on the PanelWindow (our parent), since the layer vocabulary
+	// is not part of the core PanelWindow interface. A background layer is
+	// suppressed on macOS - the OS owns the desktop.
+	auto background =
+	    this->parent() != nullptr && this->parent()->property("bentoDesktopBackground").toBool();
+	QTimer::singleShot(0, this, [window, above, background]() {
+		qs::mac::configurePanelWindow(window, above, background);
+	});
 }
 
 // Declare (or drop) this panel's reserved strip to the compositor. This is the
@@ -230,17 +248,34 @@ void MacPanelWindow::updateReservation() {
 	default: edge = QString(); break;
 	}
 
+	QString message;
 	if (zone <= 0 || edge.isEmpty()) {
-		sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
+		message = QStringLiteral("action clear-zone %1").arg(this->mReservationId);
 	} else {
 		// Pass our pid so the compositor drops the reservation if we die
 		// without clearing it (a crash or a hard kill) - the destructor's
 		// clear-zone only runs on a clean exit.
-		sendCompositorMessage(QStringLiteral("action reserve-zone %1 %2 %3 %4")
-		                          .arg(this->mReservationId, edge)
-		                          .arg(zone)
-		                          .arg(::getpid()));
+		message = QStringLiteral("action reserve-zone %1 %2 %3 %4")
+		              .arg(this->mReservationId, edge)
+		              .arg(zone)
+		              .arg(::getpid());
 	}
+
+	if (sendCompositorMessage(message)) {
+		this->mReservationRetries = 0;
+		return;
+	}
+
+	// The send did not land - at startup the compositor maps several panels at
+	// once and refuses connections in bursts while it adopts them on its single
+	// thread. Re-send the CURRENT reservation state a moment later, once it has
+	// drained, so the strut is not silently lost. Bounded, and always re-derived
+	// from the live bindings (not the stale message above), so a value that
+	// changed meanwhile still converges - and if no compositor is really there,
+	// it simply gives up after a few tries.
+	if (this->mReservationRetries >= kMaxReservationRetries) return;
+	this->mReservationRetries++;
+	QTimer::singleShot(500, this, &MacPanelWindow::updateReservation);
 }
 
 // MacPanelInterface

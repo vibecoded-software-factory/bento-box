@@ -98,6 +98,11 @@ private:
 	// Stable per-panel id for the compositor reservation, so this panel sets
 	// and clears its own strut. Assigned once in the constructor.
 	QString mReservationId;
+	// Bounded self-heal for a reservation that could not be delivered (the
+	// compositor busy at startup): re-sent on a short delay, up to this many
+	// times, then given up as "no compositor". Reset to zero on a clean send.
+	static constexpr int kMaxReservationRetries = 10;
+	int mReservationRetries = 0;
 
 	// clang-format off
 	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MacPanelWindow, bool, bAboveWindows, true, &MacPanelWindow::aboveWindowsChanged);

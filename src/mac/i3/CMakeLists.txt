@@ -1,0 +1,5 @@
+qt_add_library(quickshell-mac-i3 STATIC i3.cpp)
+qt_add_qml_module(quickshell-mac-i3 URI Quickshell.I3 VERSION 0.1 DEPENDENCIES QtQuick)
+install_qml_module(quickshell-mac-i3)
+target_link_libraries(quickshell-mac-i3 PRIVATE Qt::Quick)
+target_link_libraries(quickshell PRIVATE quickshell-mac-i3plugin)

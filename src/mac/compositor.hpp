@@ -16,6 +16,11 @@ namespace qs::mac {
 // send silently fails and the panel simply draws without a reserved zone -
 // the same graceful degradation as any platform where exclusion is
 // unavailable. bento never requires a compositor to be present.
-void sendCompositorMessage(const QString& line);
+//
+// Returns true if the line was delivered. A caller that needs the message to
+// land (a reservation, not a fire-and-forget) can retry on false: at startup a
+// shell maps several panels at once and the compositor, busy adopting them on
+// its single thread, refuses connections in bursts until it drains.
+bool sendCompositorMessage(const QString& line);
 
 } // namespace qs::mac

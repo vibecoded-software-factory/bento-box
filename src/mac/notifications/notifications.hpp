@@ -215,6 +215,10 @@ public:
 	}
 
 signals:
+	// Emitted when a notification arrives. Never fires on macOS (nothing to
+	// receive), but a shell binds `onNotification` to it, so it must exist.
+	void notification(qs::mac::notifications::Notification* notification);
+
 	void keepOnReloadChanged();
 	void persistenceSupportedChanged();
 	void bodySupportedChanged();
