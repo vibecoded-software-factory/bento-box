@@ -14,8 +14,15 @@ WlrLayershell* WlrLayershell::qmlAttachedProperties(QObject* object) {
 void WlrLayershell::setLayer(WlrLayer::Enum layer) {
 	if (this->mLayer == layer) return;
 	this->mLayer = layer;
-	// Top/Overlay float above ordinary windows; Background/Bottom do not.
-	if (this->mPanel) this->mPanel->setProperty("aboveWindows", layer >= WlrLayer::Top);
+	if (this->mPanel) {
+		// The Background layer is a shell's wallpaper. macOS owns the desktop, so
+		// the panel backend suppresses that surface (invisible + click-through)
+		// rather than drawing it over the user's windows. Flag it before
+		// aboveWindows, whose change reapplies the native config and must see it.
+		this->mPanel->setProperty("bentoDesktopBackground", layer == WlrLayer::Background);
+		// Top/Overlay float above ordinary windows; Background/Bottom do not.
+		this->mPanel->setProperty("aboveWindows", layer >= WlrLayer::Top);
+	}
 	emit this->layerChanged();
 }
 

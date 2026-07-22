@@ -15,8 +15,12 @@ namespace qs::mac {
 //     system menu bar), matching WlrLayer.Top.
 //
 // `aboveWindows` picks the level (status-bar vs a normal, below-everything
-// level). Called after the native window exists and whenever the layer/level
-// inputs change. A no-op (logged once) if the QWindow has no native handle yet.
-void configurePanelWindow(QWindow* window, bool aboveWindows);
+// level). `desktopBackground` marks a shell's wallpaper layer: macOS owns the
+// desktop, so instead of covering the user's windows with it we make it
+// invisible and click-through (a shell drives the OS wallpaper through
+// Quickshell.Mac.Desktop). Called after the native window exists and whenever
+// the layer/level inputs change. A no-op (logged once) if the QWindow has no
+// native handle yet.
+void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground);
 
 } // namespace qs::mac

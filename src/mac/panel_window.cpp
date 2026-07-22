@@ -222,7 +222,15 @@ void MacPanelWindow::applyNativeConfig() {
 	// win instead of being overwritten by Qt's flag application.
 	auto* window = this->window;
 	auto above = this->bAboveWindows.value();
-	QTimer::singleShot(0, this, [window, above]() { qs::mac::configurePanelWindow(window, above); });
+	// The WlrLayershell shim flags a shell's background (wallpaper) layer with a
+	// dynamic property on the PanelWindow (our parent), since the layer vocabulary
+	// is not part of the core PanelWindow interface. A background layer is
+	// suppressed on macOS - the OS owns the desktop.
+	auto background =
+	    this->parent() != nullptr && this->parent()->property("bentoDesktopBackground").toBool();
+	QTimer::singleShot(0, this, [window, above, background]() {
+		qs::mac::configurePanelWindow(window, above, background);
+	});
 }
 
 // Declare (or drop) this panel's reserved strip to the compositor. This is the

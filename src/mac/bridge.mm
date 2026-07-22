@@ -18,7 +18,7 @@ static NSWindow* nsWindowFor(QWindow* window) {
 	return view.window;
 }
 
-void configurePanelWindow(QWindow* window, bool aboveWindows) {
+void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground) {
 	NSWindow* nsWindow = nsWindowFor(window);
 	if (nsWindow == nil) {
 		static bool warned = false;
@@ -35,16 +35,28 @@ void configurePanelWindow(QWindow* window, bool aboveWindows) {
 	nsWindow.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
 	    | NSWindowCollectionBehaviorStationary | NSWindowCollectionBehaviorIgnoresCycle;
 
+	if (desktopBackground) {
+		// A shell's wallpaper layer. macOS draws the desktop itself, so this
+		// surface has no place: it can only sit over the user's windows and hide
+		// them. It cannot be pushed underneath by level either - Qt's cocoa QPA
+		// keeps resetting a non-floating window's level back to normal, undoing
+		// any below-normal level we set. So make it invisible and click-through
+		// instead: the real desktop shows, the shell keeps rendering into it
+		// harmlessly, and the chosen wallpaper is put on the OS through
+		// Quickshell.Mac.Desktop.
+		nsWindow.alphaValue = 0.0;
+		nsWindow.ignoresMouseEvents = YES;
+		return;
+	}
+
+	nsWindow.alphaValue = 1.0;
+	nsWindow.ignoresMouseEvents = NO;
+
 	// Above ordinary windows sits at the status-bar level (over normal windows,
 	// below the system menu bar and Mission Control) - the closest macOS analogue
 	// to WlrLayer.Top. Qt's WindowStaysOnTopHint already lifts it to the floating
-	// level; this overrides that with the level the panel actually wants.
-	//
-	// Below: a background layer must sit UNDER every app window. kCGDesktopWindowLevel
-	// is ~INT_MIN and macOS clamps it back to the normal level (0) - a background
-	// panel then covered the windows it should hide behind. The desktop-icon level
-	// is a real, un-clamped level below ordinary windows, which is where a
-	// wallpaper belongs.
+	// level; this overrides that with the level the panel actually wants. Below
+	// sits just under the normal level.
 	nsWindow.level = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
 }
 
