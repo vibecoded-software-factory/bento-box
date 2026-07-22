@@ -117,7 +117,9 @@ private:
 class PwNode: public QObject {
 	Q_OBJECT;
 	// clang-format off
-	/// The object id of the node (the CoreAudio device id).
+	/// The object id of the node. Unique per node - a duplex CoreAudio device
+	/// (capture and playback at once) is presented as a separate source and sink
+	/// node, each with its own id, so this is NOT the raw CoreAudio device id.
 	Q_PROPERTY(quint32 id READ id CONSTANT);
 	/// The node's name.
 	Q_PROPERTY(QString name READ name CONSTANT);
@@ -145,6 +147,10 @@ public:
 	explicit PwNode(quint32 deviceId, bool input, QObject* parent = nullptr);
 
 	[[nodiscard]] quint32 id() const { return this->mId; }
+	// The backing CoreAudio AudioObjectID. Distinct from id(): a duplex device
+	// shares one AudioObjectID across its source and sink nodes, which is exactly
+	// why id() cannot be it. Used to drive CoreAudio calls (e.g. set-default).
+	[[nodiscard]] quint32 deviceId() const { return this->mDeviceId; }
 	[[nodiscard]] QString name() const { return this->mName; }
 	[[nodiscard]] QString description() const { return this->mDescription; }
 	[[nodiscard]] QString nickname() const { return this->mNickname; }
@@ -165,6 +171,7 @@ signals:
 
 private:
 	quint32 mId;
+	quint32 mDeviceId;
 	bool mInput;
 	QString mName;
 	QString mDescription;
