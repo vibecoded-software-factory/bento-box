@@ -199,6 +199,27 @@ place, since it already speaks niri's IPC.
     value here since macOS already shows these items in its own menu bar.
     Verified: the URI imports, `items.length == 0`, the enums resolve, and a
     `Repeater` over the model creates zero delegates.
+  - **Bluetooth** ✅ — `Quickshell.Bluetooth` on macOS (`src/mac/bluetooth/`,
+    Objective-C++), backed by **IOBluetooth** (classic BR-EDR). Mirrors the
+    BlueZ service's surface so DMS binds unchanged: the `Bluetooth` singleton
+    (`defaultAdapter`/`adapters`/`devices`), `BluetoothAdapter` (name, `enabled`
+    write toggles power, `state`, `devices`, `adapterId`), `BluetoothDevice`
+    (address, name, icon, `state`, `connected` write connects/disconnects,
+    `paired`/`bonded`, `adapter`) and the two state enums. The default host
+    controller gives adapter name/power; `[IOBluetoothDevice pairedDevices]`
+    gives the device list, refreshed on a 2s poll (IOBluetooth's change
+    callbacks are per-device and awkward; a poll is the honest simple choice).
+    connect/disconnect run `openConnection`/`closeConnection` off the main
+    thread; power uses `IOBluetoothPreferenceSetControllerPowerState`.
+    IOBluetooth exposes no analogue for discoverable/pairable/trusted/blocked/
+    wakeAllowed/per-device battery or programmatic pair/forget - those are
+    present for binding compatibility but inert, and clearly marked as such.
+    **Verified live** against `system_profiler`: adapter enabled with the right
+    id, and all 12 paired devices enumerated with correct names, addresses and
+    icons (mouse/keyboard/headphones/generic). The write paths (connect,
+    disconnect, power) are wired with standard IOBluetooth calls but were not
+    toggled live, to avoid disconnecting the Magic Mouse/Keyboard/Trackpad in
+    active use.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

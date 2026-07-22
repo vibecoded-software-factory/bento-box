@@ -42,3 +42,7 @@ add_subdirectory(pipewire)
 # Quickshell.Services.SystemTray on macOS: an API-compatible stub. macOS has no
 # public way to enumerate other apps' tray items, so items is always empty.
 add_subdirectory(systemtray)
+
+# Quickshell.Bluetooth on macOS, backed by IOBluetooth (the BlueZ service is
+# Linux-only). Paired devices, connection state and adapter power.
+add_subdirectory(bluetooth)
