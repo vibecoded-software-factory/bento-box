@@ -115,38 +115,41 @@ place, since it already speaks niri's IPC.
     full metadata/state/capability/position API, and the two enums.
     The data comes from Apple's **MediaRemote** private framework - which since
     macOS 15.4 refuses access to unentitled processes, but Apple's own signed
-    binaries (`com.apple.*`) are allowed. So the backend spawns an **entitled
-    `/usr/bin/osascript` (JXA) helper** (`nowplaying.js`, embedded as a
-    resource) as a long-lived `QProcess` that streams now-playing JSON lines,
-    parsed into the player. No private entitlement on bento, no compiled helper,
-    and it covers browser media (Chrome/YouTube), not just Music/Spotify.
-    **Verified live:** the player populates with identity, title, artist, album,
-    playback state and a live-advancing position from the system now-playing.
-    Position is computed from the info's OWN timestamp
-    (`kMRMediaRemoteNowPlayingInfoTimestamp`), not arrival time: a browser
-    reports `elapsed=0` with a fresh timestamp, so `position = elapsed +
-    (now - timestamp)` - verified advancing 44→45→46→47 against a 213s track.
-    **Transport commands verified live** against both Music and a browser
-    (Chrome/YouTube) via `MRMediaRemoteSendCommand`: play, pause and toggle
-    flip the state on demand, and next/previous move the track where there is a
-    queue. The catch that made them look broken at first: the command reaches
-    mediaremoted asynchronously over XPC, so a one-shot helper that exits the
-    instant after the call drops the message - the command mode now pumps the
-    runloop ~1s before returning so the delivery flushes. (This, not any
-    browser refusal, is why the earlier YouTube test seemed unresponsive; with
-    the flush a browser obeys just like a native player.)
-    **Album art is NOT reachable from this osascript path for any app.**
-    Verified directly: `MRNowPlayingRequest.localNowPlayingItem.nowPlayingInfo`
-    carries only `kMRMediaRemoteNowPlayingInfoArtworkIdentifier`, never the
-    `...ArtworkData` bytes - true even for Music, whose art the UI clearly
-    shows. The bytes come only through the C function
-    `MRMediaRemoteGetNowPlayingInfo(queue, block)`, which takes a dispatch
-    queue and a completion block that osascript/JXA cannot call (binding the
-    block throws). So album art universally needs a compiled helper dylib (the
-    mediaremote-adapter approach), a bigger dependency deferred until wanted;
-    the helper's `art` field stays null until then.
-    macOS gotcha: JXA's `console.log` writes to STDERR; the helper writes JSON
-    to real stdout via `NSFileHandle` so the parser's stdout read sees it.
+    binaries (`com.apple.*`) are allowed. The backend spawns the **entitled
+    system `/usr/bin/perl`** (`com.apple.perl5`) running a **compiled
+    `MediaRemoteAdapter.framework`** (vendored from ungive/mediaremote-adapter,
+    BSD-3, built from source by our CMake as Objective-C; see
+    `src/mac/mpris/mediaremote-adapter/`). Perl loads the framework with the
+    stock `DynaLoader` and calls its exported `adapter_*` entry points; because
+    perl is the entitled host, the framework reaches MediaRemote. `... stream`
+    is a long-lived `QProcess` emitting now-playing JSON (parsed into the
+    player); `... send <n>` is a one-shot for transport commands. It covers
+    browser media (Chrome/YouTube), not just Music/Spotify.
+    Why compiled and not the earlier pure-osascript helper: album artwork.
+    `MRNowPlayingRequest` (reachable from JXA) exposes only an artwork
+    *identifier*, never the bytes - for ANY app, Music included. The bytes come
+    only from `MRMediaRemoteGetNowPlayingInfo(queue, block)`, whose dispatch
+    queue + completion block osascript/JXA cannot call. The compiled framework
+    can, so it returns `artworkData` (base64); the backend decodes it to a temp
+    file per track and exposes a `file://` URL. **Verified live:** Music and
+    Chrome both populate identity/title/artist, a live-advancing position (from
+    the info timestamp), working play/pause/toggle/next/previous, and real
+    album art (the actual cover, not a placeholder).
+    Build/runtime note: the framework path is baked in at build time
+    (`$<TARGET_BUNDLE_DIR:MediaRemoteAdapter>`) and overridable via
+    `$BENTO_MRA_FRAMEWORK`; the perl loader ships embedded as a Qt resource.
+    Relocatable packaging (framework inside an app bundle) is a later concern.
+    Position is computed from the info's OWN timestamp, not arrival time: a
+    browser reports `elapsedTime=0` with a fresh timestamp, so
+    `position = elapsed + (now - timestamp)`.
+    Two gotchas found integrating the framework: (1) it must compile as
+    Objective-C, not Objective-C++ - the perl loader resolves the exported
+    `adapter_*_env` entry points by plain C name, and C++ mangles them out of
+    reach; (2) transport commands reach mediaremoted asynchronously over XPC, so
+    a caller that exits the instant after the call drops the message - the
+    compiled adapter's `send` handles the flush, which the earlier ad-hoc
+    osascript command mode did not (making a browser look like it refused
+    commands when it did not).
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

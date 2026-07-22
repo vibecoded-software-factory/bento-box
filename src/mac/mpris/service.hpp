@@ -11,10 +11,13 @@
 namespace qs::mac::mpris {
 
 // Backend singleton driving the macOS now-playing bridge. Spawns the entitled
-// osascript helper (nowplaying.js) as a long-lived Process and parses its JSON
-// lines into the single MprisPlayer; sends transport commands by spawning the
-// helper one-shot in command mode. Not a QML type - the Mpris facade forwards
-// to it.
+// system perl running the vendored MediaRemoteAdapter framework as a long-lived
+// Process (`... stream`), parses its JSON lines into the single MprisPlayer, and
+// sends transport commands by spawning perl one-shot (`... send <n>`). Perl is
+// Apple-signed (com.apple.perl5), which is how the framework reaches the
+// otherwise-restricted MediaRemote - and being compiled it can call the
+// block-based API that carries album artwork, which the osascript path could
+// not. Not a QML type - the Mpris facade forwards to it.
 class MprisIpc: public QObject {
 	Q_OBJECT;
 
@@ -34,20 +37,33 @@ private slots:
 private:
 	explicit MprisIpc();
 
-	static QString helperPath();
+	// The perl loader (extracted from the Qt resource) and the adapter framework
+	// bundle path (baked in at build time, overridable via $BENTO_MRA_FRAMEWORK).
+	static QString loaderPath();
+	static QString frameworkPath();
+	QStringList adapterArgs(const QStringList& command) const;
+
 	void startStream();
 	void applySnapshot(const QByteArray& line);
+	// Decode a payload's base64 artworkData to a temp file, returning a file://
+	// URL, or empty when the payload carries no artwork.
+	QString writeArtwork(const class QJsonObject& payload);
 
 	QProcess mStream;
 	QByteArray mBuffer;
 	MprisPlayer* mPlayer = nullptr;
 	ObjectModel<MprisPlayer> mPlayers {this};
+
+	// Artwork is written to a fresh temp file per track change; the sequence
+	// number forces a new URL so a bound Image reloads instead of caching.
+	QString mArtContentId;
+	int mArtSeq = 0;
 };
 
 ///! Media players exposed by the system now-playing.
 /// The macOS counterpart of the Linux `Mpris` service. `Mpris.players` holds
 /// zero or one MprisPlayer (the system aggregates now-playing to one session),
-/// fed by the MediaRemote framework through an entitled osascript helper.
+/// fed by the MediaRemote framework through an entitled perl helper.
 class MprisQml: public QObject {
 	Q_OBJECT;
 	// clang-format off
