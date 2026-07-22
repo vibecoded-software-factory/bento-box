@@ -1,0 +1,5 @@
+qt_add_library(quickshell-mac-polkit STATIC polkit.cpp)
+qt_add_qml_module(quickshell-mac-polkit URI Quickshell.Services.Polkit VERSION 0.1 DEPENDENCIES QtQuick)
+install_qml_module(quickshell-mac-polkit)
+target_link_libraries(quickshell-mac-polkit PRIVATE Qt::Quick)
+target_link_libraries(quickshell PRIVATE quickshell-mac-polkitplugin)

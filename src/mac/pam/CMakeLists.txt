@@ -1,0 +1,5 @@
+qt_add_library(quickshell-mac-pam STATIC pam.cpp)
+qt_add_qml_module(quickshell-mac-pam URI Quickshell.Services.Pam VERSION 0.1 DEPENDENCIES QtQuick)
+install_qml_module(quickshell-mac-pam)
+target_link_libraries(quickshell-mac-pam PRIVATE Qt::Quick)
+target_link_libraries(quickshell PRIVATE quickshell-mac-pamplugin)

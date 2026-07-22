@@ -51,3 +51,18 @@ add_subdirectory(bluetooth)
 # no public way to receive other apps' notifications, so the tracked list is
 # always empty.
 add_subdirectory(notifications)
+
+# Quickshell.Wayland shim: shells reach for wlroots layer-shell directly
+# (WlrLayershell attached object); on macOS it forwards onto the AppKit
+# PanelWindow. WlSessionLock is inert (the system owns the lock screen).
+add_subdirectory(wayland)
+
+# Quickshell.Hyprland stub: multi-compositor shells import it unconditionally;
+# inert on macOS, where nigiri is the compositor (see Quickshell.Nigiri).
+add_subdirectory(hyprland)
+
+# Multi-compositor / Linux-auth module stubs DMS imports unconditionally, inert
+# on macOS: sway/i3 IPC, toplevel window sets, PAM and polkit.
+add_subdirectory(i3)
+add_subdirectory(pam)
+add_subdirectory(polkit)
