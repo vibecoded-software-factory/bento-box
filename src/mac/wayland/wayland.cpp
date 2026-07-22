@@ -42,9 +42,7 @@ void WlrLayershell::setKeyboardFocus(WlrKeyboardFocus::Enum focus) {
 		// app's key window, so the panel backend must actively take (and later
 		// give back) app focus for these panels. OnDemand panels get focus the
 		// macOS-native way: when clicked.
-		this->mPanel->setProperty(
-		    "bentoExclusiveKeyboard", focus == WlrKeyboardFocus::Exclusive
-		);
+		this->mPanel->setProperty("bentoExclusiveKeyboard", focus == WlrKeyboardFocus::Exclusive);
 	}
 	emit this->keyboardFocusChanged();
 }

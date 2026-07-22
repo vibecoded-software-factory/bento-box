@@ -125,8 +125,9 @@ namespace {
 // The app that was frontmost before an exclusive-keyboard panel took focus,
 // and which panel took it. Main-thread only. Held weakly-by-value: if the app
 // quits meanwhile, activateWithOptions is a harmless no-op.
-NSRunningApplication* gPreviousApp = nil; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
-void* gKeyboardOwner = nullptr;           // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+NSRunningApplication* gPreviousApp =
+    nil;                        // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+void* gKeyboardOwner = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 } // namespace
 
 void takeKeyboardForPanel(QWindow* window, void* owner) {
@@ -138,7 +139,9 @@ void takeKeyboardForPanel(QWindow* window, void* owner) {
 	// with the shell itself.
 	if (!NSApp.active) {
 		NSRunningApplication* frontmost = NSWorkspace.sharedWorkspace.frontmostApplication;
-		if (frontmost != nil && frontmost.processIdentifier != NSProcessInfo.processInfo.processIdentifier) {
+		if (frontmost != nil
+		    && frontmost.processIdentifier != NSProcessInfo.processInfo.processIdentifier)
+		{
 			gPreviousApp = frontmost;
 		}
 	}
