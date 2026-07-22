@@ -52,6 +52,11 @@ public:
 	void trySetWidth(qint32 implicitWidth) override;
 	void trySetHeight(qint32 implicitHeight) override;
 	void setScreen(QuickshellScreenInfo* screen) override;
+	// After the base applies the QML `mask` to the QWindow, mirror it onto the
+	// native input shape: cocoa's QWindow::setMask does no input passthrough,
+	// so without this every transparent shell surface ate the clicks meant
+	// for whatever sits underneath (bar buttons, dismiss zones, apps).
+	void onPolished() override;
 	// Watches the owning interface for the dynamic properties the Wayland shim
 	// writes (bentoExclusiveKeyboard, bentoDesktopBackground). Shells flip
 	// keyboardFocus while the window stays visible, so a visibility signal

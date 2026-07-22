@@ -2,6 +2,8 @@
 
 #import <AppKit/AppKit.h>
 #import <objc/runtime.h>
+#include <qhash.h>
+#include <qregion.h>
 #include <qwindow.h>
 
 namespace qs::mac {
@@ -162,6 +164,80 @@ void yieldKeyboardFromPanel(void* owner) {
 	if (previous != nil && !previous.terminated) {
 		[previous activateWithOptions:0];
 	}
+}
+
+namespace {
+
+// Input-region emulation state: per-NSWindow mask (window-local, top-left
+// coords) and the app-wide pointer monitors that keep ignoresMouseEvents in
+// step with the cursor. Main-thread only.
+QHash<NSWindow*, QRegion>& inputMasks() {
+	static QHash<NSWindow*, QRegion> masks;
+	return masks;
+}
+id gLocalMoveMonitor = nil;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+id gGlobalMoveMonitor = nil; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+
+// The cursor moved (anywhere): each masked window ignores mouse events
+// exactly while the cursor is OUTSIDE its mask, so by the time a click
+// arrives the window server already routes it to the right window.
+void refreshInputMasksAt(NSPoint screenPoint) {
+	for (auto it = inputMasks().constBegin(); it != inputMasks().constEnd(); ++it) {
+		NSWindow* nsWindow = it.key();
+		NSRect frame = nsWindow.frame;
+		auto localX = screenPoint.x - frame.origin.x;
+		auto localTopY = NSMaxY(frame) - screenPoint.y;
+		bool inside = it.value().contains(QPoint((int) localX, (int) localTopY));
+		if (nsWindow.ignoresMouseEvents == inside) {
+			nsWindow.ignoresMouseEvents = !inside;
+		}
+	}
+}
+
+void ensurePointerMonitors() {
+	if (gLocalMoveMonitor != nil) return;
+	NSEventMask mask = NSEventMaskMouseMoved | NSEventMaskLeftMouseDragged;
+	gLocalMoveMonitor =
+	    [NSEvent addLocalMonitorForEventsMatchingMask:mask
+	                                          handler:^NSEvent*(NSEvent* event) {
+		                                          refreshInputMasksAt(NSEvent.mouseLocation);
+		                                          return event;
+	                                          }];
+	// The global monitor sees moves delivered to OTHER apps - which is
+	// exactly where the cursor lives while a masked window is ignoring
+	// events; without it the window could never win events back.
+	gGlobalMoveMonitor =
+	    [NSEvent addGlobalMonitorForEventsMatchingMask:mask
+	                                           handler:^(NSEvent* event) {
+		                                           (void) event;
+		                                           refreshInputMasksAt(NSEvent.mouseLocation);
+	                                           }];
+}
+
+} // namespace
+
+void applyInputMask(QWindow* window, const QRegion& region, bool active) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil) return;
+
+	// An EMPTY active mask means "no input at all" - Qt already maps that to
+	// WindowTransparentForInput/ignoresMouseEvents; nothing to track.
+	if (!active || region.isEmpty()) {
+		if (inputMasks().remove(nsWindow) > 0 && active == false) {
+			nsWindow.ignoresMouseEvents = NO;
+		}
+		return;
+	}
+
+	inputMasks()[nsWindow] = region;
+	ensurePointerMonitors();
+	refreshInputMasksAt(NSEvent.mouseLocation);
+}
+
+void clearInputMask(QWindow* window) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil) return;
+	inputMasks().remove(nsWindow);
 }
 
 void assertPanelFrame(QWindow* window, const QRect& geometry) {
