@@ -168,6 +168,24 @@ place, since it already speaks niri's IPC.
     Not exercised for lack of a second state change during the test: live
     charge/discharge transitions rely on the IOKit notification (wired, plus the
     10s timer as a floor).
+  - **Audio (Pipewire)** ✅ — `Quickshell.Services.Pipewire` on macOS
+    (`src/mac/pipewire/`), backed by **CoreAudio**. Mirrors the audio slice of
+    the Linux service so DMS's volume widgets bind unchanged: the `Pipewire`
+    singleton (`nodes`, `defaultAudioSink`/`Source`, `preferredDefaultAudioSink`/
+    `Source` for switching the system default, `ready`), `PwNode`
+    (id/name/isSink/type/properties/audio), `PwNodeAudio` (volume/muted/channels/
+    volumes, all read-write), the `PwNodeType`/`PwAudioChannel` enums, and a
+    `PwObjectTracker` that is a no-op (CoreAudio devices are always fully
+    available - no binding step). Each CoreAudio device becomes a node per
+    direction it carries; volume is the device's master scalar (falling back to
+    averaging channels), mute is `kAudioDevicePropertyMute`. Updates arrive on
+    CoreAudio property listeners (device list, default in/out, and volume/mute on
+    the current defaults), bounced to the main thread. **No link graph** -
+    CoreAudio has none, so `links`/`linkGroups` are always empty.
+    **Verified live** against `osascript`/system volume: enumerated speakers +
+    two mics with correct types and channel counts; read the default sink at
+    78%; set it to 35% from QML and the system volume followed; muted and
+    unmuted through the same path - then restored.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

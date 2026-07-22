@@ -34,3 +34,7 @@ add_subdirectory(mpris)
 # Quickshell.Services.UPower on macOS, backed by IOKit power sources (the D-Bus
 # UPower service is Linux-only).
 add_subdirectory(upower)
+
+# Quickshell.Services.Pipewire on macOS, backed by CoreAudio (the real Pipewire
+# service is Linux-only). Audio nodes + volumes only; no link graph.
+add_subdirectory(pipewire)
