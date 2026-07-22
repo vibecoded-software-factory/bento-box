@@ -22,3 +22,7 @@ target_link_libraries(quickshell-mac-init PRIVATE Qt::Quick Qt::Qml)
 # exist. The module is small enough that skipping the PCH costs nothing.
 
 target_link_libraries(quickshell PRIVATE quickshell-macplugin quickshell-mac-init)
+
+# The nigiri integration module (Quickshell.Nigiri): the macOS compositor
+# integration, in the place Quickshell.Hyprland occupies on Linux.
+add_subdirectory(nigiri)

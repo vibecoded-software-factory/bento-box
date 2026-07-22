@@ -85,8 +85,23 @@ place, since it already speaks niri's IPC.
   macOS paths M0 fixed): `qs ipc call m2 ping` → "pong", `add 3 4` → 7.
   Not exercised for lack of hardware: multi-monitor enumeration and hot-plug
   (`screensChanged`) - single display only.
-- **M3** — the nigiri integration module, in the place `Quickshell.Hyprland`
-  occupies for DMS.
+- **M3** 🚧 — the nigiri integration module (`Quickshell.Nigiri`, in `src/mac/nigiri/`),
+  the macOS counterpart of `Quickshell.Hyprland`. Structured the same way: a
+  backend singleton (`NigiriIpc`) owning a persistent event socket read with the
+  shared `StreamReader`, an `ObjectModel<NigiriWorkspace>` updated in place, and
+  a QML facade singleton `Nigiri`. Transport is nigiri's niri-shaped JSON line
+  protocol on one socket (`event-stream` to subscribe - it replays current state
+  first - and `action <line>` to command), not Hyprland's two `NAME>>DATA`
+  sockets. **Done:** workspaces (id/idx/name/active/focused, live), focused
+  workspace and window id, `NigiriWorkspace.activate()`, and `Nigiri.dispatch()`.
+  Verified live end to end: the model populates from the event stream, reacts to
+  external workspace switches, and a QML-initiated `activate()`/`dispatch()`
+  switches nigiri. **Next:** a windows/toplevels model (WindowOpenedOrChanged /
+  WindowClosed are already carried on `Nigiri.rawEvent`), and monitors.
+  One macOS gotcha found and worked around: `QLocalSocket`'s
+  `stateChanged(ConnectedState)` can arrive before the device is open
+  (`isOpen()` false, writes return -1); the subscribe must wait for the
+  `connected()` signal instead.
 - **M4+** — services, one at a time, in the order DMS needs them.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
