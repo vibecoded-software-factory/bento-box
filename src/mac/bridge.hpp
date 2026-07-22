@@ -64,6 +64,14 @@ void applyInputMask(QWindow* window, const QRegion& region, bool active);
 // Drop any input-mask tracking for this window (teardown path).
 void clearInputMask(QWindow* window);
 
+// Cheap, idempotent re-assert of the panel's window level. Freshly-shown
+// panels race Qt's own flag application: the deferred full config sometimes
+// loses and the window spends its first frames at Qt's floating level, BELOW
+// the bar - flipping the z-order (and therefore which window receives a
+// click) nondeterministically. Called from every polish pass to win that
+// race within a frame.
+void assertPanelLevel(QWindow* window, bool aboveWindows);
+
 // Give app focus back after an exclusive-keyboard panel hides or is torn
 // down: reactivate the app remembered by takeKeyboardForPanel. A no-op unless
 // `owner` is the panel currently holding the grab, so overlapping modals
