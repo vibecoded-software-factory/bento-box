@@ -1,5 +1,7 @@
 qt_add_library(quickshell-mac-wayland STATIC
 	wayland.cpp
+	toplevel.cpp
+	screencopy.mm
 )
 
 qt_add_qml_module(quickshell-mac-wayland
@@ -10,6 +12,13 @@ qt_add_qml_module(quickshell-mac-wayland
 
 install_qml_module(quickshell-mac-wayland)
 
-target_link_libraries(quickshell-mac-wayland PRIVATE Qt::Quick)
+# The toplevel bridge consumes the compositor IPC's window model; the
+# screencopy view captures via ScreenCaptureKit.
+target_link_libraries(quickshell-mac-wayland PRIVATE
+	Qt::Quick
+	quickshell-mac-nigiri
+	"-framework ScreenCaptureKit"
+	"-framework CoreGraphics"
+)
 
 target_link_libraries(quickshell PRIVATE quickshell-mac-waylandplugin)
