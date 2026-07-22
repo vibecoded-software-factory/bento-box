@@ -220,6 +220,21 @@ place, since it already speaks niri's IPC.
     disconnect, power) are wired with standard IOBluetooth calls but were not
     toggled live, to avoid disconnecting the Magic Mouse/Keyboard/Trackpad in
     active use.
+  - **Notifications** ✅ (stub) — `Quickshell.Services.Notifications` on macOS
+    (`src/mac/notifications/`) is an **API-compatible stub**: `NotificationServer`
+    (capability flags honored as storage), `Notification`, `NotificationAction`
+    and the `NotificationUrgency`/`NotificationCloseReason` enums exist so a
+    shell that imports the service binds without error, but `trackedNotifications`
+    is **always empty**. Like SystemTray, this is a hard platform limit: the
+    Linux service works by making the shell the freedesktop notification *server*
+    so every app's notification is delivered to it; macOS has **no public API for
+    a third-party app to receive another app's notifications**
+    (DistributedNotificationCenter, NSWorkspace and notification service
+    extensions all fail for this - Apple blocks it by design). The only route is
+    scraping the private Notification Center SQLite DB, which needs Full Disk
+    Access and breaks each OS release - deferred. Verified: the URI imports,
+    `NotificationServer` is creatable and its capability flags round-trip,
+    `trackedNotifications.length == 0`, and the enums resolve.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

@@ -46,3 +46,8 @@ add_subdirectory(systemtray)
 # Quickshell.Bluetooth on macOS, backed by IOBluetooth (the BlueZ service is
 # Linux-only). Paired devices, connection state and adapter power.
 add_subdirectory(bluetooth)
+
+# Quickshell.Services.Notifications on macOS: an API-compatible stub. macOS has
+# no public way to receive other apps' notifications, so the tracked list is
+# always empty.
+add_subdirectory(notifications)
