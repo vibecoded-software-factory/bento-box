@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: brew install qt ninja
+        run: brew install qt ninja cli11
 
       # The Linux backends and the D-Bus/Linux services each have a macOS
       # replacement under src/mac/, so their originals are switched off - they
