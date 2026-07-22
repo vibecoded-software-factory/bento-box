@@ -248,17 +248,34 @@ void MacPanelWindow::updateReservation() {
 	default: edge = QString(); break;
 	}
 
+	QString message;
 	if (zone <= 0 || edge.isEmpty()) {
-		sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
+		message = QStringLiteral("action clear-zone %1").arg(this->mReservationId);
 	} else {
 		// Pass our pid so the compositor drops the reservation if we die
 		// without clearing it (a crash or a hard kill) - the destructor's
 		// clear-zone only runs on a clean exit.
-		sendCompositorMessage(QStringLiteral("action reserve-zone %1 %2 %3 %4")
-		                          .arg(this->mReservationId, edge)
-		                          .arg(zone)
-		                          .arg(::getpid()));
+		message = QStringLiteral("action reserve-zone %1 %2 %3 %4")
+		              .arg(this->mReservationId, edge)
+		              .arg(zone)
+		              .arg(::getpid());
 	}
+
+	if (sendCompositorMessage(message)) {
+		this->mReservationRetries = 0;
+		return;
+	}
+
+	// The send did not land - at startup the compositor maps several panels at
+	// once and refuses connections in bursts while it adopts them on its single
+	// thread. Re-send the CURRENT reservation state a moment later, once it has
+	// drained, so the strut is not silently lost. Bounded, and always re-derived
+	// from the live bindings (not the stale message above), so a value that
+	// changed meanwhile still converges - and if no compositor is really there,
+	// it simply gives up after a few tries.
+	if (this->mReservationRetries >= kMaxReservationRetries) return;
+	this->mReservationRetries++;
+	QTimer::singleShot(500, this, &MacPanelWindow::updateReservation);
 }
 
 // MacPanelInterface
