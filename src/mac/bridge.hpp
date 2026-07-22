@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qregion.h>
+
 class QWindow;
 class QRect;
 
@@ -46,6 +48,21 @@ void assertPanelFrame(QWindow* window, const QRect& geometry);
 // panel across the grab's lifetime; it must outlive the QWindow, which shells
 // destroy on close (the window is often gone by the time focus is returned).
 void takeKeyboardForPanel(QWindow* window, void* owner);
+
+// Approximate a Wayland INPUT REGION on macOS. Shells mask their large
+// transparent panels (popouts, OSD, notification layers) down to the visible
+// widget so clicks elsewhere fall through to whatever is underneath; cocoa's
+// QWindow::setMask does not do input passthrough, so those windows silently
+// ate every click on their transparent area. macOS has no partial input
+// shape either - the standard technique (Electron does the same) is to track
+// the pointer and flip the whole window's ignoresMouseEvents depending on
+// whether the cursor is inside the mask. `region` is in the window's local
+// top-left coordinates; an inactive/empty call removes the tracking and
+// restores normal hit-testing.
+void applyInputMask(QWindow* window, const QRegion& region, bool active);
+
+// Drop any input-mask tracking for this window (teardown path).
+void clearInputMask(QWindow* window);
 
 // Give app focus back after an exclusive-keyboard panel hides or is torn
 // down: reactivate the app remembered by takeKeyboardForPanel. A no-op unless

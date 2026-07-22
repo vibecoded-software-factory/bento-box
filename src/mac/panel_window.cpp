@@ -66,6 +66,9 @@ MacPanelWindow::~MacPanelWindow() {
 	// yield never runs - give app focus back here too. No-op unless this
 	// panel holds the keyboard grab.
 	qs::mac::yieldKeyboardFromPanel(this);
+	if (this->window != nullptr) {
+		qs::mac::clearInputMask(this->window);
+	}
 }
 
 void MacPanelWindow::connectWindow() {
@@ -137,6 +140,13 @@ void MacPanelWindow::connectWindow() {
 			}
 		});
 		this->mReservationHeartbeat->start();
+	}
+}
+
+void MacPanelWindow::onPolished() {
+	this->ProxyWindowBase::onPolished();
+	if (this->window != nullptr) {
+		qs::mac::applyInputMask(this->window, this->window->mask(), this->mask() != nullptr);
 	}
 }
 
