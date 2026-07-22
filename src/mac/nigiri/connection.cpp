@@ -98,6 +98,11 @@ void NigiriIpc::onEventSocketReady() {
 void NigiriIpc::handleEvent(const QString& name, const QJsonObject& data) {
 	if (name == "WorkspacesChanged") {
 		this->applyWorkspaces(data.value("workspaces").toArray());
+	} else if (name == "WindowsChanged") {
+		// niri's bulk snapshot: how the event stream seeds a new subscriber -
+		// and the only way a RECONNECTING client can drop windows that closed
+		// while it was away. Reconcile: upsert what is present, prune the rest.
+		this->applyWindows(data.value("windows").toArray());
 	} else if (name == "WorkspaceActivated") {
 		auto* ws = this->findWorkspaceById(data.value("id").toInt(), false);
 		if (ws != nullptr) this->bFocusedWorkspace = ws;
@@ -125,6 +130,31 @@ void NigiriIpc::updateActiveWindow() {
 	// binding off focusedWindowId, so it recomputes itself; this only tracks
 	// the pointer for `Nigiri.activeWindow`.
 	this->bActiveWindow = this->findWindowById(this->bFocusedWindowId.value(), false);
+}
+
+void NigiriIpc::applyWindows(const QJsonArray& array) {
+	// Same in-place reconcile as applyWorkspaces: update keyed by id so QML
+	// delegates survive, then prune what the snapshot no longer contains.
+	QList<qint32> seen;
+	for (auto value: array) {
+		auto object = value.toObject();
+		auto id = object.value("id").toInt();
+		seen.append(id);
+		auto* w = this->findWindowById(id, true);
+		w->updateFromJson(object);
+	}
+
+	const auto current = this->mWindows.values();
+	for (auto* object: current) {
+		auto* w = qobject_cast<NigiriWindow*>(object);
+		if (w != nullptr && !seen.contains(w->bindableId().value())) {
+			if (this->bActiveWindow.value() == w) this->bActiveWindow = nullptr;
+			this->mWindows.removeObject(w);
+			w->deleteLater();
+		}
+	}
+
+	this->updateActiveWindow();
 }
 
 NigiriWindow* NigiriIpc::findWindowById(qint32 id, bool createIfMissing) {
