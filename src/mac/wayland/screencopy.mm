@@ -1,10 +1,9 @@
 #include "screencopy.hpp"
 
 #import <CoreGraphics/CoreGraphics.h>
-#import <ScreenCaptureKit/ScreenCaptureKit.h>
-
 #include <QtQuick/qquickwindow.h>
 #include <QtQuick/qsgsimpletexturenode.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 #include <qimage.h>
 #include <qloggingcategory.h>
 #include <qmetaobject.h>
@@ -22,13 +21,14 @@ Q_LOGGING_CATEGORY(logScreencopy, "quickshell.mac.screencopy");
 // windows of one app, falling back to the pid's frontmost.
 CGWindowID windowIdFor(pid_t pid, const QString& title) {
 	auto* list = (__bridge_transfer NSArray*) CGWindowListCopyWindowInfo(
-	    kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID
+	    kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+	    kCGNullWindowID
 	);
 	CGWindowID fallback = kCGNullWindowID;
 	for (NSDictionary* entry in list) {
 		if ([entry[(id) kCGWindowOwnerPID] intValue] != pid) continue;
 		if ([entry[(id) kCGWindowLayer] intValue] != 0) continue;
-		auto windowId = (CGWindowID) [entry[(id) kCGWindowNumber] unsignedIntValue];
+		auto windowId = (CGWindowID)[entry[(id) kCGWindowNumber] unsignedIntValue];
 		if (fallback == kCGNullWindowID) fallback = windowId;
 		NSString* name = entry[(id) kCGWindowName];
 		if (name != nil && QString::fromNSString(name) == title) return windowId;
@@ -40,59 +40,89 @@ CGWindowID windowIdFor(pid_t pid, const QString& title) {
 // QImage on the main thread. Fails soft (empty image) when the window is
 // gone or Screen Recording permission is missing.
 void captureWindow(CGWindowID windowId, std::function<void(QImage)> deliver) {
-	[SCShareableContent getShareableContentExcludingDesktopWindows:YES
-	                                           onScreenWindowsOnly:YES
-	                                             completionHandler:^(
-	                                                 SCShareableContent* content, NSError* error
-	                                             ) {
-		if (error != nil || content == nil) {
-			qCWarning(logScreencopy)
-			    << "shareable content unavailable (Screen Recording permission?):"
-			    << QString::fromNSString(error.localizedDescription);
-			dispatch_async(dispatch_get_main_queue(), ^{ deliver(QImage()); });
-			return;
-		}
-		SCWindow* target = nil;
-		for (SCWindow* window in content.windows) {
-			if (window.windowID == windowId) {
-				target = window;
-				break;
-			}
-		}
-		if (target == nil) {
-			dispatch_async(dispatch_get_main_queue(), ^{ deliver(QImage()); });
-			return;
-		}
-		auto* filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:target];
-		auto* config = [[SCStreamConfiguration alloc] init];
-		config.width = (size_t) (target.frame.size.width * filter.pointPixelScale);
-		config.height = (size_t) (target.frame.size.height * filter.pointPixelScale);
-		config.showsCursor = NO;
-		[SCScreenshotManager captureImageWithFilter:filter
-		                              configuration:config
-		                          completionHandler:^(CGImageRef image, NSError* captureError) {
-			if (captureError != nil || image == nil) {
-				dispatch_async(dispatch_get_main_queue(), ^{ deliver(QImage()); });
-				return;
-			}
-			// Copy into a QImage while the CGImage is alive.
-			auto width = CGImageGetWidth(image);
-			auto height = CGImageGetHeight(image);
-			QImage frame((int) width, (int) height, QImage::Format_ARGB32_Premultiplied);
-			frame.fill(Qt::transparent);
-			CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-			CGContextRef ctx = CGBitmapContextCreate(
-			    frame.bits(), width, height, 8, frame.bytesPerLine(), colorSpace,
-			    kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host
-			);
-			CGColorSpaceRelease(colorSpace);
-			if (ctx != nullptr) {
-				CGContextDrawImage(ctx, CGRectMake(0, 0, width, height), image);
-				CGContextRelease(ctx);
-			}
-			dispatch_async(dispatch_get_main_queue(), ^{ deliver(frame); });
-		}];
-	}];
+	[SCShareableContent
+	    getShareableContentExcludingDesktopWindows:YES
+	                           onScreenWindowsOnly:YES
+	                             completionHandler:^(SCShareableContent* content, NSError* error) {
+		                             if (error != nil || content == nil) {
+			                             qCWarning(logScreencopy)
+			                                 << "shareable content unavailable (Screen Recording "
+			                                    "permission?):"
+			                                 << QString::fromNSString(error.localizedDescription);
+			                             dispatch_async(dispatch_get_main_queue(), ^{
+				                             deliver(QImage());
+			                             });
+			                             return;
+		                             }
+		                             SCWindow* target = nil;
+		                             for (SCWindow* window in content.windows) {
+			                             if (window.windowID == windowId) {
+				                             target = window;
+				                             break;
+			                             }
+		                             }
+		                             if (target == nil) {
+			                             dispatch_async(dispatch_get_main_queue(), ^{
+				                             deliver(QImage());
+			                             });
+			                             return;
+		                             }
+		                             auto* filter = [[SCContentFilter alloc]
+		                                 initWithDesktopIndependentWindow:target];
+		                             auto* config = [[SCStreamConfiguration alloc] init];
+		                             config.width =
+		                                 (size_t) (target.frame.size.width * filter.pointPixelScale);
+		                             config.height =
+		                                 (size_t) (target.frame.size.height * filter.pointPixelScale);
+		                             config.showsCursor = NO;
+		                             [SCScreenshotManager
+		                                 captureImageWithFilter:filter
+		                                          configuration:config
+		                                      completionHandler:^(
+		                                          CGImageRef image,
+		                                          NSError* captureError
+		                                      ) {
+			                                      if (captureError != nil || image == nil) {
+				                                      dispatch_async(dispatch_get_main_queue(), ^{
+					                                      deliver(QImage());
+				                                      });
+				                                      return;
+			                                      }
+			                                      // Copy into a QImage while the CGImage is alive.
+			                                      auto width = CGImageGetWidth(image);
+			                                      auto height = CGImageGetHeight(image);
+			                                      QImage frame(
+			                                          (int) width,
+			                                          (int) height,
+			                                          QImage::Format_ARGB32_Premultiplied
+			                                      );
+			                                      frame.fill(Qt::transparent);
+			                                      CGColorSpaceRef colorSpace =
+			                                          CGColorSpaceCreateDeviceRGB();
+			                                      CGContextRef ctx = CGBitmapContextCreate(
+			                                          frame.bits(),
+			                                          width,
+			                                          height,
+			                                          8,
+			                                          frame.bytesPerLine(),
+			                                          colorSpace,
+			                                          kCGImageAlphaPremultipliedFirst
+			                                              | kCGBitmapByteOrder32Host
+			                                      );
+			                                      CGColorSpaceRelease(colorSpace);
+			                                      if (ctx != nullptr) {
+				                                      CGContextDrawImage(
+				                                          ctx,
+				                                          CGRectMake(0, 0, width, height),
+				                                          image
+				                                      );
+				                                      CGContextRelease(ctx);
+			                                      }
+			                                      dispatch_async(dispatch_get_main_queue(), ^{
+				                                      deliver(frame);
+			                                      });
+		                                      }];
+	                             }];
 }
 
 } // namespace
