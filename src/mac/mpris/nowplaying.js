@@ -29,6 +29,13 @@ function run(argv) {
 	if (argv[0] === 'command') {
 		ObjC.bindFunction('MRMediaRemoteSendCommand', ['bool', ['int', 'id']]);
 		$.MRMediaRemoteSendCommand(parseInt(argv[1], 10), $());
+		// The command is delivered to mediaremoted asynchronously (over XPC). If
+		// this process exits immediately after the call the message is dropped
+		// and nothing happens - so pump the runloop briefly to let the delivery
+		// flush before returning. Without this, commands silently no-op.
+		$.NSRunLoop.currentRunLoop.runUntilDate(
+			$.NSDate.dateWithTimeIntervalSinceNow(1.0)
+		);
 		return;
 	}
 

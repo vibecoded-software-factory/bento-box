@@ -126,21 +126,24 @@ place, since it already speaks niri's IPC.
     (`kMRMediaRemoteNowPlayingInfoTimestamp`), not arrival time: a browser
     reports `elapsed=0` with a fresh timestamp, so `position = elapsed +
     (now - timestamp)` - verified advancing 44→45→46→47 against a 213s track.
-    **Album art** is written to a temp file once per track and passed by
-    `file://` path (binary is too heavy to stream inline); the helper reads
-    `kMRMediaRemoteNowPlayingInfoArtworkData` from the now-playing item. This
-    works for apps that publish the bytes inline (Music/Spotify), but **a
-    browser publishes only an artwork *identifier*, not the bytes** - the data
-    for those is reachable only through the C function
+    **Transport commands verified live** against Music (`MRMediaRemoteSendCommand`):
+    play, pause, toggle (both directions), next and previous all take effect.
+    The catch that made them look broken at first: the command reaches
+    mediaremoted asynchronously over XPC, so a one-shot helper that exits the
+    instant after the call drops the message - the command mode now pumps the
+    runloop ~1s before returning so the delivery flushes. (A browser still
+    ignores MediaRemote commands, but that is the browser's choice, not our
+    bug - a real player obeys.)
+    **Album art is NOT reachable from this osascript path for any app.**
+    Verified directly: `MRNowPlayingRequest.localNowPlayingItem.nowPlayingInfo`
+    carries only `kMRMediaRemoteNowPlayingInfoArtworkIdentifier`, never the
+    `...ArtworkData` bytes - true even for Music, whose art the UI clearly
+    shows. The bytes come only through the C function
     `MRMediaRemoteGetNowPlayingInfo(queue, block)`, which takes a dispatch
     queue and a completion block that osascript/JXA cannot call (binding the
-    block throws). Getting browser art would need a compiled helper dylib (the
-    mediaremote-adapter approach), a bigger dependency deferred until wanted.
-    **Not yet verified:** transport commands (play/pause/next/previous) are
-    wired through the helper's command mode (`MRMediaRemoteSendCommand`, which
-    returns success), but their effect could not be confirmed against the test
-    case (a browser, which does not accept MediaRemote commands) - needs a
-    check with an app that does (Music/Spotify).
+    block throws). So album art universally needs a compiled helper dylib (the
+    mediaremote-adapter approach), a bigger dependency deferred until wanted;
+    the helper's `art` field stays null until then.
     macOS gotcha: JXA's `console.log` writes to STDERR; the helper writes JSON
     to real stdout via `NSFileHandle` so the parser's stdout read sees it.
 
