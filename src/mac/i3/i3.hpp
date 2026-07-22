@@ -1,5 +1,7 @@
 #pragma once
 #include <qobject.h>
+#include <qstring.h>
+#include <qstringlist.h>
 #include <qqmlintegration.h>
 #include <qtmetamacros.h>
 #include <qvariant.h>
@@ -20,5 +22,24 @@ public:
 	[[nodiscard]] ObjectModel<I3Workspace>* workspaces() { return &this->mWorkspaces; }
 	Q_INVOKABLE void dispatch(const QString& = {}) {}
 private: ObjectModel<I3Workspace> mWorkspaces {this};
+};
+class I3IpcListener: public QObject {
+	Q_OBJECT;
+	Q_PROPERTY(QStringList subscriptions READ subscriptions WRITE setSubscriptions NOTIFY subscriptionsChanged);
+	QML_ELEMENT;
+public:
+	explicit I3IpcListener(QObject* p = nullptr): QObject(p) {}
+	[[nodiscard]] QStringList subscriptions() const { return this->mSubscriptions; }
+	void setSubscriptions(const QStringList& s) {
+		this->mSubscriptions = s;
+		emit this->subscriptionsChanged();
+	}
+	Q_INVOKABLE void start() {}
+	Q_INVOKABLE void stop() {}
+signals:
+	void ipcEvent(const QString& type, const QString& payload);
+	void subscriptionsChanged();
+private:
+	QStringList mSubscriptions;
 };
 } // namespace

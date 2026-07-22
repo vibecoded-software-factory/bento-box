@@ -7,6 +7,8 @@
 #include <qtmetamacros.h>
 #include <qtypes.h>
 
+#include <QtQuick/qquickitem.h>
+
 #include "../../core/doc.hpp"
 #include "../../core/model.hpp"
 
@@ -150,6 +152,7 @@ private:
 class IdleInhibitor: public QObject {
 	Q_OBJECT;
 	Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged);
+	Q_PROPERTY(QObject* window READ window WRITE setWindow NOTIFY windowChanged);
 	QML_ELEMENT;
 
 public:
@@ -160,12 +163,20 @@ public:
 		this->mEnabled = enabled;
 		emit this->enabledChanged();
 	}
+	[[nodiscard]] QObject* window() const { return this->mWindow; }
+	void setWindow(QObject* window) {
+		if (this->mWindow == window) return;
+		this->mWindow = window;
+		emit this->windowChanged();
+	}
 
 signals:
 	void enabledChanged();
+	void windowChanged();
 
 private:
 	bool mEnabled = false;
+	QObject* mWindow = nullptr;
 };
 
 ///! A foreign toplevel (another app's window). Inert stub; the real window list
@@ -216,6 +227,50 @@ signals:
 
 private:
 	ObjectModel<Toplevel> mToplevels {this};
+};
+
+///! A live view of a captured window/screen. Inert stub - renders nothing
+/// (macOS window capture would be ScreenCaptureKit); keeps the overview from
+/// erroring.
+class ScreencopyView: public QQuickItem {
+	Q_OBJECT;
+	// clang-format off
+	Q_PROPERTY(QObject* captureSource READ captureSource WRITE setCaptureSource NOTIFY captureSourceChanged);
+	Q_PROPERTY(bool live READ live WRITE setLive NOTIFY liveChanged);
+	Q_PROPERTY(bool paintCursor READ paintCursor WRITE setPaintCursor NOTIFY paintCursorChanged);
+	// clang-format on
+	QML_ELEMENT;
+
+public:
+	explicit ScreencopyView(QQuickItem* parent = nullptr): QQuickItem(parent) {}
+	[[nodiscard]] QObject* captureSource() const { return this->mCaptureSource; }
+	void setCaptureSource(QObject* source) {
+		if (this->mCaptureSource == source) return;
+		this->mCaptureSource = source;
+		emit this->captureSourceChanged();
+	}
+	[[nodiscard]] bool live() const { return this->mLive; }
+	void setLive(bool live) {
+		if (this->mLive == live) return;
+		this->mLive = live;
+		emit this->liveChanged();
+	}
+	[[nodiscard]] bool paintCursor() const { return this->mPaintCursor; }
+	void setPaintCursor(bool value) {
+		if (this->mPaintCursor == value) return;
+		this->mPaintCursor = value;
+		emit this->paintCursorChanged();
+	}
+
+signals:
+	void captureSourceChanged();
+	void liveChanged();
+	void paintCursorChanged();
+
+private:
+	QObject* mCaptureSource = nullptr;
+	bool mLive = false;
+	bool mPaintCursor = false;
 };
 
 ///! Session lock. No macOS analogue - inert stub for binding compatibility.
