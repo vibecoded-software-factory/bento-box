@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qelapsedtimer.h>
 #include <qobject.h>
 #include <qprocess.h>
 #include <qqmlintegration.h>
@@ -44,6 +45,9 @@ private:
 	QStringList adapterArgs(const QStringList& command) const;
 
 	void startStream();
+	// Backoff-restart for a dead/unstartable stream: doubles the delay per
+	// consecutive quick failure (1s..32s); reset after a healthy run.
+	void scheduleStreamRestart();
 	void applySnapshot(const QByteArray& line);
 	// Decode a payload's base64 artworkData to a temp file, returning a file://
 	// URL, or empty when the payload carries no artwork.
@@ -51,6 +55,8 @@ private:
 
 	QProcess mStream;
 	QByteArray mBuffer;
+	QElapsedTimer mStreamStarted;
+	int mStreamRestartStrikes = 0;
 	MprisPlayer* mPlayer = nullptr;
 	ObjectModel<MprisPlayer> mPlayers {this};
 
