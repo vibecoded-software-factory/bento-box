@@ -68,6 +68,21 @@ void Socket::onSocketDisconnected() {
 void Socket::onSocketError(QLocalSocket::LocalSocketError error) {
 	qCWarning(logSocket) << "Socket error for" << this << error;
 	emit this->error(error);
+
+	// A FAILED connection attempt (server absent/refusing while it restarts)
+	// never emits disconnected() - the socket was never connected - so nothing
+	// cleaned up the dead QLocalSocket. It stayed parked in this->socket,
+	// setConnected(true) refused to dial again (socket != nullptr), and no
+	// connectionStateChanged reached QML: a client's reconnect-with-backoff
+	// silently died on its first refused attempt. Mirror onSocketDisconnected:
+	// drop the dead socket and notify, leaving retry pacing to the client.
+	if (!this->connected && !this->disconnecting && this->socket != nullptr) {
+		this->targetConnected = false;
+		this->socket->deleteLater();
+		this->socket = nullptr;
+		this->buffer.clear();
+		emit this->connectionStateChanged();
+	}
 }
 
 bool Socket::isConnected() const { return this->connected; }
