@@ -213,7 +213,12 @@ void MacPanelWindow::updateDimensions() {
 		geometry.setHeight(this->implicitHeight());
 	}
 
+	this->mIntendedGeometry = geometry;
 	this->window->setGeometry(geometry);
+	// Qt's setGeometry alone can leave the native frame clamped below the
+	// menu-bar strip when it ran while the window was still at the normal
+	// level (see assertPanelFrame); push the intended frame through natively.
+	assertPanelFrame(this->window, geometry);
 }
 
 void MacPanelWindow::updateAboveWindows() {
@@ -245,8 +250,12 @@ void MacPanelWindow::applyNativeConfig() {
 	// suppressed on macOS - the OS owns the desktop.
 	auto background =
 	    this->parent() != nullptr && this->parent()->property("bentoDesktopBackground").toBool();
-	QTimer::singleShot(0, this, [window, above, background]() {
+	QTimer::singleShot(0, this, [this, window, above, background]() {
 		qs::mac::configurePanelWindow(window, above, background);
+		// The panel was shown (and possibly clamped out of the menu-bar strip)
+		// before this deferred config raised its level; re-assert the intended
+		// frame now that the level permits the true screen edge.
+		assertPanelFrame(window, this->mIntendedGeometry);
 	});
 }
 
