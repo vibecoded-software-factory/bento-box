@@ -1,13 +1,12 @@
 #pragma once
 
+#include <QtQuick/qquickitem.h>
 #include <qobject.h>
 #include <qpointer.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
 #include <qtmetamacros.h>
 #include <qtypes.h>
-
-#include <QtQuick/qquickitem.h>
 
 #include "../../core/doc.hpp"
 #include "../../core/model.hpp"

@@ -1,9 +1,4 @@
 #include "compositor.hpp"
-
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-
 #include <cerrno>
 #include <cstring>
 
@@ -11,6 +6,9 @@
 #include <qloggingcategory.h>
 #include <qstring.h>
 #include <qtenvironmentvariables.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
 
 namespace qs::mac {
 
@@ -70,7 +68,8 @@ bool sendCompositorMessage(const QString& line) {
 	}
 
 	if (!connected) {
-		qCDebug(logCompositor) << "no compositor listening at" << path << "-" << std::strerror(lastErrno);
+		qCDebug(logCompositor) << "no compositor listening at" << path << "-"
+		                       << std::strerror(lastErrno);
 	}
 	return connected;
 }

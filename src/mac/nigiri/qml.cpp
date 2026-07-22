@@ -8,9 +8,19 @@ namespace qs::nigiri {
 
 NigiriIpcQml::NigiriIpcQml(QObject* parent): QObject(parent) {
 	auto* ipc = NigiriIpc::instance();
-	QObject::connect(ipc, &NigiriIpc::focusedWorkspaceChanged, this, &NigiriIpcQml::focusedWorkspaceChanged);
+	QObject::connect(
+	    ipc,
+	    &NigiriIpc::focusedWorkspaceChanged,
+	    this,
+	    &NigiriIpcQml::focusedWorkspaceChanged
+	);
 	QObject::connect(ipc, &NigiriIpc::activeWindowChanged, this, &NigiriIpcQml::activeWindowChanged);
-	QObject::connect(ipc, &NigiriIpc::focusedWindowIdChanged, this, &NigiriIpcQml::focusedWindowIdChanged);
+	QObject::connect(
+	    ipc,
+	    &NigiriIpc::focusedWindowIdChanged,
+	    this,
+	    &NigiriIpcQml::focusedWindowIdChanged
+	);
 	QObject::connect(ipc, &NigiriIpc::rawEvent, this, &NigiriIpcQml::rawEvent);
 }
 

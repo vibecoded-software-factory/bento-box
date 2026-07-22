@@ -1,7 +1,6 @@
 #include "service.hpp"
 
 #include <CoreAudio/CoreAudio.h>
-
 #include <qset.h>
 
 #include "coreaudio.hpp"
@@ -30,7 +29,13 @@ OSStatus listenerProc(
 	return noErr;
 }
 
-void listen(AudioObjectID object, AudioObjectPropertySelector selector, AudioObjectPropertyScope scope, void* context, bool add) {
+void listen(
+    AudioObjectID object,
+    AudioObjectPropertySelector selector,
+    AudioObjectPropertyScope scope,
+    void* context,
+    bool add
+) {
 	AudioObjectPropertyAddress addr = {selector, scope, kAudioObjectPropertyElementMain};
 	if (add) AudioObjectAddPropertyListener(object, &addr, listenerProc, context);
 	else AudioObjectRemovePropertyListener(object, &addr, listenerProc, context);
@@ -49,15 +54,34 @@ Pipewire::Pipewire(QObject* parent): QObject(parent) {
 Pipewire::~Pipewire() {
 	this->setListeners(false);
 	if (this->mListenedSink != 0) this->setDeviceVolumeListeners(this->mListenedSink, false, false);
-	if (this->mListenedSource != 0) this->setDeviceVolumeListeners(this->mListenedSource, true, false);
+	if (this->mListenedSource != 0)
+		this->setDeviceVolumeListeners(this->mListenedSource, true, false);
 	if (sInstance == this) sInstance = nullptr;
 }
 
 void Pipewire::setListeners(bool add) {
 	// System-level: device list and the two default-device selectors.
-	listen(kAudioObjectSystemObject, kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeGlobal, this, add);
-	listen(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeGlobal, this, add);
-	listen(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultInputDevice, kAudioObjectPropertyScopeGlobal, this, add);
+	listen(
+	    kAudioObjectSystemObject,
+	    kAudioHardwarePropertyDevices,
+	    kAudioObjectPropertyScopeGlobal,
+	    this,
+	    add
+	);
+	listen(
+	    kAudioObjectSystemObject,
+	    kAudioHardwarePropertyDefaultOutputDevice,
+	    kAudioObjectPropertyScopeGlobal,
+	    this,
+	    add
+	);
+	listen(
+	    kAudioObjectSystemObject,
+	    kAudioHardwarePropertyDefaultInputDevice,
+	    kAudioObjectPropertyScopeGlobal,
+	    this,
+	    add
+	);
 }
 
 void Pipewire::setDeviceVolumeListeners(quint32 deviceId, bool input, bool add) {
@@ -111,7 +135,8 @@ void Pipewire::update() {
 	auto inId = coreaudio::defaultDevice(true);
 	auto* newSource = this->findNode(inId, true);
 	if (newSource != this->mDefaultSource) {
-		if (this->mListenedSource != 0) this->setDeviceVolumeListeners(this->mListenedSource, true, false);
+		if (this->mListenedSource != 0)
+			this->setDeviceVolumeListeners(this->mListenedSource, true, false);
 		this->mDefaultSource = newSource;
 		this->mListenedSource = newSource != nullptr ? inId : 0;
 		if (this->mListenedSource != 0) this->setDeviceVolumeListeners(inId, true, true);

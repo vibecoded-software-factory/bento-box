@@ -8,6 +8,7 @@ class PolkitAgent: public QObject {
 	Q_OBJECT;
 	Q_PROPERTY(bool registered READ registered CONSTANT);
 	QML_ELEMENT;
+
 public:
 	explicit PolkitAgent(QObject* p = nullptr): QObject(p) {}
 	[[nodiscard]] bool registered() const { return false; }
@@ -16,9 +17,11 @@ public:
 class Polkit: public QObject {
 	Q_OBJECT;
 	Q_PROPERTY(bool available READ available CONSTANT);
-	QML_NAMED_ELEMENT(Polkit); QML_SINGLETON;
+	QML_NAMED_ELEMENT(Polkit);
+	QML_SINGLETON;
+
 public:
 	explicit Polkit(QObject* p = nullptr): QObject(p) {}
 	[[nodiscard]] bool available() const { return false; }
 };
-} // namespace
+} // namespace qs::mac::polkit

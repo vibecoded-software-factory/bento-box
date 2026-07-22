@@ -1,7 +1,5 @@
 #include "panel_window.hpp"
 
-#include <unistd.h>
-
 #include <qnamespace.h>
 #include <qobject.h>
 #include <qqmlengine.h>
@@ -11,6 +9,7 @@
 #include <qtimer.h>
 #include <qtmetamacros.h>
 #include <qtypes.h>
+#include <unistd.h>
 
 #include "../core/qmlscreen.hpp"
 #include "../core/types.hpp"

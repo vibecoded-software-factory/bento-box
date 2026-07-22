@@ -1,0 +1,28 @@
+name: quality
+
+# The formatter, over the code this port actually owns. Only src/mac/ is checked
+# - the inherited quickshell tree keeps its own upstream formatting, and running
+# our pass over it would be noise. clang-format comes from Homebrew so it is the
+# same build developers get locally; if a newer clang-format lands and disagrees,
+# re-run `clang-format -i` over src/mac and commit the result.
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  format:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: brew install clang-format
+
+      - name: clang-format (src/mac)
+        run: |
+          set -euo pipefail
+          git ls-files \
+            'src/mac/**/*.cpp' 'src/mac/**/*.hpp' 'src/mac/**/*.mm' \
+            'src/mac/*.cpp' 'src/mac/*.hpp' 'src/mac/*.mm' \
+            | xargs clang-format --Werror --dry-run

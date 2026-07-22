@@ -73,7 +73,12 @@ private:
 	    bFocusedWorkspace,
 	    &NigiriIpc::focusedWorkspaceChanged
 	);
-	Q_OBJECT_BINDABLE_PROPERTY(NigiriIpc, NigiriWindow*, bActiveWindow, &NigiriIpc::activeWindowChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(
+	    NigiriIpc,
+	    NigiriWindow*,
+	    bActiveWindow,
+	    &NigiriIpc::activeWindowChanged
+	);
 	Q_OBJECT_BINDABLE_PROPERTY(
 	    NigiriIpc,
 	    qint32,

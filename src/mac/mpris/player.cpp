@@ -39,8 +39,7 @@ void MprisPlayer::updateFromSnapshot(const QVariantMap& snapshot) {
 	auto artist = snapshot.value("artist").toString();
 	auto album = snapshot.value("album").toString();
 
-	bool trackChangedNow =
-	    title != this->bTrackTitle.value() || artist != this->bTrackArtist.value();
+	bool trackChangedNow = title != this->bTrackTitle.value() || artist != this->bTrackArtist.value();
 	if (trackChangedNow) emit this->trackChanged();
 
 	this->bTrackTitle = title;
@@ -69,9 +68,10 @@ void MprisPlayer::updateFromSnapshot(const QVariantMap& snapshot) {
 	if (snapshot.contains("elapsed")) {
 		this->mSampledElapsed = snapshot.value("elapsed").toReal();
 		auto ts = snapshot.value("timestamp");
-		this->mSampledAt = ts.isValid() && !ts.isNull()
-		    ? QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(ts.toReal() * 1000), Qt::UTC)
-		    : QDateTime::currentDateTimeUtc();
+		this->mSampledAt =
+		    ts.isValid() && !ts.isNull()
+		        ? QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(ts.toReal() * 1000), Qt::UTC)
+		        : QDateTime::currentDateTimeUtc();
 		emit this->positionChanged();
 	}
 

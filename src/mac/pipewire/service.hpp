@@ -83,7 +83,7 @@ private:
 	QHash<quint64, PwNode*> mByKey; // key = deviceId<<1 | input
 	PwNode* mDefaultSink = nullptr;
 	PwNode* mDefaultSource = nullptr;
-	quint32 mListenedSink = 0;   // device currently carrying volume/mute listeners
+	quint32 mListenedSink = 0; // device currently carrying volume/mute listeners
 	quint32 mListenedSource = 0;
 	bool mReady = false;
 };

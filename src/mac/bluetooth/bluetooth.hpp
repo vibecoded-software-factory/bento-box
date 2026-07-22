@@ -114,9 +114,9 @@ public:
 
 	Q_INVOKABLE void connect();
 	Q_INVOKABLE void disconnect();
-	Q_INVOKABLE void pair() {}       // no public IOBluetooth pairing for a bar
+	Q_INVOKABLE void pair() {} // no public IOBluetooth pairing for a bar
 	Q_INVOKABLE void cancelPair() {}
-	Q_INVOKABLE void forget() {}     // no public IOBluetooth un-pair
+	Q_INVOKABLE void forget() {} // no public IOBluetooth un-pair
 
 	// Re-read state from the underlying IOBluetoothDevice.
 	void refresh();
