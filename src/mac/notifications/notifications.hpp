@@ -186,25 +186,49 @@ public:
 	explicit NotificationServer(QObject* parent = nullptr): QObject(parent) {}
 
 	[[nodiscard]] bool keepOnReload() const { return this->mKeepOnReload; }
-	void setKeepOnReload(bool v) { this->set(this->mKeepOnReload, v, &NotificationServer::keepOnReloadChanged); }
+	void setKeepOnReload(bool v) {
+		this->set(this->mKeepOnReload, v, &NotificationServer::keepOnReloadChanged);
+	}
 	[[nodiscard]] bool persistenceSupported() const { return this->mPersistenceSupported; }
-	void setPersistenceSupported(bool v) { this->set(this->mPersistenceSupported, v, &NotificationServer::persistenceSupportedChanged); }
+	void setPersistenceSupported(bool v) {
+		this->set(this->mPersistenceSupported, v, &NotificationServer::persistenceSupportedChanged);
+	}
 	[[nodiscard]] bool bodySupported() const { return this->mBodySupported; }
-	void setBodySupported(bool v) { this->set(this->mBodySupported, v, &NotificationServer::bodySupportedChanged); }
+	void setBodySupported(bool v) {
+		this->set(this->mBodySupported, v, &NotificationServer::bodySupportedChanged);
+	}
 	[[nodiscard]] bool bodyMarkupSupported() const { return this->mBodyMarkupSupported; }
-	void setBodyMarkupSupported(bool v) { this->set(this->mBodyMarkupSupported, v, &NotificationServer::bodyMarkupSupportedChanged); }
+	void setBodyMarkupSupported(bool v) {
+		this->set(this->mBodyMarkupSupported, v, &NotificationServer::bodyMarkupSupportedChanged);
+	}
 	[[nodiscard]] bool bodyHyperlinksSupported() const { return this->mBodyHyperlinksSupported; }
-	void setBodyHyperlinksSupported(bool v) { this->set(this->mBodyHyperlinksSupported, v, &NotificationServer::bodyHyperlinksSupportedChanged); }
+	void setBodyHyperlinksSupported(bool v) {
+		this->set(
+		    this->mBodyHyperlinksSupported,
+		    v,
+		    &NotificationServer::bodyHyperlinksSupportedChanged
+		);
+	}
 	[[nodiscard]] bool bodyImagesSupported() const { return this->mBodyImagesSupported; }
-	void setBodyImagesSupported(bool v) { this->set(this->mBodyImagesSupported, v, &NotificationServer::bodyImagesSupportedChanged); }
+	void setBodyImagesSupported(bool v) {
+		this->set(this->mBodyImagesSupported, v, &NotificationServer::bodyImagesSupportedChanged);
+	}
 	[[nodiscard]] bool actionsSupported() const { return this->mActionsSupported; }
-	void setActionsSupported(bool v) { this->set(this->mActionsSupported, v, &NotificationServer::actionsSupportedChanged); }
+	void setActionsSupported(bool v) {
+		this->set(this->mActionsSupported, v, &NotificationServer::actionsSupportedChanged);
+	}
 	[[nodiscard]] bool actionIconsSupported() const { return this->mActionIconsSupported; }
-	void setActionIconsSupported(bool v) { this->set(this->mActionIconsSupported, v, &NotificationServer::actionIconsSupportedChanged); }
+	void setActionIconsSupported(bool v) {
+		this->set(this->mActionIconsSupported, v, &NotificationServer::actionIconsSupportedChanged);
+	}
 	[[nodiscard]] bool imageSupported() const { return this->mImageSupported; }
-	void setImageSupported(bool v) { this->set(this->mImageSupported, v, &NotificationServer::imageSupportedChanged); }
+	void setImageSupported(bool v) {
+		this->set(this->mImageSupported, v, &NotificationServer::imageSupportedChanged);
+	}
 	[[nodiscard]] bool inlineReplySupported() const { return this->mInlineReplySupported; }
-	void setInlineReplySupported(bool v) { this->set(this->mInlineReplySupported, v, &NotificationServer::inlineReplySupportedChanged); }
+	void setInlineReplySupported(bool v) {
+		this->set(this->mInlineReplySupported, v, &NotificationServer::inlineReplySupportedChanged);
+	}
 
 	[[nodiscard]] ObjectModel<Notification>* trackedNotifications() { return &this->mTracked; }
 

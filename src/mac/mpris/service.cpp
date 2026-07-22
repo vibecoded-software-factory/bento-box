@@ -73,7 +73,12 @@ QStringList MprisIpc::adapterArgs(const QStringList& command) const {
 }
 
 MprisIpc::MprisIpc() {
-	QObject::connect(&this->mStream, &QProcess::readyReadStandardOutput, this, &MprisIpc::onStreamData);
+	QObject::connect(
+	    &this->mStream,
+	    &QProcess::readyReadStandardOutput,
+	    this,
+	    &MprisIpc::onStreamData
+	);
 	QObject::connect(
 	    &this->mStream,
 	    QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
@@ -180,7 +185,8 @@ void MprisIpc::applySnapshot(const QByteArray& line) {
 	snapshot["playing"] = payload.value("playing").toBool();
 	snapshot["art"] = this->writeArtwork(payload);
 	if (payload.contains("duration")) snapshot["duration"] = payload.value("duration").toDouble();
-	if (payload.contains("elapsedTime")) snapshot["elapsed"] = payload.value("elapsedTime").toDouble();
+	if (payload.contains("elapsedTime"))
+		snapshot["elapsed"] = payload.value("elapsedTime").toDouble();
 	// The adapter emits an ISO-8601 timestamp for when elapsedTime was true;
 	// MprisPlayer wants it as epoch seconds so it can advance position live.
 	auto ts = QDateTime::fromString(payload.value("timestamp").toString(), Qt::ISODate);

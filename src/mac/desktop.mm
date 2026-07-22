@@ -1,7 +1,6 @@
 #include "desktop.hpp"
 
 #import <AppKit/AppKit.h>
-
 #include <qfileinfo.h>
 #include <qstring.h>
 
@@ -28,8 +27,8 @@ bool MacDesktop::setWallpaper(const QString& path) {
 	// Aspect-fill and crop the overflow, the way a shell's own wallpaper layer
 	// draws it, rather than letterboxing.
 	NSDictionary* options = @{
-		NSWorkspaceDesktopImageScalingKey: @(NSImageScaleProportionallyUpOrDown),
-		NSWorkspaceDesktopImageAllowClippingKey: @YES,
+		NSWorkspaceDesktopImageScalingKey : @(NSImageScaleProportionallyUpOrDown),
+		NSWorkspaceDesktopImageAllowClippingKey : @YES,
 	};
 
 	bool anyApplied = false;

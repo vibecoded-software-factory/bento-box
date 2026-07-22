@@ -4,7 +4,6 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/ps/IOPSKeys.h>
 #include <IOKit/ps/IOPowerSources.h>
-
 #include <qstring.h>
 #include <qvariant.h>
 
@@ -20,7 +19,8 @@ namespace {
 int cfInt(CFDictionaryRef dict, CFStringRef key, int fallback = 0) {
 	auto value = static_cast<CFNumberRef>(CFDictionaryGetValue(dict, key));
 	int out = fallback;
-	if (value && CFGetTypeID(value) == CFNumberGetTypeID()) CFNumberGetValue(value, kCFNumberIntType, &out);
+	if (value && CFGetTypeID(value) == CFNumberGetTypeID())
+		CFNumberGetValue(value, kCFNumberIntType, &out);
 	return out;
 }
 
@@ -46,10 +46,10 @@ QString batteryIcon(bool present, bool charging, UPowerDeviceState::Enum state, 
 	if (!present) return "battery-missing-symbolic";
 	if (state == UPowerDeviceState::FullyCharged) return "battery-full-charged-symbolic";
 	const char* level = pct < 0.10 ? "empty"
-	    : pct < 0.30           ? "caution"
-	    : pct < 0.55           ? "low"
-	    : pct < 0.85           ? "good"
-	                           : "full";
+	                  : pct < 0.30 ? "caution"
+	                  : pct < 0.55 ? "low"
+	                  : pct < 0.85 ? "good"
+	                               : "full";
 	return QString("battery-%1%2-symbolic").arg(level, charging ? "-charging" : "");
 }
 
@@ -57,18 +57,20 @@ QString batteryIcon(bool present, bool charging, UPowerDeviceState::Enum state, 
 // IOPowerSources does not expose. Absent on desktops - the fields simply stay
 // unset (0 / empty) and healthSupported binds to false.
 void readSmartBattery(QVariantMap& snapshot) {
-	auto service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"));
+	auto service =
+	    IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"));
 	if (service == MACH_PORT_NULL) return;
 
 	CFMutableDictionaryRef props = nullptr;
 	if (IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS
-	    && props != nullptr) {
+	    && props != nullptr)
+	{
 		auto dict = static_cast<CFDictionaryRef>(props);
-		auto voltage = cfInt(dict, CFSTR("Voltage"));           // mV
-		auto amperage = cfInt(dict, CFSTR("Amperage"));         // mA, signed
+		auto voltage = cfInt(dict, CFSTR("Voltage"));                    // mV
+		auto amperage = cfInt(dict, CFSTR("Amperage"));                  // mA, signed
 		auto rawCurrent = cfInt(dict, CFSTR("AppleRawCurrentCapacity")); // mAh
 		auto rawMax = cfInt(dict, CFSTR("AppleRawMaxCapacity"));         // mAh
-		auto design = cfInt(dict, CFSTR("DesignCapacity"));             // mAh
+		auto design = cfInt(dict, CFSTR("DesignCapacity"));              // mAh
 
 		if (voltage > 0) {
 			// Wh = mAh * mV / 1e6; W = mA * mV / 1e6.
@@ -182,7 +184,12 @@ void UPower::refresh() {
 }
 
 UPowerQml::UPowerQml(QObject* parent): QObject(parent) {
-	QObject::connect(UPower::instance(), &UPower::onBatteryChanged, this, &UPowerQml::onBatteryChanged);
+	QObject::connect(
+	    UPower::instance(),
+	    &UPower::onBatteryChanged,
+	    this,
+	    &UPowerQml::onBatteryChanged
+	);
 }
 
 } // namespace qs::mac::upower

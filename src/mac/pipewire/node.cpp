@@ -115,8 +115,7 @@ PwNode::PwNode(quint32 deviceId, bool input, QObject* parent)
 	this->mProperties["node.name"] = this->mName;
 	this->mProperties["node.description"] = this->mName;
 	this->mProperties["device.uid"] = uid;
-	this->mProperties["media.class"] =
-	    input ? QString("Audio/Source") : QString("Audio/Sink");
+	this->mProperties["media.class"] = input ? QString("Audio/Source") : QString("Audio/Sink");
 
 	this->mAudio = new PwNodeAudio(deviceId, input, this);
 }

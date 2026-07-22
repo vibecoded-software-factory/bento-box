@@ -105,7 +105,9 @@ public:
 	[[nodiscard]] QString dbusName() const { return this->mBundleId; }
 	void setBundleId(const QString& id) { this->mBundleId = id; }
 
-	[[nodiscard]] bool isPlaying() const { return this->bPlaybackState.value() == MprisPlaybackState::Playing; }
+	[[nodiscard]] bool isPlaying() const {
+		return this->bPlaybackState.value() == MprisPlaybackState::Playing;
+	}
 	void setPlaying(bool playing);
 	void setPlaybackState(MprisPlaybackState::Enum state);
 
@@ -134,7 +136,9 @@ public:
 	[[nodiscard]] QBindable<bool> bindableCanSeek() { return &this->bCanSeek; }
 	[[nodiscard]] QBindable<bool> bindableCanQuit() { return &this->bCanQuit; }
 	[[nodiscard]] QBindable<bool> bindableCanRaise() { return &this->bCanRaise; }
-	[[nodiscard]] QBindable<MprisPlaybackState::Enum> bindablePlaybackState() { return &this->bPlaybackState; }
+	[[nodiscard]] QBindable<MprisPlaybackState::Enum> bindablePlaybackState() {
+		return &this->bPlaybackState;
+	}
 	[[nodiscard]] QBindable<bool> bindablePositionSupported() { return &this->bPositionSupported; }
 	[[nodiscard]] QBindable<qreal> bindableLength() { return &this->bLength; }
 	[[nodiscard]] QBindable<bool> bindableLengthSupported() { return &this->bLengthSupported; }

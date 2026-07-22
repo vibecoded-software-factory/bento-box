@@ -2,7 +2,6 @@
 
 #import <AppKit/AppKit.h>
 #import <objc/runtime.h>
-
 #include <qwindow.h>
 
 namespace qs::mac {
@@ -86,7 +85,8 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 	// belongs to the output, not to a workspace. ignoresCycle keeps it out of
 	// Cmd-` window cycling.
 	nsWindow.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
-	    | NSWindowCollectionBehaviorStationary | NSWindowCollectionBehaviorIgnoresCycle;
+	                            | NSWindowCollectionBehaviorStationary
+	                            | NSWindowCollectionBehaviorIgnoresCycle;
 
 	if (desktopBackground) {
 		// A shell's wallpaper layer. macOS draws the desktop itself, so this

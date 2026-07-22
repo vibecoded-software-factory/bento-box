@@ -1,7 +1,6 @@
 #include "bluetooth.hpp"
 
 #import <IOBluetooth/IOBluetooth.h>
-
 #include <qset.h>
 #include <qstring.h>
 
@@ -99,7 +98,8 @@ void BluetoothDevice::refresh() {
 	// Only settle to Connected/Disconnected here; a transient Connecting /
 	// Disconnecting set by our own action is left until the operation returns.
 	if (this->mState != BluetoothDeviceState::Connecting
-	    && this->mState != BluetoothDeviceState::Disconnecting) {
+	    && this->mState != BluetoothDeviceState::Disconnecting)
+	{
 		auto state =
 		    [device isConnected] ? BluetoothDeviceState::Connected : BluetoothDeviceState::Disconnected;
 		if (state != this->mState) {
@@ -189,8 +189,8 @@ void Bluetooth::refresh() {
 		auto name = QString::fromNSString([controller nameAsString]);
 		auto address = QString::fromNSString([controller addressAsString]);
 		auto state = [controller powerState] == kBluetoothHCIPowerStateON
-		    ? BluetoothAdapterState::Enabled
-		    : BluetoothAdapterState::Disabled;
+		               ? BluetoothAdapterState::Enabled
+		               : BluetoothAdapterState::Disabled;
 		this->mAdapter->setInfo(name, address, state);
 	}
 
