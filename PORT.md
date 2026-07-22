@@ -126,14 +126,15 @@ place, since it already speaks niri's IPC.
     (`kMRMediaRemoteNowPlayingInfoTimestamp`), not arrival time: a browser
     reports `elapsed=0` with a fresh timestamp, so `position = elapsed +
     (now - timestamp)` - verified advancing 44→45→46→47 against a 213s track.
-    **Transport commands verified live** against Music (`MRMediaRemoteSendCommand`):
-    play, pause, toggle (both directions), next and previous all take effect.
-    The catch that made them look broken at first: the command reaches
+    **Transport commands verified live** against both Music and a browser
+    (Chrome/YouTube) via `MRMediaRemoteSendCommand`: play, pause and toggle
+    flip the state on demand, and next/previous move the track where there is a
+    queue. The catch that made them look broken at first: the command reaches
     mediaremoted asynchronously over XPC, so a one-shot helper that exits the
     instant after the call drops the message - the command mode now pumps the
-    runloop ~1s before returning so the delivery flushes. (A browser still
-    ignores MediaRemote commands, but that is the browser's choice, not our
-    bug - a real player obeys.)
+    runloop ~1s before returning so the delivery flushes. (This, not any
+    browser refusal, is why the earlier YouTube test seemed unresponsive; with
+    the flush a browser obeys just like a native player.)
     **Album art is NOT reachable from this osascript path for any app.**
     Verified directly: `MRNowPlayingRequest.localNowPlayingItem.nowPlayingInfo`
     carries only `kMRMediaRemoteNowPlayingInfoArtworkIdentifier`, never the
