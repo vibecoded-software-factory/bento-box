@@ -38,4 +38,19 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 // frame already matches.
 void assertPanelFrame(QWindow* window, const QRect& geometry);
 
+// Take app focus for a panel that holds a Wayland-style EXCLUSIVE keyboard
+// grab (a launcher, a modal): remember the frontmost app, activate the shell
+// app and make the panel's NSWindow key, so typing reaches its QML content.
+// macOS has no compositor-side keyboard grab - this is the closest analogue,
+// and it is exactly what Spotlight-like panels do. `owner` identifies the
+// panel across the grab's lifetime; it must outlive the QWindow, which shells
+// destroy on close (the window is often gone by the time focus is returned).
+void takeKeyboardForPanel(QWindow* window, void* owner);
+
+// Give app focus back after an exclusive-keyboard panel hides or is torn
+// down: reactivate the app remembered by takeKeyboardForPanel. A no-op unless
+// `owner` is the panel currently holding the grab, so overlapping modals
+// don't fight.
+void yieldKeyboardFromPanel(void* owner);
+
 } // namespace qs::mac
