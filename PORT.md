@@ -108,7 +108,7 @@ place, since it already speaks niri's IPC.
   (`isOpen()` false, writes return -1); the subscribe must wait for the
   `connected()` signal instead.
 - **M4+** — services, one at a time, in the order DMS needs them.
-  - **Mpris (now-playing)** 🚧 — `Quickshell.Services.Mpris` on macOS
+  - **Mpris (now-playing)** ✅ — `Quickshell.Services.Mpris` on macOS
     (`src/mac/mpris/`), same QML surface as the Linux D-Bus service so DMS's
     media widget binds unchanged: singleton `Mpris` with `players` (zero or one,
     since macOS aggregates now-playing to one session), `MprisPlayer` with the
@@ -150,6 +150,24 @@ place, since it already speaks niri's IPC.
     compiled adapter's `send` handles the flush, which the earlier ad-hoc
     osascript command mode did not (making a browser look like it refused
     commands when it did not).
+  - **Battery (UPower)** ✅ — `Quickshell.Services.UPower` on macOS
+    (`src/mac/upower/`), the same QML surface as the Linux D-Bus service
+    (singleton `UPower` with `displayDevice`/`devices`/`onBattery`,
+    `UPowerDevice` with the full property set, and the `UPowerDeviceState` /
+    `UPowerDeviceType` enums) so DMS's battery widget binds unchanged. Backed by
+    **IOKit power sources** (no daemon, no entitlement): `IOPSCopyPowerSourcesInfo`
+    for the live fields (percentage 0-1, charging state, time-to-empty/full,
+    present, on-battery) refreshed on the system's `IOPSNotificationCreateRunLoopSource`
+    change callback plus a slow timer, and **AppleSmartBattery** (IORegistry) for
+    what power sources omit - energy/capacity in Wh, watt change-rate, health %
+    and model. State/`isLaptopBattery`/`healthSupported`/`iconName` are derived
+    exactly as the Linux service derives them (`percentage` is a 0-1 fraction,
+    matching UPower's `PowerPercentage` transform, not 0-100).
+    **Verified live** against `pmset -g batt`: on battery, 100%, discharging,
+    17:45 to empty (= 63900s), −3.44 W, 52.7/53.2 Wh, 90% health - all matching.
+    Not exercised for lack of a second state change during the test: live
+    charge/discharge transitions rely on the IOKit notification (wired, plus the
+    10s timer as a floor).
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

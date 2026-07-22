@@ -28,5 +28,9 @@ target_link_libraries(quickshell PRIVATE quickshell-macplugin quickshell-mac-ini
 add_subdirectory(nigiri)
 
 # Quickshell.Services.Mpris on macOS, backed by MediaRemote through an entitled
-# osascript helper (the D-Bus MPRIS service is Linux-only).
+# perl-hosted compiled adapter (the D-Bus MPRIS service is Linux-only).
 add_subdirectory(mpris)
+
+# Quickshell.Services.UPower on macOS, backed by IOKit power sources (the D-Bus
+# UPower service is Linux-only).
+add_subdirectory(upower)
