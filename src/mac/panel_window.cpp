@@ -85,6 +85,16 @@ void MacPanelWindow::connectWindow() {
 	    this,
 	    &MacPanelWindow::applyNativeConfig
 	);
+	// The layer (aboveWindows) can change AFTER the window is shown - a shell
+	// sets WlrLayershell.layer in a binding, and a background layer must drop to
+	// the desktop level. Reapply the native config on that change too, or the
+	// wallpaper stays above the windows and hides them (only their overlays show).
+	QObject::connect(
+	    this,
+	    &MacPanelWindow::aboveWindowsChanged,
+	    this,
+	    &MacPanelWindow::applyNativeConfig
+	);
 
 	this->applyNativeConfig();
 	// Send the initial reservation now that the panel is configured; later
