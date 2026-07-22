@@ -40,22 +40,10 @@ conditions.</sub>
 
 ---
 
-## Upstream quickshell
+## Credit
 
-The original project README follows, preserved for attribution.
-
-> # Quickshell
-> See the [website](https://quickshell.outfoxxed.me) for more information
-> and installation instructions.
->
-> This repo is hosted at:
-> - https://git.outfoxxed.me/quickshell/quickshell
-> - https://github.com/quickshell-mirror/quickshell
->
-> ## Contributing / Development
-> - [HACKING.md](HACKING.md) - Development instructions and policy.
-> - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution policy.
-> - [BUILD.md](BUILD.md) - Packaging and build instructions.
->
-> #### License
-> Licensed under the GNU LGPL 3.
+Built on [**quickshell**](https://github.com/quickshell-mirror/quickshell) by
+outfoxxed and contributors ([website](https://quickshell.outfoxxed.me),
+[source](https://git.outfoxxed.me/quickshell/quickshell)). This fork keeps
+`upstream` as a real remote and rebases on it; all of its copyright and license
+notices are preserved. Licensed under the GNU LGPL 3.
