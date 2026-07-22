@@ -1,9 +1,11 @@
 #include "service.hpp"
 
 #include <qbytearray.h>
+#include <qcoreapplication.h>
 #include <qdatetime.h>
 #include <qdir.h>
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonvalue.h>
@@ -61,6 +63,16 @@ QString MprisIpc::loaderPath() {
 QString MprisIpc::frameworkPath() {
 	auto env = qEnvironmentVariable("BENTO_MRA_FRAMEWORK");
 	if (!env.isEmpty()) return env;
+
+	// A framework shipped inside the app bundle (Contents/Frameworks, next to
+	// Contents/MacOS) makes a packaged build self-contained: it keeps working
+	// after the build tree is deleted or the app is moved to another machine.
+	// Preferred over the baked build-tree path below, which only exists for a
+	// dev run in place.
+	auto bundled = QCoreApplication::applicationDirPath()
+	             + QStringLiteral("/../Frameworks/MediaRemoteAdapter.framework");
+	if (QFileInfo::exists(bundled)) return QFileInfo(bundled).canonicalFilePath();
+
 #ifdef BENTO_MRA_FRAMEWORK_PATH
 	return QStringLiteral(BENTO_MRA_FRAMEWORK_PATH);
 #else
