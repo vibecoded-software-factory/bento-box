@@ -26,3 +26,7 @@ target_link_libraries(quickshell PRIVATE quickshell-macplugin quickshell-mac-ini
 # The nigiri integration module (Quickshell.Nigiri): the macOS compositor
 # integration, in the place Quickshell.Hyprland occupies on Linux.
 add_subdirectory(nigiri)
+
+# Quickshell.Services.Mpris on macOS, backed by MediaRemote through an entitled
+# osascript helper (the D-Bus MPRIS service is Linux-only).
+add_subdirectory(mpris)

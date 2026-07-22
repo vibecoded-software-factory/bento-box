@@ -108,6 +108,28 @@ place, since it already speaks niri's IPC.
   (`isOpen()` false, writes return -1); the subscribe must wait for the
   `connected()` signal instead.
 - **M4+** — services, one at a time, in the order DMS needs them.
+  - **Mpris (now-playing)** 🚧 — `Quickshell.Services.Mpris` on macOS
+    (`src/mac/mpris/`), same QML surface as the Linux D-Bus service so DMS's
+    media widget binds unchanged: singleton `Mpris` with `players` (zero or one,
+    since macOS aggregates now-playing to one session), `MprisPlayer` with the
+    full metadata/state/capability/position API, and the two enums.
+    The data comes from Apple's **MediaRemote** private framework - which since
+    macOS 15.4 refuses access to unentitled processes, but Apple's own signed
+    binaries (`com.apple.*`) are allowed. So the backend spawns an **entitled
+    `/usr/bin/osascript` (JXA) helper** (`nowplaying.js`, embedded as a
+    resource) as a long-lived `QProcess` that streams now-playing JSON lines,
+    parsed into the player. No private entitlement on bento, no compiled helper,
+    and it covers browser media (Chrome/YouTube), not just Music/Spotify.
+    **Verified live:** the player populates with identity, title, artist, album,
+    playback state and a live-advancing position from the system now-playing.
+    **Not yet verified:** transport commands (play/pause/next/previous) are
+    wired through the helper's command mode (`MRMediaRemoteSendCommand`, which
+    returns success), but their effect could not be confirmed against the test
+    case (a YouTube LIVE stream, which pauses atypically) - needs a check with
+    ordinary media. Album art is also deferred (binary; would be written to a
+    temp file and passed by path).
+    macOS gotcha: JXA's `console.log` writes to STDERR; the helper writes JSON
+    to real stdout via `NSFileHandle` so the parser's stdout read sees it.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.
