@@ -121,4 +121,26 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 	nsWindow.level = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
 }
 
+void assertPanelFrame(QWindow* window, const QRect& geometry) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil || geometry.isEmpty()) return;
+
+	// Qt's global coordinate space is the AppKit one flipped around the primary
+	// screen's top edge: qtY counts down from the primary screen's top, nsY
+	// counts up from its bottom. AppKit gives the primary screen origin (0,0),
+	// so the flip is a single subtraction against its frame height.
+	NSScreen* primary = NSScreen.screens.firstObject;
+	if (primary == nil) return;
+
+	NSRect target = NSMakeRect(
+	    geometry.x(),
+	    NSMaxY(primary.frame) - geometry.y() - geometry.height(),
+	    geometry.width(),
+	    geometry.height()
+	);
+
+	if (NSEqualRects(nsWindow.frame, target)) return;
+	[nsWindow setFrame:target display:YES];
+}
+
 } // namespace qs::mac

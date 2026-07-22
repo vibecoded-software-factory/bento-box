@@ -1,6 +1,7 @@
 #pragma once
 
 class QWindow;
+class QRect;
 
 namespace qs::mac {
 
@@ -22,5 +23,19 @@ namespace qs::mac {
 // the layer/level inputs change. A no-op (logged once) if the QWindow has no
 // native handle yet.
 void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground);
+
+// Re-assert the panel's intended frame on the native NSWindow.
+//
+// The window server constrains windows at the normal level to the screen's
+// visibleFrame, which excludes the top strip reserved for the menu bar (on
+// notched displays that strip exists even while the menu bar is set to
+// auto-hide). A panel is shown before configurePanelWindow raises it to the
+// status-bar level, so a top-anchored bar gets clamped below that strip at
+// show time and Qt never re-applies the frame. Status-level windows are NOT
+// constrained, so re-setting the frame after the level is configured places
+// the panel at the true screen edge. `geometry` is in Qt's global coordinates
+// (top-left origin); a no-op when the native handle doesn't exist yet or the
+// frame already matches.
+void assertPanelFrame(QWindow* window, const QRect& geometry);
 
 } // namespace qs::mac

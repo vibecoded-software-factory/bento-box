@@ -5,6 +5,7 @@
 #include <qpointer.h>
 #include <qproperty.h>
 #include <qqmlintegration.h>
+#include <qrect.h>
 #include <qscreen.h>
 #include <qstring.h>
 #include <qtclasshelpermacros.h>
@@ -95,6 +96,10 @@ private:
 	void updateReservation();
 
 	QPointer<QScreen> mTrackedScreen = nullptr;
+	// The frame updateDimensions last computed from anchors + margins - the
+	// panel's true target, independent of any window-server clamp applied to
+	// the native frame while the window was still at the normal level.
+	QRect mIntendedGeometry;
 	// Stable per-panel id for the compositor reservation, so this panel sets
 	// and clears its own strut. Assigned once in the constructor.
 	QString mReservationId;
