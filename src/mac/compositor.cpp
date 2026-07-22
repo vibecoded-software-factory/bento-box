@@ -4,6 +4,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstring>
 
 #include <qbytearray.h>
@@ -33,11 +34,16 @@ void sendCompositorMessage(const QString& line) {
 		return;
 	}
 	std::memcpy(addr.sun_path, path.constData(), path.size());
+	// macOS (BSD sockets) reads sun_len; connect with the exact address length,
+	// not sizeof(sockaddr_un). Passing the full struct size made connect() fail
+	// for a short path (the compositor looked "not listening" when it was).
+	addr.sun_len = static_cast<unsigned char>(SUN_LEN(&addr));
+	auto addrLen = static_cast<socklen_t>(SUN_LEN(&addr));
 
 	auto fd = ::socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) return;
 
-	if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == 0) {
+	if (::connect(fd, reinterpret_cast<sockaddr*>(&addr), addrLen) == 0) {
 		auto payload = line.toUtf8();
 		if (!payload.endsWith('\n')) payload.append('\n');
 		// Best-effort: a short write or EPIPE just means the compositor went
@@ -45,7 +51,7 @@ void sendCompositorMessage(const QString& line) {
 		auto written = ::write(fd, payload.constData(), payload.size());
 		Q_UNUSED(written);
 	} else {
-		qCDebug(logCompositor) << "no compositor listening at" << path;
+		qCDebug(logCompositor) << "no compositor listening at" << path << "-" << std::strerror(errno);
 	}
 
 	::close(fd);
