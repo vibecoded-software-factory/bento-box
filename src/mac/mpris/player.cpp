@@ -46,21 +46,32 @@ void MprisPlayer::updateFromSnapshot(const QVariantMap& snapshot) {
 	this->bTrackTitle = title;
 	this->bTrackArtist = artist;
 	this->bTrackAlbum = album;
+	// A file:// URL the helper wrote the artwork to, or empty when the track
+	// has none.
+	this->bTrackArtUrl = snapshot.value("art").toString();
 
-	// The metadata map mirrors the Linux service's xesam:* keys so DMS reads
-	// the same fields.
+	// The metadata map mirrors the Linux service's xesam:*/mpris:* keys so DMS
+	// reads the same fields.
 	QVariantMap metadata;
 	metadata["xesam:title"] = title;
 	metadata["xesam:artist"] = QStringList {artist};
 	metadata["xesam:album"] = album;
+	auto artUrl = snapshot.value("art").toString();
+	if (!artUrl.isEmpty()) metadata["mpris:artUrl"] = artUrl;
 	this->bMetadata = metadata;
 
 	if (snapshot.contains("duration")) this->bLength = snapshot.value("duration").toReal();
 
-	// Resample position so `position()` can advance from here.
+	// Resample position. The sample time is the info's OWN timestamp, not now:
+	// a browser reports elapsed=0 with a timestamp that is really "when
+	// playback started", so position must count from that timestamp, not from
+	// when this snapshot happened to arrive. Falls back to now if absent.
 	if (snapshot.contains("elapsed")) {
 		this->mSampledElapsed = snapshot.value("elapsed").toReal();
-		this->mSampledAt = QDateTime::currentDateTimeUtc();
+		auto ts = snapshot.value("timestamp");
+		this->mSampledAt = ts.isValid() && !ts.isNull()
+		    ? QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(ts.toReal() * 1000), Qt::UTC)
+		    : QDateTime::currentDateTimeUtc();
 		emit this->positionChanged();
 	}
 

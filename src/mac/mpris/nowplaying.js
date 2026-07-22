@@ -42,6 +42,28 @@ function run(argv) {
 		stdout.writeData($(s + '\n').dataUsingEncoding($.NSUTF8StringEncoding));
 	}
 
+	// Album art is binary NSData, too heavy to stream inline. Instead it is
+	// written to a temp file ONCE per track and the file URL is emitted, so a
+	// bar's Image binds to a path and only reloads when the track changes. A
+	// sequence number in the name forces a new URL each time so the Image
+	// actually reloads rather than caching the old path.
+	let artUrl = null;
+	let artTitle = null;
+	let artSeq = 0;
+	function updateArt(title, info) {
+		if (title === artTitle) return;
+		artTitle = title;
+		const data = info.valueForKey('kMRMediaRemoteNowPlayingInfoArtworkData');
+		if (data.js && data.length && data.length > 0) {
+			artSeq += 1;
+			const path = $.NSTemporaryDirectory().js + 'bento-art-' + artSeq + '.jpg';
+			data.writeToFileAtomically($(path), false);
+			artUrl = 'file://' + path;
+		} else {
+			artUrl = null;
+		}
+	}
+
 	function snapshot() {
 		const item = MRNowPlayingRequest.localNowPlayingItem;
 		if (!item.js) return JSON.stringify({ hasPlayer: false });
@@ -52,15 +74,24 @@ function run(argv) {
 			const v = info.valueForKey(k);
 			return v && v.js !== undefined ? v.js : null;
 		};
+		const title = g('kMRMediaRemoteNowPlayingInfoTitle');
+		updateArt(title, info);
+		// The Timestamp is WHEN the elapsed value was true. Some apps (a
+		// browser) report elapsed=0 with a fresh timestamp instead of a live
+		// position, so the real position is elapsed + (now - timestamp) - the
+		// consumer needs the timestamp to compute it. Emitted as epoch seconds.
+		const ts = info.valueForKey('kMRMediaRemoteNowPlayingInfoTimestamp');
 		return JSON.stringify({
 			hasPlayer: true,
 			app: client ? client.displayName.js : null,
 			bundleId: client ? client.bundleIdentifier.js : null,
-			title: g('kMRMediaRemoteNowPlayingInfoTitle'),
+			title: title,
 			artist: g('kMRMediaRemoteNowPlayingInfoArtist'),
 			album: g('kMRMediaRemoteNowPlayingInfoAlbum'),
+			art: artUrl,
 			duration: g('kMRMediaRemoteNowPlayingInfoDuration'),
 			elapsed: g('kMRMediaRemoteNowPlayingInfoElapsedTime'),
+			timestamp: ts.js ? ts.timeIntervalSince1970 : null,
 			playing: g('kMRMediaRemoteNowPlayingInfoPlaybackRate') == 1
 		});
 	}
