@@ -100,7 +100,12 @@ void PwNodeAudio::setVolumes(const QVector<float>& volumes) {
 
 PwNode::PwNode(quint32 deviceId, bool input, QObject* parent)
     : QObject(parent)
-    , mId(deviceId)
+    // A duplex device reports one AudioObjectID for both directions; fold the
+    // direction into the exposed id so its source and sink are distinct objects
+    // (PipeWire node ids are unique). mDeviceId keeps the real id for CoreAudio.
+    // Matches the low bits of the service's keyOf, by construction.
+    , mId((deviceId << 1) | (input ? 1U : 0U))
+    , mDeviceId(deviceId)
     , mInput(input) {
 	this->mName = coreaudio::deviceName(deviceId);
 	this->mDescription = this->mName;

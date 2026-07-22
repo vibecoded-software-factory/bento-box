@@ -131,7 +131,7 @@ void Pipewire::setPreferredDefaultAudioSink(PwNode* node) {
 	    kAudioObjectPropertyScopeGlobal,
 	    kAudioObjectPropertyElementMain
 	};
-	auto device = static_cast<AudioDeviceID>(node->id());
+	auto device = static_cast<AudioDeviceID>(node->deviceId());
 	AudioObjectSetPropertyData(kAudioObjectSystemObject, &addr, 0, nullptr, sizeof(device), &device);
 }
 
@@ -142,7 +142,7 @@ void Pipewire::setPreferredDefaultAudioSource(PwNode* node) {
 	    kAudioObjectPropertyScopeGlobal,
 	    kAudioObjectPropertyElementMain
 	};
-	auto device = static_cast<AudioDeviceID>(node->id());
+	auto device = static_cast<AudioDeviceID>(node->deviceId());
 	AudioObjectSetPropertyData(kAudioObjectSystemObject, &addr, 0, nullptr, sizeof(device), &device);
 }
 
