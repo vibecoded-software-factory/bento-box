@@ -47,18 +47,25 @@ void WlrLayershell::setKeyboardFocus(WlrKeyboardFocus::Enum focus) {
 	emit this->keyboardFocusChanged();
 }
 
+// NO equality guard on the exclusion setters: the shim's own initial value (0)
+// is not what the panel holds (the panel defaults to ExclusionMode::Auto,
+// which RESERVES space computed from anchors+size). A shell writing
+// `WlrLayershell.exclusiveZone: 0` to opt out of reservation used to hit the
+// guard and never reach the panel - leaving a hidden 480px slideout silently
+// reserving its whole width and squeezing the compositor's tiling area. Every
+// explicit write must reach the panel, equal-looking or not.
 void WlrLayershell::setExclusiveZone(qint32 zone) {
-	if (this->mExclusiveZone == zone) return;
+	bool changed = this->mExclusiveZone != zone;
 	this->mExclusiveZone = zone;
 	if (this->mPanel) this->mPanel->setProperty("exclusiveZone", zone);
-	emit this->exclusiveZoneChanged();
+	if (changed) emit this->exclusiveZoneChanged();
 }
 
 void WlrLayershell::setExclusionMode(int mode) {
-	if (this->mExclusionMode == mode) return;
+	bool changed = this->mExclusionMode != mode;
 	this->mExclusionMode = mode;
 	if (this->mPanel) this->mPanel->setProperty("exclusionMode", mode);
-	emit this->exclusionModeChanged();
+	if (changed) emit this->exclusionModeChanged();
 }
 
 void WlrLayershell::setMargins(Margins margins) {

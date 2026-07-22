@@ -13,6 +13,7 @@
 #include <qprocess.h>
 #include <qstandardpaths.h>
 #include <qstringlist.h>
+#include <qtimer.h>
 
 #include "player.hpp"
 
@@ -33,7 +34,12 @@ MprisIpc* MprisIpc::instance() {
 // updated loader.
 QString MprisIpc::loaderPath() {
 	static QString path;
-	if (!path.isEmpty()) return path;
+	// Re-verify the cached path: it lives under the user temp dir, which macOS
+	// purges periodically. A restart that re-used a purged path spawned perl
+	// against a missing file forever (FailedToStart, no now-playing until the
+	// whole app restarted). Fall through and re-extract when it is gone.
+	if (!path.isEmpty() && QFileInfo::exists(path)) return path;
+	path.clear();
 
 	auto dir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 	auto target = QDir(dir).filePath("bento-mediaremote-adapter.pl");
@@ -97,7 +103,31 @@ MprisIpc::MprisIpc() {
 	    this,
 	    &MprisIpc::onStreamFinished
 	);
+	// FailedToStart never emits finished() - without this, a missing loader
+	// file (the temp dir gets purged) killed now-playing permanently with no
+	// restart and no visible log.
+	QObject::connect(
+	    &this->mStream,
+	    &QProcess::errorOccurred,
+	    this,
+	    [this](QProcess::ProcessError error) {
+		    if (error == QProcess::FailedToStart) {
+			    qCWarning(logMpris) << "adapter stream failed to start - scheduling restart";
+			    this->scheduleStreamRestart();
+		    }
+	    }
+	);
 	this->startStream();
+}
+
+// Restart with backoff: each consecutive failure doubles the delay (1s -> 32s
+// cap); a stream that stays up for a while resets the ladder in
+// onStreamFinished. Prevents the tight respawn loop a permanently-broken
+// loader used to cause.
+void MprisIpc::scheduleStreamRestart() {
+	auto delayMs = 1000 << qMin(this->mStreamRestartStrikes, 5);
+	this->mStreamRestartStrikes++;
+	QTimer::singleShot(delayMs, this, &MprisIpc::startStream);
 }
 
 void MprisIpc::startStream() {
@@ -107,14 +137,21 @@ void MprisIpc::startStream() {
 	}
 	// --no-diff: each line is a full snapshot, mapped straight onto the player
 	// (no need to merge diffs). --debounce coalesces rapid updates.
+	this->mStreamStarted.start();
 	this->mStream.start(PERL, this->adapterArgs({"stream", "--no-diff", "--debounce=250"}));
 }
 
 void MprisIpc::onStreamFinished(int exitCode, QProcess::ExitStatus /*status*/) {
-	// The stream should run forever; if it dies, restart it so now-playing keeps
-	// flowing.
-	qCDebug(logMpris) << "adapter stream exited" << exitCode << "- restarting";
-	QMetaObject::invokeMethod(this, &MprisIpc::startStream, Qt::QueuedConnection);
+	// The stream should run forever; if it dies, restart it so now-playing
+	// keeps flowing. Info-level on purpose: a dying adapter is an operational
+	// event someone reading the default logs must be able to see.
+	qCInfo(logMpris) << "adapter stream exited" << exitCode << "- restarting";
+	// A stream that ran long enough to be considered healthy resets the
+	// backoff ladder; a quick death climbs it.
+	if (this->mStreamStarted.isValid() && this->mStreamStarted.elapsed() > 30000) {
+		this->mStreamRestartStrikes = 0;
+	}
+	this->scheduleStreamRestart();
 }
 
 void MprisIpc::onStreamData() {

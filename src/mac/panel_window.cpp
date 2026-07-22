@@ -89,6 +89,14 @@ void MacPanelWindow::connectWindow() {
 	    this,
 	    &MacPanelWindow::applyNativeConfig
 	);
+	// Visibility also gates the compositor reservation (an unmapped surface
+	// reserves nothing) - re-send it on every show/hide.
+	QObject::connect(
+	    this->window,
+	    &QQuickWindow::visibleChanged,
+	    this,
+	    &MacPanelWindow::updateReservation
+	);
 	// The layer (aboveWindows) can change AFTER the window is shown - a shell
 	// sets WlrLayershell.layer in a binding, and a background layer must drop to
 	// the desktop level. Reapply the native config on that change too, or the
@@ -122,7 +130,8 @@ void MacPanelWindow::connectWindow() {
 		this->mReservationHeartbeat->setInterval(3000);
 		QObject::connect(this->mReservationHeartbeat, &QTimer::timeout, this, [this]() {
 			if (this->bcExclusiveZone.value() > 0
-			    && this->bcExclusionEdge.value() != static_cast<Qt::Edge>(0))
+			    && this->bcExclusionEdge.value() != static_cast<Qt::Edge>(0) && this->window != nullptr
+			    && this->window->isVisible())
 			{
 				this->updateReservation();
 			}
@@ -301,7 +310,13 @@ void MacPanelWindow::applyNativeConfig() {
 // so the request goes over the compositor's control socket. Best-effort - if no
 // compositor is listening the panel just draws without reserved space.
 void MacPanelWindow::updateReservation() {
-	auto zone = this->bcExclusiveZone.value();
+	// An unmapped layer surface has no exclusive zone (Wayland semantics).
+	// Shells keep their popouts/modals alive and merely toggle visibility, so
+	// without this gate a CLOSED popout kept reserving its whole width/height
+	// forever (heartbeat included) - silently shrinking the compositor's
+	// tiling area and re-tiling every window on each open/close.
+	bool visible = this->window != nullptr && this->window->isVisible();
+	auto zone = visible ? this->bcExclusiveZone.value() : 0;
 	QString edge;
 	switch (this->bcExclusionEdge.value()) {
 	case Qt::TopEdge: edge = QStringLiteral("top"); break;
