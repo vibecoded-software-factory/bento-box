@@ -58,6 +58,7 @@ private:
 	void connectToNigiri();
 	void handleEvent(const QString& name, const QJsonObject& data);
 	void applyWorkspaces(const QJsonArray& array);
+	void applyWindows(const QJsonArray& array);
 	NigiriWorkspace* findWorkspaceById(qint32 id, bool createIfMissing);
 	NigiriWindow* findWindowById(qint32 id, bool createIfMissing);
 	void updateActiveWindow();
