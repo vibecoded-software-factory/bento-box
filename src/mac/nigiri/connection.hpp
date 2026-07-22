@@ -8,6 +8,7 @@
 
 #include "../../core/model.hpp"
 #include "../../core/streamreader.hpp"
+#include "window.hpp"
 #include "workspace.hpp"
 
 namespace qs::nigiri {
@@ -28,9 +29,11 @@ public:
 	static NigiriIpc* instance();
 
 	[[nodiscard]] ObjectModel<NigiriWorkspace>* workspaces() { return &this->mWorkspaces; }
+	[[nodiscard]] ObjectModel<NigiriWindow>* windows() { return &this->mWindows; }
 	[[nodiscard]] QBindable<NigiriWorkspace*> bindableFocusedWorkspace() {
 		return &this->bFocusedWorkspace;
 	}
+	[[nodiscard]] QBindable<NigiriWindow*> bindableActiveWindow() { return &this->bActiveWindow; }
 	[[nodiscard]] QBindable<qint32> bindableFocusedWindowId() { return &this->bFocusedWindowId; }
 
 	// Send an action to nigiri (e.g. "focus-workspace 2"). Fire-and-forget over
@@ -39,6 +42,7 @@ public:
 
 signals:
 	void focusedWorkspaceChanged();
+	void activeWindowChanged();
 	void focusedWindowIdChanged();
 	// Every parsed event, name and payload, for QML that wants the raw stream.
 	void rawEvent(const QString& name, const QJsonObject& data);
@@ -55,10 +59,13 @@ private:
 	void handleEvent(const QString& name, const QJsonObject& data);
 	void applyWorkspaces(const QJsonArray& array);
 	NigiriWorkspace* findWorkspaceById(qint32 id, bool createIfMissing);
+	NigiriWindow* findWindowById(qint32 id, bool createIfMissing);
+	void updateActiveWindow();
 
 	QLocalSocket mEventSocket;
 	StreamReader mEventReader;
 	ObjectModel<NigiriWorkspace> mWorkspaces {this};
+	ObjectModel<NigiriWindow> mWindows {this};
 
 	Q_OBJECT_BINDABLE_PROPERTY(
 	    NigiriIpc,
@@ -66,6 +73,7 @@ private:
 	    bFocusedWorkspace,
 	    &NigiriIpc::focusedWorkspaceChanged
 	);
+	Q_OBJECT_BINDABLE_PROPERTY(NigiriIpc, NigiriWindow*, bActiveWindow, &NigiriIpc::activeWindowChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(
 	    NigiriIpc,
 	    qint32,

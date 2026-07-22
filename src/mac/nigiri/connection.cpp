@@ -101,12 +101,42 @@ void NigiriIpc::handleEvent(const QString& name, const QJsonObject& data) {
 	} else if (name == "WorkspaceActivated") {
 		auto* ws = this->findWorkspaceById(data.value("id").toInt(), false);
 		if (ws != nullptr) this->bFocusedWorkspace = ws;
+	} else if (name == "WindowOpenedOrChanged") {
+		auto window = data.value("window").toObject();
+		auto* w = this->findWindowById(window.value("id").toInt(), true);
+		w->updateFromJson(window);
+	} else if (name == "WindowClosed") {
+		auto* w = this->findWindowById(data.value("id").toInt(), false);
+		if (w != nullptr) {
+			if (this->bActiveWindow.value() == w) this->bActiveWindow = nullptr;
+			this->mWindows.removeObject(w);
+			w->deleteLater();
+		}
 	} else if (name == "WindowFocusChanged") {
 		auto id = data.value("id");
 		this->bFocusedWindowId = id.isDouble() ? id.toInt() : 0;
+		this->updateActiveWindow();
 	}
-	// WindowOpenedOrChanged / WindowClosed / OverviewOpenedOrClosed are carried
-	// on rawEvent for now; a windows model is the next iteration.
+	// OverviewOpenedOrClosed is carried on rawEvent for now.
+}
+
+void NigiriIpc::updateActiveWindow() {
+	// The window whose id is focused, or null. Each window's own `active` is a
+	// binding off focusedWindowId, so it recomputes itself; this only tracks
+	// the pointer for `Nigiri.activeWindow`.
+	this->bActiveWindow = this->findWindowById(this->bFocusedWindowId.value(), false);
+}
+
+NigiriWindow* NigiriIpc::findWindowById(qint32 id, bool createIfMissing) {
+	for (auto* object: this->mWindows.values()) {
+		auto* w = qobject_cast<NigiriWindow*>(object);
+		if (w != nullptr && w->bindableId().value() == id) return w;
+	}
+	if (!createIfMissing) return nullptr;
+	auto* w = new NigiriWindow(this);
+	w->bindableId().setValue(id);
+	this->mWindows.insertObject(w);
+	return w;
 }
 
 void NigiriIpc::applyWorkspaces(const QJsonArray& array) {

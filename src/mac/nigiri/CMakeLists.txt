@@ -1,6 +1,7 @@
 qt_add_library(quickshell-mac-nigiri STATIC
 	connection.cpp
 	workspace.cpp
+	window.cpp
 	qml.cpp
 )
 

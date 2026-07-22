@@ -92,12 +92,17 @@ place, since it already speaks niri's IPC.
   a QML facade singleton `Nigiri`. Transport is nigiri's niri-shaped JSON line
   protocol on one socket (`event-stream` to subscribe - it replays current state
   first - and `action <line>` to command), not Hyprland's two `NAME>>DATA`
-  sockets. **Done:** workspaces (id/idx/name/active/focused, live), focused
-  workspace and window id, `NigiriWorkspace.activate()`, and `Nigiri.dispatch()`.
-  Verified live end to end: the model populates from the event stream, reacts to
-  external workspace switches, and a QML-initiated `activate()`/`dispatch()`
-  switches nigiri. **Next:** a windows/toplevels model (WindowOpenedOrChanged /
-  WindowClosed are already carried on `Nigiri.rawEvent`), and monitors.
+  sockets. **Done:** workspaces (id/idx/name/active/focused) and windows
+  (id/title/appId/pid/workspaceId/floating/active), both live; `focusedWorkspace`,
+  `activeWindow`, `focusedWindowId`; `NigiriWorkspace.activate()`,
+  `NigiriWindow.activate()`, and `Nigiri.dispatch()`. Each object's `active` is a
+  binding off the focused id, Hyprland-style, so highlights recompute themselves.
+  Verified live end to end: both models populate from the event stream, react to
+  external workspace/focus changes, and QML-initiated `activate()`/`dispatch()`
+  drive nigiri (a window's `activate()` uses nigiri's new `focus-window-by-id`,
+  switching workspace if needed). **Next:** monitors, and `msg windows` gaining
+  the `id` field (the event stream already carries it; only the one-shot query
+  omits it).
   One macOS gotcha found and worked around: `QLocalSocket`'s
   `stateChanged(ConnectedState)` can arrive before the device is open
   (`isOpen()` false, writes return -1); the subscribe must wait for the
