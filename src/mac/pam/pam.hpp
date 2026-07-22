@@ -18,6 +18,13 @@ class PamContext: public QObject {
 	Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged);
 	Q_PROPERTY(QString config READ config WRITE setConfig NOTIFY configChanged);
 	Q_PROPERTY(QString configDirectory READ configDir WRITE setConfigDir NOTIFY configChanged);
+	// The conversation surface (upstream: driven by the PAM stack as it asks
+	// for input). Inert here, but declared so lock/auth documents that bind
+	// them - `onMessageChanged`, `onResponseRequiredChanged` - still load.
+	Q_PROPERTY(QString message READ message NOTIFY messageChanged);
+	Q_PROPERTY(bool messageIsError READ messageIsError NOTIFY messageChanged);
+	Q_PROPERTY(bool responseRequired READ responseRequired NOTIFY responseRequiredChanged);
+	Q_PROPERTY(bool responseVisible READ responseVisible NOTIFY responseRequiredChanged);
 	QML_ELEMENT;
 
 public:
@@ -38,6 +45,10 @@ public:
 		mConfigDir = c;
 		emit configChanged();
 	}
+	[[nodiscard]] QString message() const { return {}; }
+	[[nodiscard]] bool messageIsError() const { return false; }
+	[[nodiscard]] bool responseRequired() const { return false; }
+	[[nodiscard]] bool responseVisible() const { return false; }
 	Q_INVOKABLE bool start() { return false; }
 	Q_INVOKABLE void abort() {}
 	Q_INVOKABLE void respond(const QString& = {}) {}
@@ -45,6 +56,8 @@ signals:
 	void activeChanged();
 	void userChanged();
 	void configChanged();
+	void messageChanged();
+	void responseRequiredChanged();
 	void completed(qs::mac::pam::PamResult::Enum result);
 	void
 	pamMessage(const QString& message, bool isError, bool responseRequired, bool responseVisible);

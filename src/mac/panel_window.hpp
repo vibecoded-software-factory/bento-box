@@ -52,6 +52,11 @@ public:
 	void trySetWidth(qint32 implicitWidth) override;
 	void trySetHeight(qint32 implicitHeight) override;
 	void setScreen(QuickshellScreenInfo* screen) override;
+	// Watches the owning interface for the dynamic properties the Wayland shim
+	// writes (bentoExclusiveKeyboard, bentoDesktopBackground). Shells flip
+	// keyboardFocus while the window stays visible, so a visibility signal
+	// alone would miss the change.
+	bool eventFilter(QObject* watched, QEvent* event) override;
 
 	[[nodiscard]] bool aboveWindows() const { return this->bAboveWindows; }
 	void setAboveWindows(bool aboveWindows) { this->bAboveWindows = aboveWindows; }

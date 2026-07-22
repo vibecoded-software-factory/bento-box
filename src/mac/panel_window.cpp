@@ -1,5 +1,6 @@
 #include "panel_window.hpp"
 
+#include <qcoreevent.h>
 #include <qnamespace.h>
 #include <qobject.h>
 #include <qqmlengine.h>
@@ -61,6 +62,10 @@ MacPanelWindow::~MacPanelWindow() {
 	// Give the space back - a panel that goes away must not leave the layout
 	// permanently shrunk.
 	sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
+	// Shells destroy a modal's window on close, so the hide path's deferred
+	// yield never runs - give app focus back here too. No-op unless this
+	// panel holds the keyboard grab.
+	qs::mac::yieldKeyboardFromPanel(this);
 }
 
 void MacPanelWindow::connectWindow() {
@@ -95,6 +100,13 @@ void MacPanelWindow::connectWindow() {
 	    &MacPanelWindow::applyNativeConfig
 	);
 
+	// The Wayland shim communicates through dynamic properties on the owning
+	// interface (our parent). Watch them: a shell flips keyboardFocus on an
+	// already-visible modal, and that change must reapply the native config.
+	if (this->parent() != nullptr) {
+		this->parent()->installEventFilter(this);
+	}
+
 	this->applyNativeConfig();
 	// Send the initial reservation now that the panel is configured; later
 	// changes drive it through the bcExclusiveZone/bcExclusionEdge bindings.
@@ -117,6 +129,18 @@ void MacPanelWindow::connectWindow() {
 		});
 		this->mReservationHeartbeat->start();
 	}
+}
+
+bool MacPanelWindow::eventFilter(QObject* watched, QEvent* event) {
+	if (watched == this->parent() && event->type() == QEvent::DynamicPropertyChange) {
+		auto* change = static_cast<QDynamicPropertyChangeEvent*>(event); // NOLINT
+		if (change->propertyName() == "bentoExclusiveKeyboard"
+		    || change->propertyName() == "bentoDesktopBackground")
+		{
+			this->applyNativeConfig();
+		}
+	}
+	return false;
 }
 
 void MacPanelWindow::trySetWidth(qint32 implicitWidth) {
@@ -250,12 +274,25 @@ void MacPanelWindow::applyNativeConfig() {
 	// suppressed on macOS - the OS owns the desktop.
 	auto background =
 	    this->parent() != nullptr && this->parent()->property("bentoDesktopBackground").toBool();
-	QTimer::singleShot(0, this, [this, window, above, background]() {
+	// A Wayland exclusive keyboard grab (launcher, modal): macOS only routes
+	// keys to the active app's key window, so showing such a panel must take
+	// app focus and hiding it must give focus back. Driven from here because
+	// applyNativeConfig already runs on every visibility change.
+	auto exclusiveKeyboard =
+	    this->parent() != nullptr && this->parent()->property("bentoExclusiveKeyboard").toBool();
+	QTimer::singleShot(0, this, [this, window, above, background, exclusiveKeyboard]() {
 		qs::mac::configurePanelWindow(window, above, background);
 		// The panel was shown (and possibly clamped out of the menu-bar strip)
 		// before this deferred config raised its level; re-assert the intended
 		// frame now that the level permits the true screen edge.
 		assertPanelFrame(window, this->mIntendedGeometry);
+		if (exclusiveKeyboard) {
+			if (window->isVisible()) {
+				qs::mac::takeKeyboardForPanel(window, this);
+			} else {
+				qs::mac::yieldKeyboardFromPanel(this);
+			}
+		}
 	});
 }
 

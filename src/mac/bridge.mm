@@ -121,6 +121,49 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 	nsWindow.level = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
 }
 
+namespace {
+// The app that was frontmost before an exclusive-keyboard panel took focus,
+// and which panel took it. Main-thread only. Held weakly-by-value: if the app
+// quits meanwhile, activateWithOptions is a harmless no-op.
+NSRunningApplication* gPreviousApp =
+    nil;                        // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+void* gKeyboardOwner = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+} // namespace
+
+void takeKeyboardForPanel(QWindow* window, void* owner) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil) return;
+
+	// Only remember the previous app when the shell is NOT already active -
+	// two exclusive panels in a row must not overwrite the real restore target
+	// with the shell itself.
+	if (!NSApp.active) {
+		NSRunningApplication* frontmost = NSWorkspace.sharedWorkspace.frontmostApplication;
+		if (frontmost != nil
+		    && frontmost.processIdentifier != NSProcessInfo.processInfo.processIdentifier)
+		{
+			gPreviousApp = frontmost;
+		}
+	}
+	gKeyboardOwner = owner;
+
+	NSLog(@"[bento] keyboard grab: taking app focus (previous=%@)", gPreviousApp.localizedName);
+	[NSApp activateIgnoringOtherApps:YES];
+	[nsWindow makeKeyAndOrderFront:nil];
+}
+
+void yieldKeyboardFromPanel(void* owner) {
+	if (gKeyboardOwner != owner) return;
+	gKeyboardOwner = nullptr;
+
+	NSRunningApplication* previous = gPreviousApp;
+	gPreviousApp = nil;
+	NSLog(@"[bento] keyboard grab: yielding app focus (restore=%@)", previous.localizedName);
+	if (previous != nil && !previous.terminated) {
+		[previous activateWithOptions:0];
+	}
+}
+
 void assertPanelFrame(QWindow* window, const QRect& geometry) {
 	NSWindow* nsWindow = nsWindowFor(window);
 	if (nsWindow == nil || geometry.isEmpty()) return;

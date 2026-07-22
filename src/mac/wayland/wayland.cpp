@@ -35,7 +35,15 @@ void WlrLayershell::setNamespace(const QString& ns) {
 void WlrLayershell::setKeyboardFocus(WlrKeyboardFocus::Enum focus) {
 	if (this->mKeyboardFocus == focus) return;
 	this->mKeyboardFocus = focus;
-	if (this->mPanel) this->mPanel->setProperty("focusable", focus != WlrKeyboardFocus::None);
+	if (this->mPanel) {
+		this->mPanel->setProperty("focusable", focus != WlrKeyboardFocus::None);
+		// Exclusive is a keyboard GRAB on Wayland - the compositor routes keys
+		// to the surface no matter what. macOS routes keys only to the active
+		// app's key window, so the panel backend must actively take (and later
+		// give back) app focus for these panels. OnDemand panels get focus the
+		// macOS-native way: when clicked.
+		this->mPanel->setProperty("bentoExclusiveKeyboard", focus == WlrKeyboardFocus::Exclusive);
+	}
 	emit this->keyboardFocusChanged();
 }
 
@@ -51,6 +59,13 @@ void WlrLayershell::setExclusionMode(int mode) {
 	this->mExclusionMode = mode;
 	if (this->mPanel) this->mPanel->setProperty("exclusionMode", mode);
 	emit this->exclusionModeChanged();
+}
+
+void WlrLayershell::setMargins(Margins margins) {
+	if (this->mMargins == margins) return;
+	this->mMargins = margins;
+	if (this->mPanel) this->mPanel->setProperty("margins", QVariant::fromValue(margins));
+	emit this->marginsChanged();
 }
 
 } // namespace qs::mac::wayland
