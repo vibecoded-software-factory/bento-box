@@ -10,6 +10,10 @@ namespace qs::mac {
 
 namespace {
 
+// Defined with the input-mask state further down; declared here so
+// configurePanelWindow can consult it without reordering the file.
+bool windowHasInputMask(NSWindow* window);
+
 // While true, our swizzled -[NSApplication isActive] reports the app as active.
 // Set only for the duration of a QNSView hover callback (see below). Main-thread
 // only, so a plain global is safe.
@@ -105,7 +109,12 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 	}
 
 	nsWindow.alphaValue = 1.0;
-	nsWindow.ignoresMouseEvents = NO;
+	// Only force the window interactive when no input mask governs it - a
+	// reconfig (level change, visibility flip) must never clobber the
+	// mask-driven ignoresMouseEvents the pointer tracking just computed.
+	if (!windowHasInputMask(nsWindow)) {
+		nsWindow.ignoresMouseEvents = NO;
+	}
 	nsWindow.acceptsMouseMovedEvents = YES;
 
 	// Hover without activation: Qt drops mouse callbacks while the shell is not
@@ -170,13 +179,16 @@ namespace {
 
 // Input-region emulation state: per-NSWindow mask (window-local, top-left
 // coords) and the app-wide pointer monitors that keep ignoresMouseEvents in
-// step with the cursor. Main-thread only.
+// step with the cursor. Main-thread only. configurePanelWindow consults this
+// table so a reconfig never clobbers a mask-driven ignoresMouseEvents.
 QHash<NSWindow*, QRegion>& inputMasks() {
 	static QHash<NSWindow*, QRegion> masks;
 	return masks;
 }
 id gLocalMoveMonitor = nil;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 id gGlobalMoveMonitor = nil; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+
+bool windowHasInputMask(NSWindow* window) { return inputMasks().contains(window); }
 
 // The cursor moved (anywhere): each masked window ignores mouse events
 // exactly while the cursor is OUTSIDE its mask, so by the time a click
@@ -238,6 +250,13 @@ void clearInputMask(QWindow* window) {
 	NSWindow* nsWindow = nsWindowFor(window);
 	if (nsWindow == nil) return;
 	inputMasks().remove(nsWindow);
+}
+
+void assertPanelLevel(QWindow* window, bool aboveWindows) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil) return;
+	NSWindowLevel target = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
+	if (nsWindow.level != target) nsWindow.level = target;
 }
 
 void assertPanelFrame(QWindow* window, const QRect& geometry) {

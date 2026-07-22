@@ -147,6 +147,7 @@ void MacPanelWindow::onPolished() {
 	this->ProxyWindowBase::onPolished();
 	if (this->window != nullptr) {
 		qs::mac::applyInputMask(this->window, this->window->mask(), this->mask() != nullptr);
+		qs::mac::assertPanelLevel(this->window, this->bAboveWindows.value());
 	}
 }
 
