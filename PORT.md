@@ -66,12 +66,16 @@ place, since it already speaks niri's IPC.
   Objective-C++ bridge (`bridge.mm`) sets `collectionBehavior` so the panel
   shows on every Space. Per-screen instances come for free from quickshell's
   `Variants`.
-  **Deferred, on purpose:** the exclusive zone. wlroots/X11 reserve space so
-  maximized windows avoid the panel; macOS exposes no public API for that (only
-  the system Dock and menu bar reserve space). The `exclusiveZone` /
-  `exclusionMode` properties exist because the interface requires them, but they
-  are no-ops on macOS. Revisiting needs private APIs, which the project's
-  public-APIs-only rule rules out.
+  **Exclusive zone** (`exclusiveZone` / `exclusionMode`): macOS has no public
+  API to reserve space (a window's `NSScreen.visibleFrame` is read-only), so
+  the backend does what a wl_layer surface does with a compositor - it *asks*
+  the tiling window manager. `MacPanelWindow` computes its zone with the exact
+  wlroots/X11 rule (`compositor.cpp`, `bridge.hpp`) and sends `reserve-zone`
+  over the compositor's control socket (`$NIGIRI_SOCKET`); the WM leaves that
+  strip free. Best-effort: with no compositor listening the panel simply draws
+  without reserved space. This is the first thread of the M3 integration.
+  The honest limit stays: only WM-managed windows respect the zone - an app
+  zoomed with the green button uses the system `visibleFrame` regardless.
 - **M2** — `Quickshell` core singleton against `NSScreen`, plus `Process`,
   `FileView` and `IpcHandler` working on macOS.
 - **M3** — the nigiri integration module, in the place `Quickshell.Hyprland`

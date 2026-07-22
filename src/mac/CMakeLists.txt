@@ -1,5 +1,6 @@
 qt_add_library(quickshell-mac STATIC
 	panel_window.cpp
+	compositor.cpp
 	bridge.mm
 )
 

@@ -1,10 +1,12 @@
 #pragma once
 
+#include <qnamespace.h>
 #include <qobject.h>
 #include <qpointer.h>
 #include <qproperty.h>
 #include <qqmlintegration.h>
 #include <qscreen.h>
+#include <qstring.h>
 #include <qtclasshelpermacros.h>
 #include <qtmetamacros.h>
 #include <qtypes.h>
@@ -90,8 +92,12 @@ private:
 	void updateAboveWindows();
 	void updateFocusable();
 	void applyNativeConfig();
+	void updateReservation();
 
 	QPointer<QScreen> mTrackedScreen = nullptr;
+	// Stable per-panel id for the compositor reservation, so this panel sets
+	// and clears its own strut. Assigned once in the constructor.
+	QString mReservationId;
 
 	// clang-format off
 	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MacPanelWindow, bool, bAboveWindows, true, &MacPanelWindow::aboveWindowsChanged);
@@ -101,10 +107,19 @@ private:
 	Q_OBJECT_BINDABLE_PROPERTY(MacPanelWindow, qint32, bExclusiveZone, &MacPanelWindow::exclusiveZoneChanged);
 	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MacPanelWindow, ExclusionMode::Enum, bExclusionMode, ExclusionMode::Auto, &MacPanelWindow::exclusionModeChanged);
 
+	// Computed, exactly as the X11/wlroots backends compute their exclusive
+	// zone: Ignore -> 0, Normal -> the set value, Auto -> the panel's own
+	// extent on its single anchored edge plus that edge's margins. The edge is
+	// the one edge left free on an axis by the anchors.
+	Q_OBJECT_BINDABLE_PROPERTY(MacPanelWindow, qint32, bcExclusiveZone);
+	Q_OBJECT_BINDABLE_PROPERTY(MacPanelWindow, Qt::Edge, bcExclusionEdge);
+
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bAboveWindows, updateAboveWindows, onValueChanged);
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bAnchors, updateDimensionsSlot, onValueChanged);
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bMargins, updateDimensionsSlot, onValueChanged);
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bFocusable, updateFocusable, onValueChanged);
+	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bcExclusiveZone, updateReservation, onValueChanged);
+	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bcExclusionEdge, updateReservation, onValueChanged);
 	// clang-format on
 };
 

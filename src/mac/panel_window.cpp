@@ -1,5 +1,7 @@
 #include "panel_window.hpp"
 
+#include <unistd.h>
+
 #include <qnamespace.h>
 #include <qobject.h>
 #include <qqmlengine.h>
@@ -15,11 +17,52 @@
 #include "../window/panelinterface.hpp"
 #include "../window/proxywindow.hpp"
 #include "bridge.hpp"
+#include "compositor.hpp"
 
 namespace qs::mac {
 
-MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {}
-MacPanelWindow::~MacPanelWindow() = default;
+namespace {
+QString nextReservationId() {
+	static int counter = 0;
+	return QStringLiteral("bento-%1").arg(counter++);
+}
+} // namespace
+
+MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {
+	this->mReservationId = nextReservationId();
+
+	// The single edge the anchors leave free on an axis - the edge to reserve
+	// against. Zero (no unique edge) means the panel is not edge-anchored and
+	// reserves nothing.
+	this->bcExclusionEdge.setBinding([this] { return this->bAnchors.value().exclusionEdge(); });
+
+	// niri/wlroots/X11's exclusive-zone rule, verbatim: Ignore reserves
+	// nothing, Normal reserves the set amount, Auto reserves the panel's own
+	// size on the anchored axis plus that edge's margins.
+	this->bcExclusiveZone.setBinding([this]() -> qint32 {
+		switch (this->bExclusionMode.value()) {
+		case ExclusionMode::Ignore: return 0;
+		case ExclusionMode::Normal: return this->bExclusiveZone;
+		case ExclusionMode::Auto:
+			auto edge = this->bcExclusionEdge.value();
+			auto margins = this->bMargins.value();
+			if (edge == Qt::TopEdge || edge == Qt::BottomEdge) {
+				return this->bImplicitHeight + margins.top + margins.bottom;
+			} else if (edge == Qt::LeftEdge || edge == Qt::RightEdge) {
+				return this->bImplicitWidth + margins.left + margins.right;
+			} else {
+				return 0;
+			}
+		}
+		return 0;
+	});
+}
+
+MacPanelWindow::~MacPanelWindow() {
+	// Give the space back - a panel that goes away must not leave the layout
+	// permanently shrunk.
+	sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
+}
 
 void MacPanelWindow::connectWindow() {
 	this->ProxyWindowBase::connectWindow();
@@ -44,6 +87,9 @@ void MacPanelWindow::connectWindow() {
 	);
 
 	this->applyNativeConfig();
+	// Send the initial reservation now that the panel is configured; later
+	// changes drive it through the bcExclusiveZone/bcExclusionEdge bindings.
+	this->updateReservation();
 }
 
 void MacPanelWindow::trySetWidth(qint32 implicitWidth) {
@@ -167,6 +213,34 @@ void MacPanelWindow::applyNativeConfig() {
 	auto* window = this->window;
 	auto above = this->bAboveWindows.value();
 	QTimer::singleShot(0, this, [window, above]() { qs::mac::configurePanelWindow(window, above); });
+}
+
+// Declare (or drop) this panel's reserved strip to the compositor. This is the
+// macOS stand-in for a wl_layer surface's exclusive zone: there is no protocol,
+// so the request goes over the compositor's control socket. Best-effort - if no
+// compositor is listening the panel just draws without reserved space.
+void MacPanelWindow::updateReservation() {
+	auto zone = this->bcExclusiveZone.value();
+	QString edge;
+	switch (this->bcExclusionEdge.value()) {
+	case Qt::TopEdge: edge = QStringLiteral("top"); break;
+	case Qt::BottomEdge: edge = QStringLiteral("bottom"); break;
+	case Qt::LeftEdge: edge = QStringLiteral("left"); break;
+	case Qt::RightEdge: edge = QStringLiteral("right"); break;
+	default: edge = QString(); break;
+	}
+
+	if (zone <= 0 || edge.isEmpty()) {
+		sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
+	} else {
+		// Pass our pid so the compositor drops the reservation if we die
+		// without clearing it (a crash or a hard kill) - the destructor's
+		// clear-zone only runs on a clean exit.
+		sendCompositorMessage(QStringLiteral("action reserve-zone %1 %2 %3 %4")
+		                          .arg(this->mReservationId, edge)
+		                          .arg(zone)
+		                          .arg(::getpid()));
+	}
 }
 
 // MacPanelInterface
