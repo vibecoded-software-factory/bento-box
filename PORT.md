@@ -186,6 +186,19 @@ place, since it already speaks niri's IPC.
     two mics with correct types and channel counts; read the default sink at
     78%; set it to 35% from QML and the system volume followed; muted and
     unmuted through the same path - then restored.
+  - **SystemTray** ✅ (stub) — `Quickshell.Services.SystemTray` on macOS
+    (`src/mac/systemtray/`) is an **API-compatible stub**: the `SystemTray`
+    singleton, `SystemTrayItem` type, and `Status`/`Category` enums exist so a
+    shell that imports the service binds without error, but `items` is **always
+    empty**. This is an honest platform limit, not laziness: macOS has **no
+    public API to enumerate another app's `NSStatusItem`s**. Confirmed by how
+    the leading tools do it - Ice/Bartender scrape the menu bar with **private
+    CoreGraphics/SkyLight APIs** and capture each icon with **ScreenCaptureKit**
+    (Screen Recording permission), which also makes them unsandboxable. A real
+    tray is that whole fragile, private-API subsystem - deferred, and of low
+    value here since macOS already shows these items in its own menu bar.
+    Verified: the URI imports, `items.length == 0`, the enums resolve, and a
+    `Repeater` over the model creates zero delegates.
 
 Same house rules as nigiri: warning-free build, a check for anything claimed,
 and small verifiable milestones.

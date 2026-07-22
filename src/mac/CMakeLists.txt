@@ -38,3 +38,7 @@ add_subdirectory(upower)
 # Quickshell.Services.Pipewire on macOS, backed by CoreAudio (the real Pipewire
 # service is Linux-only). Audio nodes + volumes only; no link graph.
 add_subdirectory(pipewire)
+
+# Quickshell.Services.SystemTray on macOS: an API-compatible stub. macOS has no
+# public way to enumerate other apps' tray items, so items is always empty.
+add_subdirectory(systemtray)
