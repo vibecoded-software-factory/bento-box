@@ -1,10 +1,63 @@
 #include "bridge.hpp"
 
 #import <AppKit/AppKit.h>
+#import <objc/runtime.h>
 
 #include <qwindow.h>
 
 namespace qs::mac {
+
+namespace {
+
+// While true, our swizzled -[NSApplication isActive] reports the app as active.
+// Set only for the duration of a QNSView hover callback (see below). Main-thread
+// only, so a plain global is safe.
+BOOL gBentoForceActive = NO; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+
+// Let a shell's bar show hover while it is NOT the frontmost app.
+//
+// Qt already tracks with NSTrackingActiveAlways, but every QNSView mouse handler
+// (mouseMovedImpl:/mouseEnteredImpl:/mouseExitedImpl:) opens with
+// `if (!NSApp.active) return;` and deliberately drops the callback while the app
+// is inactive - which a shell always is. In Wayland a layer surface gets the
+// pointer regardless of focus; to match that we wrap those three handlers so
+// NSApp.active reads true for their duration only, letting the event through
+// without otherwise pretending the shell is frontmost.
+//
+// Swizzled once (the QNSView class is shared by every panel). If Qt renames the
+// private impl selectors in a future version, the missing-method guard makes
+// this a silent no-op rather than a crash.
+void bentoInstallInactiveHoverWorkaround(NSView* view) {
+	static dispatch_once_t once;
+	dispatch_once(&once, ^{
+		Method isActive = class_getInstanceMethod([NSApplication class], @selector(isActive));
+		if (isActive != nullptr) {
+			IMP original = method_getImplementation(isActive);
+			IMP replacement = imp_implementationWithBlock(^BOOL(id self) {
+				if (gBentoForceActive) return YES;
+				return ((BOOL (*)(id, SEL)) original)(self, @selector(isActive));
+			});
+			method_setImplementation(isActive, replacement);
+		}
+
+		Class cls = [view class];
+		for (NSString* name in @[ @"mouseMovedImpl:", @"mouseEnteredImpl:", @"mouseExitedImpl:" ]) {
+			SEL sel = NSSelectorFromString(name);
+			Method m = class_getInstanceMethod(cls, sel);
+			if (m == nullptr) continue;
+			IMP original = method_getImplementation(m);
+			IMP replacement = imp_implementationWithBlock(^(id self, NSEvent* event) {
+				BOOL previous = gBentoForceActive;
+				gBentoForceActive = YES;
+				((void (*)(id, SEL, NSEvent*)) original)(self, sel, event);
+				gBentoForceActive = previous;
+			});
+			method_setImplementation(m, replacement);
+		}
+	});
+}
+
+} // namespace
 
 // QWindow::winId() returns the NSView* on the cocoa QPA; its `.window` is the
 // NSWindow Qt created for us. reinterpret_cast, not a Qt native interface,
@@ -51,6 +104,14 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 
 	nsWindow.alphaValue = 1.0;
 	nsWindow.ignoresMouseEvents = NO;
+	nsWindow.acceptsMouseMovedEvents = YES;
+
+	// Hover without activation: Qt drops mouse callbacks while the shell is not
+	// the frontmost app (see the workaround's comment). A bar is a layer
+	// surface and must receive the pointer regardless.
+	if (NSView* view = nsWindow.contentView) {
+		bentoInstallInactiveHoverWorkaround(view);
+	}
 
 	// Above ordinary windows sits at the status-bar level (over normal windows,
 	// below the system menu bar and Mission Control) - the closest macOS analogue
