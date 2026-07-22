@@ -100,6 +100,24 @@ void MacPanelWindow::connectWindow() {
 	// Send the initial reservation now that the panel is configured; later
 	// changes drive it through the bcExclusiveZone/bcExclusionEdge bindings.
 	this->updateReservation();
+
+	// Re-assert an active reservation on a slow heartbeat. The compositor holds
+	// struts in memory, so if it restarts it forgets this panel's zone - and
+	// nothing here would otherwise re-send it, since our bindings only fire on a
+	// change. A cleared panel has nothing to re-assert, so the heartbeat is a
+	// no-op unless we currently reserve space.
+	if (this->mReservationHeartbeat == nullptr) {
+		this->mReservationHeartbeat = new QTimer(this);
+		this->mReservationHeartbeat->setInterval(3000);
+		QObject::connect(this->mReservationHeartbeat, &QTimer::timeout, this, [this]() {
+			if (this->bcExclusiveZone.value() > 0
+			    && this->bcExclusionEdge.value() != static_cast<Qt::Edge>(0))
+			{
+				this->updateReservation();
+			}
+		});
+		this->mReservationHeartbeat->start();
+	}
 }
 
 void MacPanelWindow::trySetWidth(qint32 implicitWidth) {
