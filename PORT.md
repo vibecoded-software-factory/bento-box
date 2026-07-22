@@ -76,8 +76,15 @@ place, since it already speaks niri's IPC.
   without reserved space. This is the first thread of the M3 integration.
   The honest limit stays: only WM-managed windows respect the zone - an app
   zoomed with the green button uses the system `visibleFrame` regardless.
-- **M2** — `Quickshell` core singleton against `NSScreen`, plus `Process`,
-  `FileView` and `IpcHandler` working on macOS.
+- **M2** ✅ — the portable core works on macOS with no code changes, as the
+  usage table predicted. Verified live against a QML config:
+  `Quickshell.screens` enumerates the display through Qt's `QScreen` (cocoa QPA,
+  NSScreen-backed): "Built-in Retina Display" 1470x956 @ scale 2. `Process`
+  ran `uname -srm` → "Darwin 25.5.0 arm64". `FileView` read `/etc/hosts`.
+  `IpcHandler` round-tripped end to end over the instance's unix socket (whose
+  macOS paths M0 fixed): `qs ipc call m2 ping` → "pong", `add 3 4` → 7.
+  Not exercised for lack of hardware: multi-monitor enumeration and hot-plug
+  (`screensChanged`) - single display only.
 - **M3** — the nigiri integration module, in the place `Quickshell.Hyprland`
   occupies for DMS.
 - **M4+** — services, one at a time, in the order DMS needs them.
