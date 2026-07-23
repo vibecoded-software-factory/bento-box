@@ -2,6 +2,7 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qset.h>
 #include <qstring.h>
 #include <qtimer.h>
 #include <qtmetamacros.h>
@@ -11,12 +12,15 @@
 #include "../../core/model.hpp"
 
 // macOS Bluetooth, backed by IOBluetooth (classic BR-EDR). Mirrors the Linux
-// BlueZ service's QML surface so DMS's bluetooth widget binds unchanged, within
-// what IOBluetooth exposes: paired devices with name/icon/connection state,
-// connect/disconnect, and the adapter's power state. Controls macOS keeps in
-// System Settings and has no public API for (discoverable, pairable, trust,
-// block, per-device battery, programmatic pairing/removal) are present for
-// compatibility but inert - clearly noted below.
+// BlueZ service's QML surface so DMS's bluetooth widget binds unchanged:
+// paired devices with name/icon/connection state, connect/disconnect, the
+// adapter's power state, discovery (IOBluetoothDeviceInquiry), pairing
+// (IOBluetoothDevicePair - just-works and numeric-comparison auto-confirmed
+// like a NoInputNoOutput BlueZ agent, keyboard passkeys surfaced via a
+// notification), unpairing (the framework's long-stable private `remove`,
+// the same call blueutil makes - there is no public unpair), and per-device
+// battery from the IOKit registry. Controls macOS truly keeps to itself
+// (discoverable, pairable, trust, block, wake) stay present but inert.
 
 namespace qs::mac::bluetooth {
 
@@ -78,7 +82,7 @@ class BluetoothDevice: public QObject {
 	Q_PROPERTY(bool blocked READ blocked WRITE setBlocked NOTIFY blockedChanged);
 	/// No IOBluetooth equivalent - always false, setter inert.
 	Q_PROPERTY(bool wakeAllowed READ wakeAllowed WRITE setWakeAllowed NOTIFY wakeAllowedChanged);
-	/// IOBluetooth exposes no device battery level - always false.
+	/// From the IOKit registry (BatteryPercent), where the device reports it.
 	Q_PROPERTY(bool batteryAvailable READ batteryAvailable NOTIFY batteryAvailableChanged);
 	Q_PROPERTY(qreal battery READ battery NOTIFY batteryChanged);
 	Q_PROPERTY(qs::mac::bluetooth::BluetoothAdapter* adapter READ adapter CONSTANT);
@@ -101,26 +105,30 @@ public:
 	[[nodiscard]] bool connected() const { return this->mState == BluetoothDeviceState::Connected; }
 	void setConnected(bool connected);
 	[[nodiscard]] bool paired() const { return this->mPaired; }
-	[[nodiscard]] bool pairing() const { return false; }
+	[[nodiscard]] bool pairing() const { return this->mPairing; }
 	[[nodiscard]] bool trusted() const { return false; }
 	void setTrusted(bool /*trusted*/) {}
 	[[nodiscard]] bool blocked() const { return false; }
 	void setBlocked(bool /*blocked*/) {}
 	[[nodiscard]] bool wakeAllowed() const { return false; }
 	void setWakeAllowed(bool /*wakeAllowed*/) {}
-	[[nodiscard]] bool batteryAvailable() const { return false; }
-	[[nodiscard]] qreal battery() const { return 0.0; }
+	[[nodiscard]] bool batteryAvailable() const { return this->mBatteryAvailable; }
+	[[nodiscard]] qreal battery() const { return this->mBattery; }
 	[[nodiscard]] BluetoothAdapter* adapter() const { return this->mAdapter; }
 
 	Q_INVOKABLE void connect();
 	Q_INVOKABLE void disconnect();
-	Q_INVOKABLE void pair() {} // no public IOBluetooth pairing for a bar
-	Q_INVOKABLE void cancelPair() {}
-	Q_INVOKABLE void forget() {} // no public IOBluetooth un-pair
+	Q_INVOKABLE void pair();
+	Q_INVOKABLE void cancelPair();
+	Q_INVOKABLE void forget();
 
 	// Re-read state from the underlying IOBluetoothDevice.
 	void refresh();
 	[[nodiscard]] void* handle() const { return this->mDevice; }
+
+	// Backend hooks.
+	void setBatteryInfo(bool available, qreal level);
+	void pairingFinished(bool success); // called by the pairing delegate
 
 signals:
 	void addressChanged();
@@ -136,6 +144,8 @@ signals:
 	void batteryChanged();
 
 private:
+	void startPairing(bool connectAfter);
+
 	void* mDevice; // IOBluetoothDevice* (retained)
 	BluetoothAdapter* mAdapter;
 	QString mAddress;
@@ -143,6 +153,12 @@ private:
 	QString mIcon;
 	BluetoothDeviceState::Enum mState = BluetoothDeviceState::Disconnected;
 	bool mPaired = true;
+	bool mPairing = false;
+	bool mConnectAfterPair = false;
+	bool mBatteryAvailable = false;
+	qreal mBattery = 0.0;
+	void* mPair = nullptr;         // IOBluetoothDevicePair* while pairing (retained)
+	void* mPairDelegate = nullptr; // its delegate (retained)
 };
 
 ///! A bluetooth adapter.
@@ -153,8 +169,9 @@ class BluetoothAdapter: public QObject {
 	/// Whether the adapter is powered on. Writable (toggles Bluetooth power).
 	Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY stateChanged);
 	Q_PROPERTY(qs::mac::bluetooth::BluetoothAdapterState::Enum state READ state NOTIFY stateChanged);
-	/// macOS controls these in System Settings; present but inert.
+	/// macOS controls discoverable/pairable in System Settings; present but inert.
 	Q_PROPERTY(bool discoverable READ discoverable WRITE setDiscoverable NOTIFY discoverableChanged);
+	/// Device discovery (IOBluetoothDeviceInquiry); found devices join `devices`.
 	Q_PROPERTY(bool discovering READ discovering WRITE setDiscovering NOTIFY discoveringChanged);
 	Q_PROPERTY(bool pairable READ pairable WRITE setPairable NOTIFY pairableChanged);
 	QSDOC_TYPE_OVERRIDE(ObjectModel<qs::mac::bluetooth::BluetoothDevice>*);
@@ -173,8 +190,8 @@ public:
 	[[nodiscard]] BluetoothAdapterState::Enum state() const { return this->mState; }
 	[[nodiscard]] bool discoverable() const { return false; }
 	void setDiscoverable(bool /*discoverable*/) {}
-	[[nodiscard]] bool discovering() const { return false; }
-	void setDiscovering(bool /*discovering*/) {}
+	[[nodiscard]] bool discovering() const { return this->mDiscovering; }
+	void setDiscovering(bool discovering);
 	[[nodiscard]] bool pairable() const { return false; }
 	void setPairable(bool /*pairable*/) {}
 	[[nodiscard]] ObjectModel<BluetoothDevice>* devices() { return &this->mDevices; }
@@ -182,6 +199,7 @@ public:
 
 	// Backend hooks (set from the singleton).
 	void setInfo(const QString& name, const QString& address, BluetoothAdapterState::Enum state);
+	void setDiscoveringState(bool discovering);
 	ObjectModel<BluetoothDevice> mDevices {this};
 
 signals:
@@ -195,6 +213,7 @@ private:
 	QString mName;
 	QString mAddress;
 	BluetoothAdapterState::Enum mState = BluetoothAdapterState::Disabled;
+	bool mDiscovering = false;
 };
 
 ///! Bluetooth manager.
@@ -219,17 +238,31 @@ public:
 	[[nodiscard]] ObjectModel<BluetoothAdapter>* adapters() { return &this->mAdapters; }
 	[[nodiscard]] ObjectModel<BluetoothDevice>* devices() { return &this->mDevices; }
 
-	// Refresh adapter power state and the paired-device list from IOBluetooth.
+	// Refresh adapter power state, the device list and battery levels.
 	void refresh();
+
+	// Discovery (IOBluetoothDeviceInquiry). Found devices join the models
+	// unpaired; they are pruned once discovery ends unless busy or paired.
+	void setDiscovering(bool discovering);
+	[[nodiscard]] bool discovering() const { return this->mDiscovering; }
+	void inquiryFound(void* device); // IOBluetoothDevice*, from the delegate
+	void inquiryComplete();          // from the delegate
 
 signals:
 	void defaultAdapterChanged();
 
 private:
+	BluetoothDevice* deviceByAddress(const QString& address);
+	void insertDevice(void* device); // IOBluetoothDevice*, transfers retain
+
 	BluetoothAdapter* mAdapter = nullptr;
 	ObjectModel<BluetoothAdapter> mAdapters {this};
 	ObjectModel<BluetoothDevice> mDevices {this};
 	QTimer mPollTimer;
+	bool mDiscovering = false;
+	void* mInquiry = nullptr;         // IOBluetoothDeviceInquiry* (retained)
+	void* mInquiryDelegate = nullptr; // its delegate (retained)
+	QSet<QString> mDiscovered;        // addresses found by the current discovery
 };
 
 } // namespace qs::mac::bluetooth

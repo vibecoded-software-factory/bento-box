@@ -16,6 +16,7 @@ set_source_files_properties(bluetooth.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc"
 target_link_libraries(quickshell-mac-bluetooth PRIVATE
 	Qt::Quick
 	"-framework IOBluetooth"
+	"-framework IOKit"
 	"-framework Foundation"
 )
 
