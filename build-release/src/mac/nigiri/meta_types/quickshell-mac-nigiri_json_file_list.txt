@@ -1,4 +1,0 @@
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/nigiri/quickshell-mac-nigiri_autogen/include/../EWIEGA46WW/moc_connection.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/nigiri/quickshell-mac-nigiri_autogen/include/../EWIEGA46WW/moc_qml.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/nigiri/quickshell-mac-nigiri_autogen/include/../EWIEGA46WW/moc_window.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/nigiri/quickshell-mac-nigiri_autogen/include/../EWIEGA46WW/moc_workspace.cpp.json

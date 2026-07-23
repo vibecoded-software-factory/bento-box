@@ -1,6 +1,0 @@
---resource
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ui/.qt/rcc/qmake_Quickshell__InternalUi.qrc
---resource
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ui/.qt/rcc/quickshell-ui_raw_qml_0.qrc
-/qt/qml/Quickshell/_InternalUi/Tooltip.qml
-/qt/qml/Quickshell/_InternalUi/ReloadPopup.qml

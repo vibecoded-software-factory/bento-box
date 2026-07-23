@@ -1,2 +1,0 @@
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/quickshell-mac_autogen/include/../EWIEGA46WW/moc_desktop.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/quickshell-mac_autogen/include/../EWIEGA46WW/moc_panel_window.cpp.json

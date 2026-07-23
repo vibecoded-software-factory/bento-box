@@ -1,8 +1,0 @@
-module Quickshell.Services.Mpris
-linktarget quickshell-mac-mprisplugin
-optional plugin quickshell-mac-mprisplugin
-classname Quickshell_Services_MprisPlugin
-typeinfo quickshell-mac-mpris.qmltypes
-depends QtQuick
-prefer :/qt/qml/Quickshell/Services/Mpris/
-

@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/">
-    <file alias="/qt/qml/Quickshell/WindowManager">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/WindowManager</file>
-
-  </qresource>
-</RCC>

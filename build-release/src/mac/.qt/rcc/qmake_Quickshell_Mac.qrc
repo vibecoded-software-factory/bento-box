@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/Quickshell/Mac">
-    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Mac/qmldir</file>
-  </qresource>
-</RCC>
-

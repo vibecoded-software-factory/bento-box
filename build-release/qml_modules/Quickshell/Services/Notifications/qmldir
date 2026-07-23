@@ -1,8 +1,0 @@
-module Quickshell.Services.Notifications
-linktarget quickshell-mac-notificationsplugin
-optional plugin quickshell-mac-notificationsplugin
-classname Quickshell_Services_NotificationsPlugin
-typeinfo quickshell-mac-notifications.qmltypes
-depends QtQuick
-prefer :/qt/qml/Quickshell/Services/Notifications/
-
