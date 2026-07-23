@@ -1,0 +1,68 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "ElapsedTimer",
+            "lineNumber": 12,
+            "methods": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 21,
+                    "name": "elapsed",
+                    "returnType": "qreal"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 25,
+                    "name": "restart",
+                    "returnType": "qreal"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 29,
+                    "name": "elapsedMs",
+                    "returnType": "qint64"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 33,
+                    "name": "restartMs",
+                    "returnType": "qint64"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 37,
+                    "name": "elapsedNs",
+                    "returnType": "qint64"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "lineNumber": 41,
+                    "name": "restartNs",
+                    "returnType": "qint64"
+                }
+            ],
+            "object": true,
+            "qualifiedClassName": "ElapsedTimer",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "elapsedtimer.hpp",
+    "outputRevision": 69
+}

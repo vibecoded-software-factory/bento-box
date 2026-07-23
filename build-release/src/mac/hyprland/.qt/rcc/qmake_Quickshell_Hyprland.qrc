@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/Quickshell/Hyprland">
+    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Hyprland/qmldir</file>
+  </qresource>
+</RCC>
+

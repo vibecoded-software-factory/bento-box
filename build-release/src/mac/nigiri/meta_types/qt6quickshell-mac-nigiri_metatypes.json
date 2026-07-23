@@ -1,0 +1,640 @@
+[
+    {
+        "classes": [
+            {
+                "className": "NigiriIpc",
+                "lineNumber": 25,
+                "object": true,
+                "qualifiedClassName": "qs::nigiri::NigiriIpc",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 44,
+                        "name": "focusedWorkspaceChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 45,
+                        "name": "activeWindowChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "lineNumber": 46,
+                        "name": "focusedWindowIdChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "name",
+                                "type": "QString"
+                            },
+                            {
+                                "name": "data",
+                                "type": "QJsonObject"
+                            }
+                        ],
+                        "index": 3,
+                        "lineNumber": 48,
+                        "name": "rawEvent",
+                        "returnType": "void"
+                    }
+                ],
+                "slots": [
+                    {
+                        "access": "private",
+                        "arguments": [
+                            {
+                                "name": "state",
+                                "type": "QLocalSocket::LocalSocketState"
+                            }
+                        ],
+                        "index": 4,
+                        "lineNumber": 51,
+                        "name": "onEventSocketState",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "private",
+                        "index": 5,
+                        "lineNumber": 52,
+                        "name": "onEventSocketReady",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "connection.hpp",
+        "outputRevision": 69
+    },
+    {
+        "classes": [
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "Nigiri"
+                    },
+                    {
+                        "name": "QML.Singleton",
+                        "value": "true"
+                    }
+                ],
+                "className": "NigiriIpcQml",
+                "lineNumber": 20,
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "action",
+                                "type": "QString"
+                            }
+                        ],
+                        "index": 4,
+                        "lineNumber": 50,
+                        "name": "dispatch",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "properties": [
+                    {
+                        "constant": true,
+                        "designable": true,
+                        "final": false,
+                        "index": 0,
+                        "lineNumber": 25,
+                        "name": "workspaces",
+                        "override": false,
+                        "read": "workspaces",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "UntypedObjectModel*",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "constant": true,
+                        "designable": true,
+                        "final": false,
+                        "index": 1,
+                        "lineNumber": 28,
+                        "name": "windows",
+                        "override": false,
+                        "read": "windows",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "UntypedObjectModel*",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 2,
+                        "lineNumber": 30,
+                        "name": "focusedWorkspace",
+                        "notify": "focusedWorkspaceChanged",
+                        "override": false,
+                        "read": "focusedWorkspace",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qs::nigiri::NigiriWorkspace*",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 3,
+                        "lineNumber": 32,
+                        "name": "activeWindow",
+                        "notify": "activeWindowChanged",
+                        "override": false,
+                        "read": "activeWindow",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qs::nigiri::NigiriWindow*",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 4,
+                        "lineNumber": 34,
+                        "name": "focusedWindowId",
+                        "notify": "focusedWindowIdChanged",
+                        "override": false,
+                        "read": "focusedWindowId",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    }
+                ],
+                "qualifiedClassName": "qs::nigiri::NigiriIpcQml",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 53,
+                        "name": "focusedWorkspaceChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 54,
+                        "name": "activeWindowChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "lineNumber": 55,
+                        "name": "focusedWindowIdChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "name",
+                                "type": "QString"
+                            },
+                            {
+                                "name": "data",
+                                "type": "QJsonObject"
+                            }
+                        ],
+                        "index": 3,
+                        "lineNumber": 57,
+                        "name": "rawEvent",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "qml.hpp",
+        "outputRevision": 69
+    },
+    {
+        "classes": [
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "auto"
+                    },
+                    {
+                        "name": "QML.Creatable",
+                        "value": "false"
+                    },
+                    {
+                        "name": "QML.UncreatableReason",
+                        "value": "NigiriWindows are retrieved from the Nigiri singleton."
+                    }
+                ],
+                "className": "NigiriWindow",
+                "lineNumber": 18,
+                "methods": [
+                    {
+                        "access": "public",
+                        "index": 7,
+                        "lineNumber": 45,
+                        "name": "activate",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "properties": [
+                    {
+                        "bindable": "bindableId",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 0,
+                        "lineNumber": 22,
+                        "name": "id",
+                        "notify": "idChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableTitle",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 1,
+                        "lineNumber": 24,
+                        "name": "title",
+                        "notify": "titleChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableAppId",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 2,
+                        "lineNumber": 26,
+                        "name": "appId",
+                        "notify": "appIdChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindablePid",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 3,
+                        "lineNumber": 28,
+                        "name": "pid",
+                        "notify": "pidChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableWorkspaceId",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 4,
+                        "lineNumber": 30,
+                        "name": "workspaceId",
+                        "notify": "workspaceIdChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableFloating",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 5,
+                        "lineNumber": 32,
+                        "name": "floating",
+                        "notify": "floatingChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableActive",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 6,
+                        "lineNumber": 34,
+                        "name": "active",
+                        "notify": "activeChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    }
+                ],
+                "qualifiedClassName": "qs::nigiri::NigiriWindow",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 56,
+                        "name": "idChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 57,
+                        "name": "titleChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "lineNumber": 58,
+                        "name": "appIdChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 3,
+                        "lineNumber": 59,
+                        "name": "pidChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 4,
+                        "lineNumber": 60,
+                        "name": "workspaceIdChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 5,
+                        "lineNumber": 61,
+                        "name": "floatingChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 6,
+                        "lineNumber": 62,
+                        "name": "activeChanged",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "window.hpp",
+        "outputRevision": 69
+    },
+    {
+        "classes": [
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "auto"
+                    },
+                    {
+                        "name": "QML.Creatable",
+                        "value": "false"
+                    },
+                    {
+                        "name": "QML.UncreatableReason",
+                        "value": "NigiriWorkspaces are retrieved from the Nigiri singleton."
+                    }
+                ],
+                "className": "NigiriWorkspace",
+                "lineNumber": 17,
+                "methods": [
+                    {
+                        "access": "public",
+                        "index": 5,
+                        "lineNumber": 41,
+                        "name": "activate",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "properties": [
+                    {
+                        "bindable": "bindableId",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 0,
+                        "lineNumber": 21,
+                        "name": "id",
+                        "notify": "idChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableIdx",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 1,
+                        "lineNumber": 24,
+                        "name": "idx",
+                        "notify": "idxChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qint32",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableName",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 2,
+                        "lineNumber": 26,
+                        "name": "name",
+                        "notify": "nameChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableActive",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 3,
+                        "lineNumber": 28,
+                        "name": "active",
+                        "notify": "activeChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableFocused",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 4,
+                        "lineNumber": 30,
+                        "name": "focused",
+                        "notify": "focusedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    }
+                ],
+                "qualifiedClassName": "qs::nigiri::NigiriWorkspace",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 50,
+                        "name": "idChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 51,
+                        "name": "idxChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "lineNumber": 52,
+                        "name": "nameChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 3,
+                        "lineNumber": 53,
+                        "name": "activeChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 4,
+                        "lineNumber": 54,
+                        "name": "focusedChanged",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "workspace.hpp",
+        "outputRevision": 69
+    }
+]

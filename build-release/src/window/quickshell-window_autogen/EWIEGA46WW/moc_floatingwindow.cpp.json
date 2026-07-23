@@ -1,0 +1,297 @@
+{
+    "classes": [
+        {
+            "className": "ProxyFloatingWindow",
+            "lineNumber": 15,
+            "object": true,
+            "qualifiedClassName": "ProxyFloatingWindow",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 35,
+                    "name": "minimumSizeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 36,
+                    "name": "maximumSizeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 37,
+                    "name": "titleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 38,
+                    "name": "parentWindowChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 4,
+                    "lineNumber": 41,
+                    "name": "onParentDestroyed",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "ProxyWindowBase"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "FloatingWindow"
+                }
+            ],
+            "className": "FloatingWindowInterface",
+            "lineNumber": 86,
+            "methods": [
+                {
+                    "access": "public",
+                    "index": 9,
+                    "isConst": true,
+                    "lineNumber": 128,
+                    "name": "startSystemMove",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "edges",
+                            "type": "Qt::Edges"
+                        }
+                    ],
+                    "index": 10,
+                    "isConst": true,
+                    "lineNumber": 130,
+                    "name": "startSystemResize",
+                    "returnType": "bool"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "bindable": "bindableTitle",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 90,
+                    "name": "title",
+                    "notify": "titleChanged",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false,
+                    "write": "default"
+                },
+                {
+                    "bindable": "bindableMinimumSize",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 92,
+                    "name": "minimumSize",
+                    "notify": "minimumSizeChanged",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QSize",
+                    "user": false,
+                    "virtual": false,
+                    "write": "default"
+                },
+                {
+                    "bindable": "bindableMaximumSize",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 94,
+                    "name": "maximumSize",
+                    "notify": "maximumSizeChanged",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QSize",
+                    "user": false,
+                    "virtual": false,
+                    "write": "default"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 96,
+                    "name": "minimized",
+                    "notify": "minimizedChanged",
+                    "override": false,
+                    "read": "isMinimized",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMinimized"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 98,
+                    "name": "maximized",
+                    "notify": "maximizedChanged",
+                    "override": false,
+                    "read": "isMaximized",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMaximized"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "lineNumber": 100,
+                    "name": "fullscreen",
+                    "notify": "fullscreenChanged",
+                    "override": false,
+                    "read": "isFullscreen",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setFullscreen"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 6,
+                    "lineNumber": 105,
+                    "name": "parentWindow",
+                    "notify": "parentWindowChanged",
+                    "override": false,
+                    "read": "parentWindow",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QObject*",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setParentWindow"
+                }
+            ],
+            "qualifiedClassName": "FloatingWindowInterface",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 136,
+                    "name": "minimumSizeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 137,
+                    "name": "maximumSizeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 138,
+                    "name": "titleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 139,
+                    "name": "minimizedChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 140,
+                    "name": "maximizedChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "lineNumber": 141,
+                    "name": "fullscreenChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 6,
+                    "lineNumber": 142,
+                    "name": "parentWindowChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 7,
+                    "lineNumber": 145,
+                    "name": "onWindowConnected",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 8,
+                    "lineNumber": 146,
+                    "name": "onWindowStateChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "WindowInterface"
+                }
+            ]
+        }
+    ],
+    "inputFile": "floatingwindow.hpp",
+    "outputRevision": 69
+}

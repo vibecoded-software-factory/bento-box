@@ -1,0 +1,8 @@
+module Quickshell.Hyprland
+linktarget quickshell-mac-hyprlandplugin
+optional plugin quickshell-mac-hyprlandplugin
+classname Quickshell_HyprlandPlugin
+typeinfo quickshell-mac-hyprland.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/Hyprland/
+

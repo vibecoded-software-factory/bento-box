@@ -1,0 +1,42 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "ShellRoot",
+            "lineNumber": 12,
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 14,
+                    "name": "settings",
+                    "override": false,
+                    "read": "settings",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QuickshellSettings*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "ShellRoot",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "ReloadPropagator"
+                }
+            ]
+        }
+    ],
+    "inputFile": "shell.hpp",
+    "outputRevision": 69
+}

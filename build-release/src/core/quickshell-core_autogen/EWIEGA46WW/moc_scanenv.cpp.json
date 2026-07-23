@@ -1,0 +1,102 @@
+{
+    "classes": [
+        {
+            "className": "PreprocEnv",
+            "lineNumber": 9,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "major",
+                            "type": "int"
+                        },
+                        {
+                            "name": "minor",
+                            "type": "int"
+                        },
+                        {
+                            "name": "features",
+                            "type": "QStringList"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 14,
+                    "name": "hasVersion",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "major",
+                            "type": "int"
+                        },
+                        {
+                            "name": "minor",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 1,
+                    "isCloned": true,
+                    "lineNumber": 14,
+                    "name": "hasVersion",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "major",
+                            "type": "int"
+                        },
+                        {
+                            "name": "minor",
+                            "type": "int"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 15,
+                    "name": "hasQtVersion",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "variable",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 3,
+                    "lineNumber": 17,
+                    "name": "env",
+                    "returnType": "QString"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "variable",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 4,
+                    "lineNumber": 18,
+                    "name": "isEnvSet",
+                    "returnType": "bool"
+                }
+            ],
+            "object": true,
+            "qualifiedClassName": "qs::scan::env::PreprocEnv",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "scanenv.hpp",
+    "outputRevision": 69
+}

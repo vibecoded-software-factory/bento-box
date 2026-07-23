@@ -1,0 +1,11 @@
+quickshell-launch_autogen/timestamp: \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/CMakeLists.txt \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/command.cpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/launch.cpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/launch_p.hpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/main.cpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/main.hpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/parsecommand.cpp \
+	/opt/homebrew/share/cmake/CLI11/CLI11Config.cmake \
+	/opt/homebrew/share/cmake/CLI11/CLI11ConfigVersion.cmake \
+	/opt/homebrew/bin/cmake

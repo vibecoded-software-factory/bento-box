@@ -1,0 +1,11 @@
+-rootPath
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src
+-cmake-output
+-output-file
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/.qt/qml_imports/quickshell_conf.cmake
+-importPath
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src
+-importPath
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-importPath
+/opt/homebrew/opt/qt/share/qt/qml

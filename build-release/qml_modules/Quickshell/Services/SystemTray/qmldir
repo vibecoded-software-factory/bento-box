@@ -1,0 +1,8 @@
+module Quickshell.Services.SystemTray
+linktarget quickshell-mac-systemtrayplugin
+optional plugin quickshell-mac-systemtrayplugin
+classname Quickshell_Services_SystemTrayPlugin
+typeinfo quickshell-mac-systemtray.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/Services/SystemTray/
+

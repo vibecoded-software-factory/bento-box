@@ -1,0 +1,221 @@
+{
+    "classes": [
+        {
+            "className": "ColorQuantizerOperation",
+            "lineNumber": 14,
+            "object": true,
+            "qualifiedClassName": "ColorQuantizerOperation",
+            "signals": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "colors",
+                            "type": "QList<QColor>"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 26,
+                    "name": "done",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 1,
+                    "lineNumber": 29,
+                    "name": "finished",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                },
+                {
+                    "access": "public",
+                    "name": "QRunnable"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "ColorQuantizer",
+            "interfaces": [
+                [
+                    {
+                        "className": "QQmlParserStatus",
+                        "id": "\"org.qt-project.Qt.QQmlParserStatus\""
+                    }
+                ]
+            ],
+            "lineNumber": 65,
+            "object": true,
+            "properties": [
+                {
+                    "bindable": "bindableColors",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 74,
+                    "name": "colors",
+                    "notify": "colorsChanged",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<QColor>",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 77,
+                    "name": "source",
+                    "notify": "sourceChanged",
+                    "override": false,
+                    "read": "source",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QUrl",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setSource"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 81,
+                    "name": "depth",
+                    "notify": "depthChanged",
+                    "override": false,
+                    "read": "depth",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setDepth"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 87,
+                    "name": "imageRect",
+                    "notify": "imageRectChanged",
+                    "override": false,
+                    "read": "imageRect",
+                    "required": false,
+                    "reset": "resetImageRect",
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QRect",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setImageRect"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 93,
+                    "name": "rescaleSize",
+                    "notify": "rescaleSizeChanged",
+                    "override": false,
+                    "read": "rescaleSize",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qreal",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setRescaleSize"
+                }
+            ],
+            "qualifiedClassName": "ColorQuantizer",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 117,
+                    "name": "colorsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 118,
+                    "name": "sourceChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 119,
+                    "name": "depthChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 120,
+                    "name": "imageRectChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 121,
+                    "name": "rescaleSizeChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "result",
+                            "type": "QList<QColor>"
+                        }
+                    ],
+                    "index": 5,
+                    "lineNumber": 124,
+                    "name": "operationFinished",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                },
+                {
+                    "access": "public",
+                    "name": "QQmlParserStatus"
+                }
+            ]
+        }
+    ],
+    "inputFile": "colorquantizer.hpp",
+    "outputRevision": 69
+}

@@ -1,0 +1,332 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "Hyprland is not the compositor on macOS"
+                }
+            ],
+            "className": "HyprlandWorkspace",
+            "lineNumber": 24,
+            "object": true,
+            "qualifiedClassName": "qs::mac::hyprland::HyprlandWorkspace",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "Hyprland is not the compositor on macOS"
+                }
+            ],
+            "className": "HyprlandMonitor",
+            "lineNumber": 34,
+            "object": true,
+            "qualifiedClassName": "qs::mac::hyprland::HyprlandMonitor",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "Hyprland is not the compositor on macOS"
+                }
+            ],
+            "className": "HyprlandToplevel",
+            "lineNumber": 44,
+            "object": true,
+            "qualifiedClassName": "qs::mac::hyprland::HyprlandToplevel",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "HyprlandFocusGrab",
+            "lineNumber": 55,
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 58,
+                    "name": "active",
+                    "notify": "activeChanged",
+                    "override": false,
+                    "read": "active",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setActive"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 59,
+                    "name": "windows",
+                    "notify": "windowsChanged",
+                    "override": false,
+                    "read": "windows",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<QObject*>",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setWindows"
+                }
+            ],
+            "qualifiedClassName": "qs::mac::hyprland::HyprlandFocusGrab",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 79,
+                    "name": "activeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 80,
+                    "name": "windowsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 81,
+                    "name": "cleared",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "Hyprland"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "Hyprland",
+            "lineNumber": 89,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 113,
+                    "name": "dispatch",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 114,
+                    "name": "refreshToplevels",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 115,
+                    "name": "refreshWorkspaces",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "lineNumber": 116,
+                    "name": "refreshMonitors",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "type": "QObject*"
+                        }
+                    ],
+                    "index": 6,
+                    "lineNumber": 117,
+                    "name": "monitorFor",
+                    "returnType": "QObject*"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 92,
+                    "name": "focusedWorkspace",
+                    "notify": "focusedWorkspaceChanged",
+                    "override": false,
+                    "read": "focusedWorkspace",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::hyprland::HyprlandWorkspace*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 93,
+                    "name": "focusedMonitor",
+                    "notify": "focusedMonitorChanged",
+                    "override": false,
+                    "read": "focusedMonitor",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::hyprland::HyprlandMonitor*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 95,
+                    "name": "workspaces",
+                    "override": false,
+                    "read": "workspaces",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 97,
+                    "name": "monitors",
+                    "override": false,
+                    "read": "monitors",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 99,
+                    "name": "toplevels",
+                    "override": false,
+                    "read": "toplevels",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::mac::hyprland::Hyprland",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 120,
+                    "name": "focusedWorkspaceChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 121,
+                    "name": "focusedMonitorChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "hyprland.hpp",
+    "outputRevision": 69
+}

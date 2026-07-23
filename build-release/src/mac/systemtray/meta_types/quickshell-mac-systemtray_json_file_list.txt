@@ -1,0 +1,1 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/systemtray/quickshell-mac-systemtray_autogen/include/../EWIEGA46WW/moc_systemtray.cpp.json

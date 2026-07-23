@@ -1,0 +1,342 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "SystemTrayItem"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "SystemTrayItems can only be acquired from SystemTray"
+                }
+            ],
+            "className": "SystemTrayItem",
+            "lineNumber": 58,
+            "methods": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 91,
+                    "name": "activate",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 92,
+                    "name": "secondaryActivate",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "delta",
+                            "type": "qint32"
+                        },
+                        {
+                            "name": "horizontal",
+                            "type": "bool"
+                        }
+                    ],
+                    "index": 2,
+                    "isConst": true,
+                    "lineNumber": 93,
+                    "name": "scroll",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "parentWindow",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "relativeX",
+                            "type": "qint32"
+                        },
+                        {
+                            "name": "relativeY",
+                            "type": "qint32"
+                        }
+                    ],
+                    "index": 3,
+                    "lineNumber": 94,
+                    "name": "display",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 61,
+                    "name": "id",
+                    "override": false,
+                    "read": "id",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 62,
+                    "name": "title",
+                    "override": false,
+                    "read": "title",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 63,
+                    "name": "status",
+                    "override": false,
+                    "read": "status",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::systemtray::Status::Enum",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 64,
+                    "name": "category",
+                    "override": false,
+                    "read": "category",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::systemtray::Category::Enum",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 65,
+                    "name": "icon",
+                    "override": false,
+                    "read": "icon",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "lineNumber": 66,
+                    "name": "tooltipTitle",
+                    "override": false,
+                    "read": "tooltipTitle",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 6,
+                    "lineNumber": 67,
+                    "name": "tooltipDescription",
+                    "override": false,
+                    "read": "tooltipDescription",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 7,
+                    "lineNumber": 68,
+                    "name": "hasMenu",
+                    "override": false,
+                    "read": "hasMenu",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 8,
+                    "lineNumber": 69,
+                    "name": "onlyMenu",
+                    "override": false,
+                    "read": "onlyMenu",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 9,
+                    "lineNumber": 72,
+                    "name": "menu",
+                    "override": false,
+                    "read": "menu",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QObject*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::mac::systemtray::SystemTrayItem",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "SystemTray",
+            "lineNumber": 101,
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 104,
+                    "name": "items",
+                    "override": false,
+                    "read": "items",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::mac::systemtray::SystemTray",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "Status",
+            "enums": [
+                {
+                    "isClass": false,
+                    "isFlag": false,
+                    "lineNumber": 32,
+                    "name": "Enum",
+                    "type": "quint8",
+                    "values": [
+                        "Passive",
+                        "Active",
+                        "NeedsAttention"
+                    ]
+                }
+            ],
+            "lineNumber": 28,
+            "namespace": true,
+            "qualifiedClassName": "qs::mac::systemtray::Status"
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "Category",
+            "enums": [
+                {
+                    "isClass": false,
+                    "isFlag": false,
+                    "lineNumber": 45,
+                    "name": "Enum",
+                    "type": "quint8",
+                    "values": [
+                        "Hardware",
+                        "SystemServices",
+                        "ApplicationStatus",
+                        "Communications"
+                    ]
+                }
+            ],
+            "lineNumber": 41,
+            "namespace": true,
+            "qualifiedClassName": "qs::mac::systemtray::Category"
+        }
+    ],
+    "inputFile": "systemtray.hpp",
+    "outputRevision": 69
+}

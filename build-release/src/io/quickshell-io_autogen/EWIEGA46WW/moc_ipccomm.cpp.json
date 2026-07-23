@@ -1,0 +1,48 @@
+{
+    "classes": [
+        {
+            "className": "RemoteSignalListener",
+            "lineNumber": 82,
+            "object": true,
+            "qualifiedClassName": "qs::io::ipc::comm::RemoteSignalListener",
+            "slots": [
+                {
+                    "access": "private",
+                    "arguments": [
+                        {
+                            "name": "target",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "signal",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "value",
+                            "type": "QString"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 93,
+                    "name": "onSignal",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 1,
+                    "lineNumber": 94,
+                    "name": "onConnDestroyed",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "ipccomm.hpp",
+    "outputRevision": 69
+}

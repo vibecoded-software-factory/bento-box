@@ -141,7 +141,7 @@ namespace {
 // (doesNotRecognizeSelector abort, or a Code Signature Invalid kill when the
 // stale isa leads execution into an unmapped page). A pid is weak by value:
 // if the app quit meanwhile, the lookup below just returns nil.
-pid_t gPreviousAppPid = -1; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+pid_t gPreviousAppPid = -1;     // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 void* gKeyboardOwner = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 } // namespace
 
@@ -173,9 +173,9 @@ void yieldKeyboardFromPanel(void* owner) {
 
 	pid_t previousPid = gPreviousAppPid;
 	gPreviousAppPid = -1;
-	NSRunningApplication* previous = previousPid > 0
-	    ? [NSRunningApplication runningApplicationWithProcessIdentifier:previousPid]
-	    : nil;
+	NSRunningApplication* previous =
+	    previousPid > 0 ? [NSRunningApplication runningApplicationWithProcessIdentifier:previousPid]
+	                    : nil;
 	NSLog(@"[bento] keyboard grab: yielding app focus (restore=%@)", previous.localizedName);
 	if (previous != nil && !previous.terminated) {
 		[previous activateWithOptions:0];

@@ -1,0 +1,6 @@
+qs-pchset-launch_autogen/timestamp: \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/pchstub.cpp \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/launch/CMakeLists.txt \
+	/opt/homebrew/share/cmake/CLI11/CLI11Config.cmake \
+	/opt/homebrew/share/cmake/CLI11/CLI11ConfigVersion.cmake \
+	/opt/homebrew/bin/cmake

@@ -1,0 +1,421 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "Toplevels must be acquired from the ToplevelManager."
+                }
+            ],
+            "className": "Toplevel",
+            "lineNumber": 28,
+            "methods": [
+                {
+                    "access": "public",
+                    "index": 9,
+                    "lineNumber": 58,
+                    "name": "activate",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 10,
+                    "lineNumber": 60,
+                    "name": "close",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "screen",
+                            "type": "QuickshellScreenInfo*"
+                        }
+                    ],
+                    "index": 11,
+                    "lineNumber": 63,
+                    "name": "fullscreenOn",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "window",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "rect",
+                            "type": "QRect"
+                        }
+                    ],
+                    "index": 12,
+                    "lineNumber": 66,
+                    "name": "setRectangle",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 13,
+                    "lineNumber": 67,
+                    "name": "unsetRectangle",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 31,
+                    "name": "appId",
+                    "notify": "appIdChanged",
+                    "override": false,
+                    "read": "appId",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 32,
+                    "name": "title",
+                    "notify": "titleChanged",
+                    "override": false,
+                    "read": "title",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 35,
+                    "name": "parent",
+                    "notify": "parentChanged",
+                    "override": false,
+                    "read": "parentToplevel",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::wayland::Toplevel*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 37,
+                    "name": "activated",
+                    "notify": "activatedChanged",
+                    "override": false,
+                    "read": "activated",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 40,
+                    "name": "screens",
+                    "notify": "screensChanged",
+                    "override": false,
+                    "read": "screens",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<QuickshellScreenInfo*>",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "lineNumber": 43,
+                    "name": "maximized",
+                    "notify": "maximizedChanged",
+                    "override": false,
+                    "read": "maximized",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMaximized"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 6,
+                    "lineNumber": 46,
+                    "name": "minimized",
+                    "notify": "minimizedChanged",
+                    "override": false,
+                    "read": "minimized",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMinimized"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 7,
+                    "lineNumber": 49,
+                    "name": "fullscreen",
+                    "notify": "fullscreenChanged",
+                    "override": false,
+                    "read": "fullscreen",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setFullscreen"
+                }
+            ],
+            "qualifiedClassName": "qs::mac::wayland::Toplevel",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 86,
+                    "name": "closed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 87,
+                    "name": "appIdChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 88,
+                    "name": "titleChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 89,
+                    "name": "parentChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 90,
+                    "name": "activatedChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "lineNumber": 91,
+                    "name": "screensChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 6,
+                    "lineNumber": 92,
+                    "name": "maximizedChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 7,
+                    "lineNumber": 93,
+                    "name": "minimizedChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 8,
+                    "lineNumber": 94,
+                    "name": "fullscreenChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "className": "MacToplevelManager",
+            "lineNumber": 105,
+            "object": true,
+            "qualifiedClassName": "qs::mac::wayland::MacToplevelManager",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 117,
+                    "name": "activeToplevelChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 1,
+                    "lineNumber": 120,
+                    "name": "onWindowInserted",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 121,
+                    "name": "onWindowRemoved",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 3,
+                    "lineNumber": 122,
+                    "name": "updateActiveToplevel",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "ToplevelManager"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "ToplevelManager",
+            "lineNumber": 136,
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 141,
+                    "name": "toplevels",
+                    "override": false,
+                    "read": "toplevels",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 143,
+                    "name": "activeToplevel",
+                    "notify": "activeToplevelChanged",
+                    "override": false,
+                    "read": "activeToplevel",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::mac::wayland::Toplevel*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::mac::wayland::ToplevelManager",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 159,
+                    "name": "activeToplevelChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "toplevel.hpp",
+    "outputRevision": 69
+}

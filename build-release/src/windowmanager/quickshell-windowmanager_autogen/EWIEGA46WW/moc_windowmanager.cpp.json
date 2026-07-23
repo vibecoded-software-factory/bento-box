@@ -1,0 +1,122 @@
+{
+    "classes": [
+        {
+            "className": "WindowManager",
+            "lineNumber": 19,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "screen",
+                            "type": "QuickshellScreenInfo*"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 26,
+                    "name": "screenProjection",
+                    "returnType": "ScreenProjection*"
+                }
+            ],
+            "object": true,
+            "qualifiedClassName": "qs::wm::WindowManager",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 37,
+                    "name": "windowsetsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 38,
+                    "name": "windowsetProjectionsChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "WindowManager"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "WindowManagerQml",
+            "lineNumber": 61,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "screen",
+                            "type": "QuickshellScreenInfo*"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 78,
+                    "name": "screenProjection",
+                    "returnType": "ScreenProjection*"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "bindable": "bindableWindowsets",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 67,
+                    "name": "windowsets",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<Windowset*>",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "bindable": "bindableWindowsetProjections",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 70,
+                    "name": "windowsetProjections",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<WindowsetProjection*>",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::wm::WindowManagerQml",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "windowmanager.hpp",
+    "outputRevision": 69
+}

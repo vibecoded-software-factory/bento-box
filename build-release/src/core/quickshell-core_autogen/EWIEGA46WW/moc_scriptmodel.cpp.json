@@ -1,0 +1,78 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "ScriptModel",
+            "lineNumber": 45,
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 74,
+                    "name": "values",
+                    "notify": "valuesChanged",
+                    "override": false,
+                    "read": "values",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<QJSValue>",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setValues"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 81,
+                    "name": "objectProp",
+                    "notify": "objectPropChanged",
+                    "override": false,
+                    "read": "objectProp",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setObjectProp"
+                }
+            ],
+            "qualifiedClassName": "ScriptModel",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 102,
+                    "name": "valuesChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 103,
+                    "name": "objectPropChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QAbstractListModel"
+                }
+            ]
+        }
+    ],
+    "inputFile": "scriptmodel.hpp",
+    "outputRevision": 69
+}

@@ -1,0 +1,144 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "ObjectModel"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "ObjectModels cannot be created directly."
+                }
+            ],
+            "className": "UntypedObjectModel",
+            "lineNumber": 40,
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        }
+                    ],
+                    "index": 5,
+                    "isConst": true,
+                    "lineNumber": 56,
+                    "name": "indexOf",
+                    "returnType": "qsizetype"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 45,
+                    "name": "values",
+                    "notify": "valuesChanged",
+                    "override": false,
+                    "read": "values",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QList<QObject*>",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "UntypedObjectModel",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 61,
+                    "name": "valuesChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 1,
+                    "lineNumber": 63,
+                    "name": "objectInsertedPre",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 65,
+                    "name": "objectInsertedPost",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 3,
+                    "lineNumber": 67,
+                    "name": "objectRemovedPre",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "object",
+                            "type": "QObject*"
+                        },
+                        {
+                            "name": "index",
+                            "type": "qsizetype"
+                        }
+                    ],
+                    "index": 4,
+                    "lineNumber": 69,
+                    "name": "objectRemovedPost",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QAbstractListModel"
+                }
+            ]
+        }
+    ],
+    "inputFile": "model.hpp",
+    "outputRevision": 69
+}

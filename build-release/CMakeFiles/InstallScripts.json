@@ -1,0 +1,33 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/build/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/launch/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/core/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/debug/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ipc/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/widgets/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ui/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/nigiri/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/mpris/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/mpris/mediaremote-adapter/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/upower/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/pipewire/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/systemtray/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/bluetooth/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/notifications/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/wayland/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/hyprland/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/i3/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/pam/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/polkit/cmake_install.cmake",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/services/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
