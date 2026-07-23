@@ -18,6 +18,7 @@ target_link_libraries(quickshell-mac-wayland PRIVATE
 	Qt::Quick
 	quickshell-mac-nigiri
 	"-framework ScreenCaptureKit"
+	"-framework IOKit"
 	"-framework CoreGraphics"
 )
 
