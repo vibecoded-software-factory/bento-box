@@ -180,6 +180,26 @@ void BluetoothDevice::refresh() {
 	}
 }
 
+// Settle a transient Connecting/Disconnecting to the real connection state
+// and notify. Reads [device isConnected] directly and always emits, because
+// we are leaving a transient the UI is already showing - so the settled value
+// is always worth pushing, even when it equals what was requested (a
+// disconnect that Continuity immediately undid still has to leave the
+// "Disconnecting" state). The old pre-set-the-opposite trick left the UI
+// stuck on the transient whenever the outcome matched the pre-set value.
+void BluetoothDevice::settleState() {
+	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
+	auto real =
+	    [device isConnected] ? BluetoothDeviceState::Connected : BluetoothDeviceState::Disconnected;
+	if (this->mState != real) {
+		this->mState = real;
+		emit this->stateChanged();
+	}
+	// Also refresh name/icon/battery; the state read there is now a no-op
+	// since mState is no longer transient.
+	this->refresh();
+}
+
 void BluetoothDevice::setConnected(bool connected) {
 	connected ? this->connect() : this->disconnect();
 }
@@ -205,10 +225,7 @@ void BluetoothDevice::connect() {
 	// openConnection blocks, so run it off the main thread and settle back.
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
 		[device openConnection];
-		dispatch_async(dispatch_get_main_queue(), ^{
-			this->mState = BluetoothDeviceState::Disconnected; // refresh reads truth
-			this->refresh();
-		});
+		dispatch_async(dispatch_get_main_queue(), ^{ this->settleState(); });
 	});
 }
 
@@ -315,10 +332,7 @@ void BluetoothDevice::disconnect() {
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
 		[device closeConnection];
-		dispatch_async(dispatch_get_main_queue(), ^{
-			this->mState = BluetoothDeviceState::Connected; // refresh reads truth
-			this->refresh();
-		});
+		dispatch_async(dispatch_get_main_queue(), ^{ this->settleState(); });
 	});
 }
 

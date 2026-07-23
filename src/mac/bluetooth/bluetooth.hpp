@@ -128,6 +128,8 @@ public:
 
 	// Re-read state from the underlying IOBluetoothDevice.
 	void refresh();
+	// Settle a transient Connecting/Disconnecting to the real state and notify.
+	void settleState();
 	[[nodiscard]] void* handle() const { return this->mDevice; }
 
 	// Backend hooks.
