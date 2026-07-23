@@ -1,5 +1,6 @@
 #include "bluetooth.hpp"
 
+#import <AppKit/AppKit.h>
 #import <IOBluetooth/IOBluetooth.h>
 #import <IOKit/IOKitLib.h>
 #include <qhash.h>
@@ -282,18 +283,35 @@ void BluetoothDevice::pairingFinished(bool success) {
 
 void BluetoothDevice::forget() {
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
-	// There is no public unpair; `remove` has lived in IOBluetoothDevice for
-	// many releases and is what blueutil calls. The next refresh prunes the
-	// device once it is gone from pairedDevices.
+	// There is no public unpair. The framework's private `remove` (blueutil's
+	// call) works on older macOS; current releases gate unpairing behind a
+	// bluetoothd entitlement and silently ignore it (verified: remove and
+	// forceRemove both return a CoreBluetooth coordinator and the pairing
+	// stays). Attempt it, verify, and when the OS ignored us hand the user
+	// to the one surface that can unpair: System Settings' Bluetooth pane.
 	SEL removeSel = NSSelectorFromString(@"remove");
 	if ([device respondsToSelector:removeSel]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 		[device performSelector:removeSel];
 #pragma clang diagnostic pop
-	} else {
-		NSLog(@"[bento] bluetooth: IOBluetoothDevice.remove unavailable; cannot unpair");
 	}
+
+	NSString* address = [device addressString];
+	dispatch_after(
+	    dispatch_time(DISPATCH_TIME_NOW, (int64_t) (1.5 * NSEC_PER_SEC)),
+	    dispatch_get_main_queue(),
+	    ^{
+		    for (IOBluetoothDevice* paired in [IOBluetoothDevice pairedDevices]) {
+			    if (![[paired addressString] isEqualToString:address]) continue;
+			    NSLog(@"[bento] bluetooth: unpair is OS-gated here; opening System Settings");
+			    [[NSWorkspace sharedWorkspace]
+			        openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple."
+			                                     @"BluetoothSettings"]];
+			    return;
+		    }
+	    }
+	);
 }
 
 void BluetoothDevice::setBatteryInfo(bool available, qreal level) {
