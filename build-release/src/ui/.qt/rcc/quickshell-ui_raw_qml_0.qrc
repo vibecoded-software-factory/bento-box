@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/qt/qml/Quickshell/_InternalUi/">
+    <file alias="Tooltip.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/ui/Tooltip.qml</file>
+    <file alias="ReloadPopup.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/ui/ReloadPopup.qml</file>
+  </qresource>
+</RCC>
+

@@ -1,0 +1,40 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "PersistentProperties",
+            "lineNumber": 41,
+            "object": true,
+            "qualifiedClassName": "PersistentProperties",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 53,
+                    "name": "loaded",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 56,
+                    "name": "reloaded",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "Reloadable"
+                }
+            ]
+        }
+    ],
+    "inputFile": "persistentprops.hpp",
+    "outputRevision": 69
+}

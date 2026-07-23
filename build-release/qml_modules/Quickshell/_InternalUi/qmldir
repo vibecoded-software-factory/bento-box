@@ -1,0 +1,10 @@
+module Quickshell._InternalUi
+linktarget quickshell-uiplugin
+optional plugin quickshell-uiplugin
+classname Quickshell__InternalUiPlugin
+typeinfo quickshell-ui.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/_InternalUi/
+Tooltip 0.0 Tooltip.qml
+ReloadPopup 0.0 ReloadPopup.qml
+

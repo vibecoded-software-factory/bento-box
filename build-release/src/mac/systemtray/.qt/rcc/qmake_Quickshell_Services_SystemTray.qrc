@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/Quickshell/Services/SystemTray">
+    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Services/SystemTray/qmldir</file>
+  </qresource>
+</RCC>
+

@@ -1,0 +1,5 @@
+quickshell_autogen/timestamp: \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/.qt/qml_imports/quickshell_conf.cmake \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/CMakeLists.txt \
+	/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/main.cpp \
+	/opt/homebrew/bin/cmake

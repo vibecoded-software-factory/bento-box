@@ -1,0 +1,143 @@
+{
+	"BUILD_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen",
+	"CMAKE_BINARY_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release",
+	"CMAKE_CURRENT_BINARY_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager",
+	"CMAKE_EXECUTABLE" : "/opt/homebrew/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/CMakeLists.txt",
+		"/opt/homebrew/opt/qt/lib/cmake/Qt6Core/Qt6CoreConfigureFileTemplate.in",
+		"/opt/homebrew/opt/qt/lib/cmake/Qt6Core/Qt6CoreResourceInit.in.cpp",
+		"/opt/homebrew/opt/qt/lib/cmake/Qt6Qml/Qt6QmlPluginTemplate.cpp.in",
+		"/opt/homebrew/opt/qt/lib/cmake/Qt6Qml/Qt6QmlModuleDirMappingTemplate.qrc.in",
+		"/opt/homebrew/opt/qt/lib/cmake/Qt6Qml/Qt6qmldirTemplate.cmake.in",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanagerplugin_Quickshell_WindowManagerPlugin_in.cpp"
+	],
+	"CMAKE_SOURCE_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box",
+	"CROSS_CONFIG" : false,
+	"DEP_FILE" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "quickshell-windowmanager_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/screenprojection.hpp",
+			"Mu",
+			"EWIEGA46WW/moc_screenprojection.cpp",
+			null
+		],
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/windowmanager.hpp",
+			"Mu",
+			"EWIEGA46WW/moc_windowmanager.cpp",
+			null
+		],
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/windowset.hpp",
+			"Mu",
+			"EWIEGA46WW/moc_windowset.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/include",
+	"MOC_COMPILATION_FILE" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"QT_CORE_LIB",
+		"QT_GUI_LIB",
+		"QT_NETWORK_LIB",
+		"QT_NO_DEBUG",
+		"QT_OPENGL_LIB",
+		"QT_QMLINTEGRATION_LIB",
+		"QT_QML_LIB",
+		"QT_QUICK_LIB",
+		"_REENTRANT"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager",
+		"/opt/homebrew/opt/qt/lib/QtQml.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtQml.framework",
+		"/opt/homebrew/opt/qt/lib/QtCore.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtCore.framework",
+		"/opt/homebrew/opt/qt/share/qt/mkspecs/macx-clang",
+		"/opt/homebrew/opt/qt/include",
+		"/opt/homebrew/opt/qt/include/QtQmlIntegration",
+		"/opt/homebrew/opt/qt/lib/QtNetwork.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtNetwork.framework",
+		"/opt/homebrew/opt/qt/lib/QtQuick.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtQuick.framework",
+		"/opt/homebrew/opt/qt/lib/QtGui.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtGui.framework",
+		"/opt/homebrew/opt/qt/lib/QtOpenGL.framework/Headers",
+		"/opt/homebrew/opt/qt/lib/QtOpenGL.framework",
+		"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1",
+		"/Library/Developer/CommandLineTools/usr/lib/clang/21/include",
+		"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include",
+		"/Library/Developer/CommandLineTools/usr/include"
+	],
+	"MOC_MACRO_NAMES" : 
+	[
+		"Q_OBJECT",
+		"Q_GADGET",
+		"Q_NAMESPACE",
+		"Q_NAMESPACE_EXPORT",
+		"Q_GADGET_EXPORT",
+		"Q_ENUM_NS"
+	],
+	"MOC_OPTIONS" : [ "--output-json" ],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-std=gnu++20",
+		"-w",
+		"-dM",
+		"-E",
+		"/opt/homebrew/share/cmake/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : 
+	[
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/.qt/rcc/qrc_qmake_Quickshell_WindowManager.cpp",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/.qt/rcc/qrc_qmake_Quickshell_WindowManager_init.cpp",
+		"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_qmltyperegistrations.cpp"
+	],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 8,
+	"PARSE_CACHE_FILE" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/CMakeFiles/quickshell-windowmanager_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/opt/homebrew/opt/qt/share/qt/libexec/moc",
+	"QT_UIC_EXECUTABLE" : "",
+	"QT_VERSION_MAJOR" : 6,
+	"QT_VERSION_MINOR" : 11,
+	"SETTINGS_FILE" : "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/CMakeFiles/quickshell-windowmanager_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/screenprojection.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/windowmanager.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/windowmanager/windowset.cpp",
+			"Mu",
+			null
+		]
+	],
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

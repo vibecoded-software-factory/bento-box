@@ -1,0 +1,2 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/pipewire/quickshell-mac-pipewire_autogen/include/../EWIEGA46WW/moc_node.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/pipewire/quickshell-mac-pipewire_autogen/include/../EWIEGA46WW/moc_service.cpp.json

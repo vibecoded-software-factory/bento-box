@@ -1,0 +1,12 @@
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Services/Polkit
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/opt/homebrew/opt/qt/share/qt/qml
+--resource
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/polkit/.qt/rcc/qmake_Quickshell_Services_Polkit.qrc
+--module
+Quickshell.Services.Polkit

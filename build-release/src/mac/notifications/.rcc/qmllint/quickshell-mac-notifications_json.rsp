@@ -1,0 +1,13 @@
+--bare
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Services/Notifications
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/opt/homebrew/opt/qt/share/qt/qml
+--resource
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/notifications/.qt/rcc/qmake_Quickshell_Services_Notifications.qrc
+--json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/quickshell-mac-notifications_qmllint.json

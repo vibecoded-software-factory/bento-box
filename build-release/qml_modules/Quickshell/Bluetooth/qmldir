@@ -1,0 +1,8 @@
+module Quickshell.Bluetooth
+linktarget quickshell-mac-bluetoothplugin
+optional plugin quickshell-mac-bluetoothplugin
+classname Quickshell_BluetoothPlugin
+typeinfo quickshell-mac-bluetooth.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/Bluetooth/
+

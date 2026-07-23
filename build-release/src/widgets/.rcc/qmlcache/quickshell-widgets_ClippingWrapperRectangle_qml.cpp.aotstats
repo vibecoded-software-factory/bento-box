@@ -1,0 +1,31 @@
+{
+    "formatRevision": 1,
+    "modules": [
+        {
+            "moduleFiles": [
+                {
+                    "entries": [
+                        {
+                            "codegenResult": 0,
+                            "column": 27,
+                            "durationMicroseconds": 0,
+                            "functionName": "__implicitWidthInternal",
+                            "line": 59,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
+                            "column": 28,
+                            "durationMicroseconds": 0,
+                            "functionName": "__implicitHeightInternal",
+                            "line": 60,
+                            "message": ""
+                        }
+                    ],
+                    "filePath": "/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/ClippingWrapperRectangle.qml"
+                }
+            ],
+            "moduleId": "Quickshell.Widgets(quickshell-widgets)"
+        }
+    ]
+}

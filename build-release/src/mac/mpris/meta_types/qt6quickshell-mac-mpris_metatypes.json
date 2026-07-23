@@ -1,0 +1,1011 @@
+[
+    {
+        "classes": [
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "MprisPlaybackState"
+                    },
+                    {
+                        "name": "QML.Singleton",
+                        "value": "true"
+                    }
+                ],
+                "className": "MprisPlaybackState",
+                "enums": [
+                    {
+                        "isClass": false,
+                        "isFlag": false,
+                        "lineNumber": 21,
+                        "name": "Enum",
+                        "type": "quint8",
+                        "values": [
+                            "Stopped",
+                            "Playing",
+                            "Paused"
+                        ]
+                    }
+                ],
+                "lineNumber": 14,
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "value",
+                                "type": "qs::mac::mpris::MprisPlaybackState::Enum"
+                            }
+                        ],
+                        "index": 0,
+                        "lineNumber": 28,
+                        "name": "toString",
+                        "returnType": "QString"
+                    }
+                ],
+                "object": true,
+                "qualifiedClassName": "qs::mac::mpris::MprisPlaybackState",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            },
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "MprisLoopState"
+                    },
+                    {
+                        "name": "QML.Singleton",
+                        "value": "true"
+                    }
+                ],
+                "className": "MprisLoopState",
+                "enums": [
+                    {
+                        "isClass": false,
+                        "isFlag": false,
+                        "lineNumber": 38,
+                        "name": "Enum",
+                        "type": "quint8",
+                        "values": [
+                            "None",
+                            "Track",
+                            "Playlist"
+                        ]
+                    }
+                ],
+                "lineNumber": 32,
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "value",
+                                "type": "qs::mac::mpris::MprisLoopState::Enum"
+                            }
+                        ],
+                        "index": 0,
+                        "lineNumber": 45,
+                        "name": "toString",
+                        "returnType": "QString"
+                    }
+                ],
+                "object": true,
+                "qualifiedClassName": "qs::mac::mpris::MprisLoopState",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            },
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "auto"
+                    },
+                    {
+                        "name": "QML.Creatable",
+                        "value": "false"
+                    },
+                    {
+                        "name": "QML.UncreatableReason",
+                        "value": "MprisPlayers can only be acquired from Mpris."
+                    }
+                ],
+                "className": "MprisPlayer",
+                "lineNumber": 56,
+                "methods": [
+                    {
+                        "access": "public",
+                        "index": 28,
+                        "lineNumber": 117,
+                        "name": "play",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 29,
+                        "lineNumber": 118,
+                        "name": "pause",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 30,
+                        "lineNumber": 119,
+                        "name": "stop",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 31,
+                        "lineNumber": 120,
+                        "name": "togglePlaying",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 32,
+                        "lineNumber": 121,
+                        "name": "next",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 33,
+                        "lineNumber": 122,
+                        "name": "previous",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "type": "qreal"
+                            }
+                        ],
+                        "index": 34,
+                        "lineNumber": 124,
+                        "name": "seek",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 35,
+                        "lineNumber": 125,
+                        "name": "raise",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 36,
+                        "lineNumber": 126,
+                        "name": "quit",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "properties": [
+                    {
+                        "bindable": "bindableIdentity",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 0,
+                        "lineNumber": 59,
+                        "name": "identity",
+                        "notify": "identityChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableDesktopEntry",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 1,
+                        "lineNumber": 60,
+                        "name": "desktopEntry",
+                        "notify": "desktopEntryChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "constant": true,
+                        "designable": true,
+                        "final": false,
+                        "index": 2,
+                        "lineNumber": 61,
+                        "name": "dbusName",
+                        "override": false,
+                        "read": "dbusName",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanControl",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 3,
+                        "lineNumber": 63,
+                        "name": "canControl",
+                        "notify": "canControlChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanPlay",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 4,
+                        "lineNumber": 64,
+                        "name": "canPlay",
+                        "notify": "canPlayChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanPause",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 5,
+                        "lineNumber": 65,
+                        "name": "canPause",
+                        "notify": "canPauseChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanTogglePlaying",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 6,
+                        "lineNumber": 66,
+                        "name": "canTogglePlaying",
+                        "notify": "canTogglePlayingChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanGoNext",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 7,
+                        "lineNumber": 67,
+                        "name": "canGoNext",
+                        "notify": "canGoNextChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanGoPrevious",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 8,
+                        "lineNumber": 68,
+                        "name": "canGoPrevious",
+                        "notify": "canGoPreviousChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanSeek",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 9,
+                        "lineNumber": 69,
+                        "name": "canSeek",
+                        "notify": "canSeekChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanQuit",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 10,
+                        "lineNumber": 70,
+                        "name": "canQuit",
+                        "notify": "canQuitChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableCanRaise",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 11,
+                        "lineNumber": 71,
+                        "name": "canRaise",
+                        "notify": "canRaiseChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindablePlaybackState",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 12,
+                        "lineNumber": 73,
+                        "name": "playbackState",
+                        "notify": "playbackStateChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qs::mac::mpris::MprisPlaybackState::Enum",
+                        "user": false,
+                        "virtual": false,
+                        "write": "setPlaybackState"
+                    },
+                    {
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 13,
+                        "lineNumber": 74,
+                        "name": "isPlaying",
+                        "notify": "playbackStateChanged",
+                        "override": false,
+                        "read": "isPlaying",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false,
+                        "write": "setPlaying"
+                    },
+                    {
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 14,
+                        "lineNumber": 76,
+                        "name": "position",
+                        "notify": "positionChanged",
+                        "override": false,
+                        "read": "position",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qreal",
+                        "user": false,
+                        "virtual": false,
+                        "write": "setPosition"
+                    },
+                    {
+                        "bindable": "bindablePositionSupported",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 15,
+                        "lineNumber": 77,
+                        "name": "positionSupported",
+                        "notify": "positionSupportedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableLength",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 16,
+                        "lineNumber": 78,
+                        "name": "length",
+                        "notify": "lengthChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qreal",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableLengthSupported",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 17,
+                        "lineNumber": 79,
+                        "name": "lengthSupported",
+                        "notify": "lengthSupportedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableMetadata",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 18,
+                        "lineNumber": 81,
+                        "name": "metadata",
+                        "notify": "metadataChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QVariantMap",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableTrackTitle",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 19,
+                        "lineNumber": 82,
+                        "name": "trackTitle",
+                        "notify": "trackTitleChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableTrackArtist",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 20,
+                        "lineNumber": 83,
+                        "name": "trackArtist",
+                        "notify": "trackArtistChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableTrackAlbum",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 21,
+                        "lineNumber": 84,
+                        "name": "trackAlbum",
+                        "notify": "trackAlbumChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableTrackArtUrl",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 22,
+                        "lineNumber": 85,
+                        "name": "trackArtUrl",
+                        "notify": "trackArtUrlChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "QString",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableVolume",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 23,
+                        "lineNumber": 89,
+                        "name": "volume",
+                        "notify": "volumeChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qreal",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableVolumeSupported",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 24,
+                        "lineNumber": 90,
+                        "name": "volumeSupported",
+                        "notify": "volumeSupportedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableLoopState",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 25,
+                        "lineNumber": 91,
+                        "name": "loopState",
+                        "notify": "loopStateChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "qs::mac::mpris::MprisLoopState::Enum",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableLoopSupported",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 26,
+                        "lineNumber": 92,
+                        "name": "loopSupported",
+                        "notify": "loopSupportedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableShuffle",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 27,
+                        "lineNumber": 93,
+                        "name": "shuffle",
+                        "notify": "shuffleChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    },
+                    {
+                        "bindable": "bindableShuffleSupported",
+                        "constant": false,
+                        "designable": true,
+                        "final": false,
+                        "index": 28,
+                        "lineNumber": 94,
+                        "name": "shuffleSupported",
+                        "notify": "shuffleSupportedChanged",
+                        "override": false,
+                        "read": "default",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "bool",
+                        "user": false,
+                        "virtual": false
+                    }
+                ],
+                "qualifiedClassName": "qs::mac::mpris::MprisPlayer",
+                "signals": [
+                    {
+                        "access": "public",
+                        "index": 0,
+                        "lineNumber": 158,
+                        "name": "trackChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 1,
+                        "lineNumber": 159,
+                        "name": "identityChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 2,
+                        "lineNumber": 160,
+                        "name": "desktopEntryChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 3,
+                        "lineNumber": 161,
+                        "name": "canControlChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 4,
+                        "lineNumber": 162,
+                        "name": "canPlayChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 5,
+                        "lineNumber": 163,
+                        "name": "canPauseChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 6,
+                        "lineNumber": 164,
+                        "name": "canTogglePlayingChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 7,
+                        "lineNumber": 165,
+                        "name": "canGoNextChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 8,
+                        "lineNumber": 166,
+                        "name": "canGoPreviousChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 9,
+                        "lineNumber": 167,
+                        "name": "canSeekChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 10,
+                        "lineNumber": 168,
+                        "name": "canQuitChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 11,
+                        "lineNumber": 169,
+                        "name": "canRaiseChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 12,
+                        "lineNumber": 170,
+                        "name": "playbackStateChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 13,
+                        "lineNumber": 171,
+                        "name": "positionChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 14,
+                        "lineNumber": 172,
+                        "name": "positionSupportedChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 15,
+                        "lineNumber": 173,
+                        "name": "lengthChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 16,
+                        "lineNumber": 174,
+                        "name": "lengthSupportedChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 17,
+                        "lineNumber": 175,
+                        "name": "metadataChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 18,
+                        "lineNumber": 176,
+                        "name": "trackTitleChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 19,
+                        "lineNumber": 177,
+                        "name": "trackArtistChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 20,
+                        "lineNumber": 178,
+                        "name": "trackAlbumChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 21,
+                        "lineNumber": 179,
+                        "name": "trackArtUrlChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 22,
+                        "lineNumber": 180,
+                        "name": "volumeChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 23,
+                        "lineNumber": 181,
+                        "name": "volumeSupportedChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 24,
+                        "lineNumber": 182,
+                        "name": "loopStateChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 25,
+                        "lineNumber": 183,
+                        "name": "loopSupportedChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 26,
+                        "lineNumber": 184,
+                        "name": "shuffleChanged",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 27,
+                        "lineNumber": 185,
+                        "name": "shuffleSupportedChanged",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "player.hpp",
+        "outputRevision": 69
+    },
+    {
+        "classes": [
+            {
+                "className": "MprisIpc",
+                "lineNumber": 22,
+                "object": true,
+                "qualifiedClassName": "qs::mac::mpris::MprisIpc",
+                "slots": [
+                    {
+                        "access": "private",
+                        "index": 0,
+                        "lineNumber": 35,
+                        "name": "onStreamData",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "private",
+                        "arguments": [
+                            {
+                                "name": "exitCode",
+                                "type": "int"
+                            },
+                            {
+                                "name": "status",
+                                "type": "QProcess::ExitStatus"
+                            }
+                        ],
+                        "index": 1,
+                        "lineNumber": 36,
+                        "name": "onStreamFinished",
+                        "returnType": "void"
+                    }
+                ],
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            },
+            {
+                "classInfos": [
+                    {
+                        "name": "QML.Element",
+                        "value": "Mpris"
+                    },
+                    {
+                        "name": "QML.Singleton",
+                        "value": "true"
+                    }
+                ],
+                "className": "MprisQml",
+                "lineNumber": 73,
+                "object": true,
+                "properties": [
+                    {
+                        "constant": true,
+                        "designable": true,
+                        "final": false,
+                        "index": 0,
+                        "lineNumber": 77,
+                        "name": "players",
+                        "override": false,
+                        "read": "players",
+                        "required": false,
+                        "scriptable": true,
+                        "stored": true,
+                        "type": "UntypedObjectModel*",
+                        "user": false,
+                        "virtual": false
+                    }
+                ],
+                "qualifiedClassName": "qs::mac::mpris::MprisQml",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "service.hpp",
+        "outputRevision": 69
+    }
+]

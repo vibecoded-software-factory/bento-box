@@ -1,0 +1,139 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "QsMenuAnchor",
+            "lineNumber": 14,
+            "methods": [
+                {
+                    "access": "public",
+                    "index": 6,
+                    "lineNumber": 52,
+                    "name": "open",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 7,
+                    "lineNumber": 54,
+                    "name": "close",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 35,
+                    "name": "anchor",
+                    "override": false,
+                    "read": "anchor",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "PopupAnchor*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 39,
+                    "name": "menu",
+                    "notify": "menuChanged",
+                    "override": false,
+                    "read": "menu",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qs::menu::QsMenuHandle*",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMenu"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 43,
+                    "name": "visible",
+                    "notify": "visibleChanged",
+                    "override": false,
+                    "read": "isVisible",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::menu::QsMenuAnchor",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 66,
+                    "name": "opened",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 68,
+                    "name": "closed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 70,
+                    "name": "menuChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 71,
+                    "name": "visibleChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 4,
+                    "lineNumber": 74,
+                    "name": "onMenuChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 5,
+                    "lineNumber": 75,
+                    "name": "onMenuDestroyed",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "qsmenuanchor.hpp",
+    "outputRevision": 69
+}

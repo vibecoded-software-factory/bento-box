@@ -1,0 +1,168 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "PopupWindow"
+                }
+            ],
+            "className": "ProxyPopupWindow",
+            "lineNumber": 43,
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 52,
+                    "name": "parentWindow",
+                    "notify": "parentWindowChanged",
+                    "override": false,
+                    "read": "parentWindow",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QObject*",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setParentWindow"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 56,
+                    "name": "relativeX",
+                    "notify": "relativeXChanged",
+                    "override": false,
+                    "read": "relativeX",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setRelativeX"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 60,
+                    "name": "relativeY",
+                    "notify": "relativeYChanged",
+                    "override": false,
+                    "read": "relativeY",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setRelativeY"
+                },
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 74,
+                    "name": "anchor",
+                    "override": false,
+                    "read": "anchor",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "PopupAnchor*",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "bindable": "bindableGrabFocus",
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 87,
+                    "name": "grabFocus",
+                    "notify": "grabFocusChanged",
+                    "override": false,
+                    "read": "default",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "default"
+                }
+            ],
+            "qualifiedClassName": "ProxyPopupWindow",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 120,
+                    "name": "parentWindowChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 121,
+                    "name": "relativeXChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 122,
+                    "name": "relativeYChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 123,
+                    "name": "grabFocusChanged",
+                    "returnType": "void"
+                }
+            ],
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 4,
+                    "lineNumber": 126,
+                    "name": "onParentWindowChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 5,
+                    "lineNumber": 127,
+                    "name": "onClosed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 6,
+                    "lineNumber": 128,
+                    "name": "reposition",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "ProxyWindowBase"
+                }
+            ]
+        }
+    ],
+    "inputFile": "popupwindow.hpp",
+    "outputRevision": 69
+}

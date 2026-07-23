@@ -1,0 +1,8 @@
+module Quickshell.Wayland
+linktarget quickshell-mac-waylandplugin
+optional plugin quickshell-mac-waylandplugin
+classname Quickshell_WaylandPlugin
+typeinfo quickshell-mac-wayland.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/Wayland/
+

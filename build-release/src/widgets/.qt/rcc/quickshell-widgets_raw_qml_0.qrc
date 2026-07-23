@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="/qt/qml/Quickshell/Widgets/">
+    <file alias="IconImage.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/IconImage.qml</file>
+    <file alias="ClippingRectangle.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/ClippingRectangle.qml</file>
+    <file alias="WrapperItem.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/WrapperItem.qml</file>
+    <file alias="WrapperMouseArea.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/WrapperMouseArea.qml</file>
+    <file alias="WrapperRectangle.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/WrapperRectangle.qml</file>
+    <file alias="ClippingWrapperRectangle.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/ClippingWrapperRectangle.qml</file>
+    <file alias="ClippingWrapperRectangleInternal.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/ClippingWrapperRectangleInternal.qml</file>
+  </qresource>
+</RCC>
+

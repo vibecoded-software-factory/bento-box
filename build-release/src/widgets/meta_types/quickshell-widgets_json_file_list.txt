@@ -1,0 +1,3 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/widgets/quickshell-widgets_autogen/include/../EWIEGA46WW/moc_cliprect.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/widgets/quickshell-widgets_autogen/include/../EWIEGA46WW/moc_marginwrapper.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/widgets/quickshell-widgets_autogen/include/../EWIEGA46WW/moc_wrapper.cpp.json

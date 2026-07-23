@@ -1,0 +1,298 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "panelAnchors"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "true"
+                },
+                {
+                    "name": "QML.CreationMethod",
+                    "value": "structured"
+                }
+            ],
+            "className": "Anchors",
+            "gadget": true,
+            "lineNumber": 12,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 14,
+                    "member": "mLeft",
+                    "name": "left",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 15,
+                    "member": "mRight",
+                    "name": "right",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 16,
+                    "member": "mTop",
+                    "name": "top",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 17,
+                    "member": "mBottom",
+                    "name": "bottom",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "Anchors"
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "PanelWindow"
+                },
+                {
+                    "name": "QML.Creatable",
+                    "value": "false"
+                },
+                {
+                    "name": "QML.UncreatableReason",
+                    "value": "No PanelWindow backend loaded."
+                }
+            ],
+            "className": "PanelWindowInterface",
+            "lineNumber": 96,
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 105,
+                    "name": "anchors",
+                    "notify": "anchorsChanged",
+                    "override": false,
+                    "read": "anchors",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "Anchors",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setAnchors"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 109,
+                    "name": "margins",
+                    "notify": "marginsChanged",
+                    "override": false,
+                    "read": "margins",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "Margins",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setMargins"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 114,
+                    "name": "exclusiveZone",
+                    "notify": "exclusiveZoneChanged",
+                    "override": false,
+                    "read": "exclusiveZone",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setExclusiveZone"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 116,
+                    "name": "exclusionMode",
+                    "notify": "exclusionModeChanged",
+                    "override": false,
+                    "read": "exclusionMode",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "ExclusionMode::Enum",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setExclusionMode"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 120,
+                    "name": "aboveWindows",
+                    "notify": "aboveWindowsChanged",
+                    "override": false,
+                    "read": "aboveWindows",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setAboveWindows"
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "lineNumber": 124,
+                    "name": "focusable",
+                    "notify": "focusableChanged",
+                    "override": false,
+                    "read": "focusable",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false,
+                    "virtual": false,
+                    "write": "setFocusable"
+                }
+            ],
+            "qualifiedClassName": "PanelWindowInterface",
+            "signals": [
+                {
+                    "access": "public",
+                    "index": 0,
+                    "lineNumber": 152,
+                    "name": "anchorsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 1,
+                    "lineNumber": 153,
+                    "name": "marginsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 2,
+                    "lineNumber": 154,
+                    "name": "exclusiveZoneChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 3,
+                    "lineNumber": 155,
+                    "name": "exclusionModeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 4,
+                    "lineNumber": 156,
+                    "name": "aboveWindowsChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "index": 5,
+                    "lineNumber": 157,
+                    "name": "focusableChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "WindowInterface"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "auto"
+                }
+            ],
+            "className": "ExclusionMode",
+            "enums": [
+                {
+                    "isClass": false,
+                    "isFlag": false,
+                    "lineNumber": 61,
+                    "name": "Enum",
+                    "type": "quint8",
+                    "values": [
+                        "Normal",
+                        "Ignore",
+                        "Auto"
+                    ]
+                }
+            ],
+            "lineNumber": 57,
+            "namespace": true,
+            "qualifiedClassName": "ExclusionMode"
+        }
+    ],
+    "inputFile": "panelinterface.hpp",
+    "outputRevision": 69
+}

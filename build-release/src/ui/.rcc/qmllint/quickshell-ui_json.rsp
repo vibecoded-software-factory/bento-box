@@ -1,0 +1,17 @@
+--bare
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/_InternalUi
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/opt/homebrew/opt/qt/share/qt/qml
+--resource
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ui/.qt/rcc/qmake_Quickshell__InternalUi.qrc
+--resource
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ui/.qt/rcc/quickshell-ui_raw_qml_0.qrc
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/ui/Tooltip.qml
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/ui/ReloadPopup.qml
+--json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/quickshell-ui_qmllint.json

@@ -1,0 +1,84 @@
+{
+    "classes": [
+        {
+            "className": "MprisIpc",
+            "lineNumber": 22,
+            "object": true,
+            "qualifiedClassName": "qs::mac::mpris::MprisIpc",
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 0,
+                    "lineNumber": 35,
+                    "name": "onStreamData",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "arguments": [
+                        {
+                            "name": "exitCode",
+                            "type": "int"
+                        },
+                        {
+                            "name": "status",
+                            "type": "QProcess::ExitStatus"
+                        }
+                    ],
+                    "index": 1,
+                    "lineNumber": 36,
+                    "name": "onStreamFinished",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "Mpris"
+                },
+                {
+                    "name": "QML.Singleton",
+                    "value": "true"
+                }
+            ],
+            "className": "MprisQml",
+            "lineNumber": 73,
+            "object": true,
+            "properties": [
+                {
+                    "constant": true,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 77,
+                    "name": "players",
+                    "override": false,
+                    "read": "players",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "UntypedObjectModel*",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "qs::mac::mpris::MprisQml",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "service.hpp",
+    "outputRevision": 69
+}

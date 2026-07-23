@@ -1,0 +1,8 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_datastream.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_fileview.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_ipccomm.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_ipchandler.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_jsonadapter.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_process.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_processcore.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/io/quickshell-io_autogen/include/../EWIEGA46WW/moc_socket.cpp.json

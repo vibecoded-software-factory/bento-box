@@ -1,0 +1,1 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/notifications/quickshell-mac-notifications_autogen/include/../EWIEGA46WW/moc_notifications.cpp.json

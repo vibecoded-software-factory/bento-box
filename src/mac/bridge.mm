@@ -134,10 +134,14 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 
 namespace {
 // The app that was frontmost before an exclusive-keyboard panel took focus,
-// and which panel took it. Main-thread only. Held weakly-by-value: if the app
-// quits meanwhile, activateWithOptions is a harmless no-op.
-NSRunningApplication* gPreviousApp =
-    nil;                        // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+// and which panel took it. Main-thread only. Stored as a pid, not as the
+// NSRunningApplication: this file compiles without ARC, so keeping the
+// autoreleased object would leave a dangling pointer once the pool drains -
+// the next grab/yield then messages freed memory and the process dies
+// (doesNotRecognizeSelector abort, or a Code Signature Invalid kill when the
+// stale isa leads execution into an unmapped page). A pid is weak by value:
+// if the app quit meanwhile, the lookup below just returns nil.
+pid_t gPreviousAppPid = -1;     // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 void* gKeyboardOwner = nullptr; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 } // namespace
 
@@ -153,12 +157,12 @@ void takeKeyboardForPanel(QWindow* window, void* owner) {
 		if (frontmost != nil
 		    && frontmost.processIdentifier != NSProcessInfo.processInfo.processIdentifier)
 		{
-			gPreviousApp = frontmost;
+			gPreviousAppPid = frontmost.processIdentifier;
 		}
 	}
 	gKeyboardOwner = owner;
 
-	NSLog(@"[bento] keyboard grab: taking app focus (previous=%@)", gPreviousApp.localizedName);
+	NSLog(@"[bento] keyboard grab: taking app focus (previous pid=%d)", gPreviousAppPid);
 	[NSApp activateIgnoringOtherApps:YES];
 	[nsWindow makeKeyAndOrderFront:nil];
 }
@@ -167,8 +171,11 @@ void yieldKeyboardFromPanel(void* owner) {
 	if (gKeyboardOwner != owner) return;
 	gKeyboardOwner = nullptr;
 
-	NSRunningApplication* previous = gPreviousApp;
-	gPreviousApp = nil;
+	pid_t previousPid = gPreviousAppPid;
+	gPreviousAppPid = -1;
+	NSRunningApplication* previous =
+	    previousPid > 0 ? [NSRunningApplication runningApplicationWithProcessIdentifier:previousPid]
+	                    : nil;
 	NSLog(@"[bento] keyboard grab: yielding app focus (restore=%@)", previous.localizedName);
 	if (previous != nil && !previous.terminated) {
 		[previous activateWithOptions:0];

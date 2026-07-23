@@ -1,0 +1,11 @@
+--bare
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Hyprland
+-I
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules
+-I
+/opt/homebrew/opt/qt/share/qt/qml
+--resource
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/hyprland/.qt/rcc/qmake_Quickshell_Hyprland.qrc

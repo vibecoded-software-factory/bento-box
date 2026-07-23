@@ -1,0 +1,8 @@
+module Quickshell.I3
+linktarget quickshell-mac-i3plugin
+optional plugin quickshell-mac-i3plugin
+classname Quickshell_I3Plugin
+typeinfo quickshell-mac-i3.qmltypes
+depends QtQuick
+prefer :/qt/qml/Quickshell/I3/
+

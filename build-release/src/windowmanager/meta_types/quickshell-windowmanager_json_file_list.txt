@@ -1,0 +1,3 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/include/../EWIEGA46WW/moc_screenprojection.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/include/../EWIEGA46WW/moc_windowmanager.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/windowmanager/quickshell-windowmanager_autogen/include/../EWIEGA46WW/moc_windowset.cpp.json

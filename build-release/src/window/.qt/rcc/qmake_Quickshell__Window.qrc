@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/Quickshell/_Window">
+    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/_Window/qmldir</file>
+  </qresource>
+</RCC>
+

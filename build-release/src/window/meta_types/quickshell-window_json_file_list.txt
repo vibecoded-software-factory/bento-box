@@ -1,0 +1,5 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/quickshell-window_autogen/include/../EWIEGA46WW/moc_floatingwindow.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/quickshell-window_autogen/include/../EWIEGA46WW/moc_panelinterface.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/quickshell-window_autogen/include/../EWIEGA46WW/moc_popupwindow.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/quickshell-window_autogen/include/../EWIEGA46WW/moc_proxywindow.cpp.json
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/window/quickshell-window_autogen/include/../EWIEGA46WW/moc_windowinterface.cpp.json

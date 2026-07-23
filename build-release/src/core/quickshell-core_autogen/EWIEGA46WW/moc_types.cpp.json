@@ -1,0 +1,292 @@
+{
+    "classes": [
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Creatable",
+                    "value": "true"
+                },
+                {
+                    "name": "QML.CreationMethod",
+                    "value": "construct"
+                },
+                {
+                    "name": "QML.Element",
+                    "value": "box"
+                }
+            ],
+            "className": "Box",
+            "constructors": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "rect",
+                            "type": "QRect"
+                        }
+                    ],
+                    "index": 0,
+                    "lineNumber": 27,
+                    "name": "Box",
+                    "returnType": ""
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "rect",
+                            "type": "QPoint"
+                        }
+                    ],
+                    "index": 1,
+                    "lineNumber": 28,
+                    "name": "Box",
+                    "returnType": ""
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "rect",
+                            "type": "QRectF"
+                        }
+                    ],
+                    "index": 2,
+                    "lineNumber": 30,
+                    "name": "Box",
+                    "returnType": ""
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "rect",
+                            "type": "QPointF"
+                        }
+                    ],
+                    "index": 3,
+                    "lineNumber": 36,
+                    "name": "Box",
+                    "returnType": ""
+                }
+            ],
+            "gadget": true,
+            "lineNumber": 12,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 14,
+                    "member": "x",
+                    "name": "x",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 15,
+                    "member": "y",
+                    "name": "y",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 16,
+                    "member": "w",
+                    "name": "w",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 17,
+                    "member": "h",
+                    "name": "h",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 4,
+                    "lineNumber": 18,
+                    "member": "w",
+                    "name": "width",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 5,
+                    "lineNumber": 19,
+                    "member": "h",
+                    "name": "height",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "Box"
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Creatable",
+                    "value": "true"
+                },
+                {
+                    "name": "QML.CreationMethod",
+                    "value": "construct"
+                },
+                {
+                    "name": "QML.Element",
+                    "value": "margins"
+                }
+            ],
+            "className": "Margins",
+            "gadget": true,
+            "lineNumber": 53,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "lineNumber": 55,
+                    "member": "left",
+                    "name": "left",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "lineNumber": 56,
+                    "member": "right",
+                    "name": "right",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "lineNumber": 57,
+                    "member": "top",
+                    "name": "top",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "lineNumber": 58,
+                    "member": "bottom",
+                    "name": "bottom",
+                    "override": false,
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "qint32",
+                    "user": false,
+                    "virtual": false
+                }
+            ],
+            "qualifiedClassName": "Margins"
+        },
+        {
+            "classInfos": [
+                {
+                    "name": "QML.Element",
+                    "value": "Edges"
+                }
+            ],
+            "className": "Edges",
+            "enums": [
+                {
+                    "isClass": false,
+                    "isFlag": false,
+                    "lineNumber": 86,
+                    "name": "Enum",
+                    "type": "quint8",
+                    "values": [
+                        "None",
+                        "Top",
+                        "Left",
+                        "Right",
+                        "Bottom"
+                    ]
+                }
+            ],
+            "lineNumber": 82,
+            "namespace": true,
+            "qualifiedClassName": "Edges"
+        }
+    ],
+    "inputFile": "types.hpp",
+    "outputRevision": 69
+}

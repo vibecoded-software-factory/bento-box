@@ -1,0 +1,48 @@
+{
+    "classes": [
+        {
+            "className": "RootWrapper",
+            "lineNumber": 12,
+            "object": true,
+            "qualifiedClassName": "RootWrapper",
+            "slots": [
+                {
+                    "access": "private",
+                    "index": 0,
+                    "lineNumber": 23,
+                    "name": "generationDestroyed",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 1,
+                    "lineNumber": 24,
+                    "name": "onWatchFilesChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 2,
+                    "lineNumber": 25,
+                    "name": "onWatchedFilesChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "private",
+                    "index": 3,
+                    "lineNumber": 26,
+                    "name": "updateTooling",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "rootwrapper.hpp",
+    "outputRevision": 69
+}

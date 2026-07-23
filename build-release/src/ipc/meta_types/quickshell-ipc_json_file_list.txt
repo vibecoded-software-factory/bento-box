@@ -1,0 +1,1 @@
+/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/ipc/quickshell-ipc_autogen/include/../EWIEGA46WW/moc_ipc.cpp.json
