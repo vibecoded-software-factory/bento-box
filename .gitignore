@@ -13,3 +13,4 @@
 # direnv
 /.envrc
 /.direnv/
+build-release/
