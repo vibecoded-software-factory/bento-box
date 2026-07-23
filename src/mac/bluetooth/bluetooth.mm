@@ -1,6 +1,5 @@
 #include "bluetooth.hpp"
 
-#import <AppKit/AppKit.h>
 #import <IOBluetooth/IOBluetooth.h>
 #import <IOKit/IOKitLib.h>
 #include <qhash.h>
@@ -287,8 +286,11 @@ void BluetoothDevice::forget() {
 	// call) works on older macOS; current releases gate unpairing behind a
 	// bluetoothd entitlement and silently ignore it (verified: remove and
 	// forceRemove both return a CoreBluetooth coordinator and the pairing
-	// stays). Attempt it, verify, and when the OS ignored us hand the user
-	// to the one surface that can unpair: System Settings' Bluetooth pane.
+	// stays). Attempt it and log the truth either way - the shell stays in
+	// charge of its own UX, so no OS UI is opened from here. Surfacing the
+	// failure as an in-shell toast needs the daemon's bluez-agent channel
+	// (DMSService.bluetoothRemove carries an error callback); tracked in the
+	// parity audit.
 	SEL removeSel = NSSelectorFromString(@"remove");
 	if ([device respondsToSelector:removeSel]) {
 #pragma clang diagnostic push
@@ -304,10 +306,11 @@ void BluetoothDevice::forget() {
 	    ^{
 		    for (IOBluetoothDevice* paired in [IOBluetoothDevice pairedDevices]) {
 			    if (![[paired addressString] isEqualToString:address]) continue;
-			    NSLog(@"[bento] bluetooth: unpair is OS-gated here; opening System Settings");
-			    [[NSWorkspace sharedWorkspace]
-			        openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple."
-			                                     @"BluetoothSettings"]];
+			    NSLog(
+			        @"[bento] bluetooth: unpair of %@ ignored by the OS "
+			        @"(entitlement-gated on this macOS)",
+			        address
+			    );
 			    return;
 		    }
 	    }
