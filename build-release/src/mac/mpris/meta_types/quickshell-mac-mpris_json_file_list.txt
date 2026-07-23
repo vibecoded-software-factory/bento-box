@@ -1,2 +1,0 @@
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/mpris/quickshell-mac-mpris_autogen/include/../EWIEGA46WW/moc_player.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/mpris/quickshell-mac-mpris_autogen/include/../EWIEGA46WW/moc_service.cpp.json

@@ -86,11 +86,11 @@ class MprisPlayer: public QObject {
 
 	// Unsupported on macOS/MediaRemote - present for binding compatibility,
 	// their *Supported flag is false and writes are ignored.
-	Q_PROPERTY(qreal volume READ default NOTIFY volumeChanged BINDABLE bindableVolume);
+	Q_PROPERTY(qreal volume READ volume WRITE setVolume NOTIFY volumeChanged);
 	Q_PROPERTY(bool volumeSupported READ default NOTIFY volumeSupportedChanged BINDABLE bindableVolumeSupported);
-	Q_PROPERTY(qs::mac::mpris::MprisLoopState::Enum loopState READ default NOTIFY loopStateChanged BINDABLE bindableLoopState);
+	Q_PROPERTY(qs::mac::mpris::MprisLoopState::Enum loopState READ loopState WRITE setLoopState NOTIFY loopStateChanged);
 	Q_PROPERTY(bool loopSupported READ default NOTIFY loopSupportedChanged BINDABLE bindableLoopSupported);
-	Q_PROPERTY(bool shuffle READ default NOTIFY shuffleChanged BINDABLE bindableShuffle);
+	Q_PROPERTY(bool shuffle READ shuffle WRITE setShuffle NOTIFY shuffleChanged);
 	Q_PROPERTY(bool shuffleSupported READ default NOTIFY shuffleSupportedChanged BINDABLE bindableShuffleSupported);
 	// clang-format on
 	QML_ELEMENT;
@@ -148,6 +148,14 @@ public:
 	[[nodiscard]] QBindable<QString> bindableTrackAlbum() { return &this->bTrackAlbum; }
 	[[nodiscard]] QBindable<QString> bindableTrackArtUrl() { return &this->bTrackArtUrl; }
 	[[nodiscard]] QBindable<qreal> bindableVolume() { return &this->bVolume; }
+	// MediaRemote exposes no control for these; accept the write, log, and
+	// keep the readable state - the same as upstream's unsupported setters.
+	[[nodiscard]] qreal volume() const { return this->bVolume.value(); }
+	void setVolume(qreal volume);
+	[[nodiscard]] MprisLoopState::Enum loopState() const { return this->bLoopState.value(); }
+	void setLoopState(MprisLoopState::Enum loopState);
+	[[nodiscard]] bool shuffle() const { return this->bShuffle.value(); }
+	void setShuffle(bool shuffle);
 	[[nodiscard]] QBindable<bool> bindableVolumeSupported() { return &this->bVolumeSupported; }
 	[[nodiscard]] QBindable<MprisLoopState::Enum> bindableLoopState() { return &this->bLoopState; }
 	[[nodiscard]] QBindable<bool> bindableLoopSupported() { return &this->bLoopSupported; }

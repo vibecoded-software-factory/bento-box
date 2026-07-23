@@ -31,10 +31,12 @@ extern "C" int IOBluetoothPreferenceSetControllerPowerState(int powered);
 }
 @end
 
-// Pairing: the same policy as a BlueZ NoInputNoOutput agent - just-works and
-// numeric-comparison confirmations are accepted, legacy PIN devices get the
-// conventional 0000, and a keyboard passkey (which must be typed on the
-// device) is surfaced through a notification.
+// Pairing carries NO local agent. Upstream's Bluetooth module calls a bare
+// Device1.Pair() and defers every confirmation to whoever registered the
+// BlueZ agent - which for DankMaterialShell is the daemon (dms-darwin's
+// bluetooth channel drives DMS's own pairing dialogs). So this delegate only
+// reports completion; a device that needs a passcode simply fails here, the
+// same "no-agent path pairs only no-passcode devices" contract DMS documents.
 @interface QSBluetoothPairDelegate: NSObject <IOBluetoothDevicePairDelegate> {
 @public
 	qs::mac::bluetooth::BluetoothDevice* owner;
@@ -42,29 +44,6 @@ extern "C" int IOBluetoothPreferenceSetControllerPowerState(int powered);
 @end
 
 @implementation QSBluetoothPairDelegate
-- (void)devicePairingPINCodeRequest:(id)sender {
-	BluetoothPINCode pin {};
-	memcpy(pin.data, "0000", 4);
-	[sender replyPINCode:4 PINCode:&pin];
-}
-
-- (void)devicePairingUserConfirmationRequest:(id)sender
-                                numericValue:(BluetoothNumericValue)numericValue {
-	[sender replyUserConfirmation:YES];
-}
-
-- (void)devicePairingUserPasskeyNotification:(id)sender passkey:(BluetoothPasskey)passkey {
-	NSLog(@"[bento] bluetooth pairing passkey: %06u", passkey);
-	NSString* script = [NSString
-	    stringWithFormat:@"display notification \"Type %06u on the device, then press Enter\" "
-	                     @"with title \"Bluetooth pairing\"",
-	                     passkey];
-	NSTask* task = [NSTask new];
-	task.executableURL = [NSURL fileURLWithPath:@"/usr/bin/osascript"];
-	task.arguments = @[ @"-e", script ];
-	[task launchAndReturnError:nil];
-}
-
 - (void)devicePairingFinished:(id)sender error:(IOReturn)error {
 	if (self->owner != nullptr) self->owner->pairingFinished(error == kIOReturnSuccess);
 }
@@ -205,16 +184,20 @@ void BluetoothDevice::setConnected(bool connected) {
 	connected ? this->connect() : this->disconnect();
 }
 
+QString BluetoothDevice::dbusPath() const {
+	// The BlueZ object-path form the shell's daemon-pairing path expects, and
+	// the same token dms-darwin's bluetooth channel round-trips.
+	QString id = this->mAddress.toUpper();
+	id.replace(':', '_').replace('-', '_');
+	return "/org/bluez/hci0/dev_" + id;
+}
+
 void BluetoothDevice::connect() {
 	if (this->mState == BluetoothDeviceState::Connected) return;
 
-	// An unpaired device (found via discovery) pairs first - the same implicit
-	// pair-on-connect the shell's non-agent fallback path expects from BlueZ.
-	if (!this->mPaired) {
-		this->startPairing(true);
-		return;
-	}
-
+	// No pair-on-connect: upstream connect() calls a bare Device1.Connect()
+	// and surfaces the error if the device is unpaired. Pairing is a separate
+	// action (pair(), or the daemon's bluetooth channel).
 	this->mState = BluetoothDeviceState::Connecting;
 	emit this->stateChanged();
 
@@ -230,12 +213,12 @@ void BluetoothDevice::connect() {
 }
 
 void BluetoothDevice::pair() {
-	if (!this->mPaired && !this->mPairing) this->startPairing(false);
-}
+	if (this->mPaired || this->mPairing) return;
 
-void BluetoothDevice::startPairing(bool connectAfter) {
-	if (this->mPairing) return;
-
+	// A bare pair attempt with no agent, mirroring upstream's Device1.Pair():
+	// just-works devices pair, a device needing a passcode fails here and the
+	// interactive flow belongs to the daemon's bluetooth channel. No policy,
+	// no auto-confirmation, no pair-on-connect.
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
 	auto* delegate = [QSBluetoothPairDelegate new];
 	delegate->owner = this;
@@ -244,7 +227,6 @@ void BluetoothDevice::startPairing(bool connectAfter) {
 
 	this->mPair = (__bridge_retained void*) pairing;
 	this->mPairDelegate = (__bridge_retained void*) delegate;
-	this->mConnectAfterPair = connectAfter;
 	this->mPairing = true;
 	emit this->pairingChanged();
 
@@ -258,6 +240,7 @@ void BluetoothDevice::cancelPair() {
 }
 
 void BluetoothDevice::pairingFinished(bool success) {
+	(void) success;
 	if (!this->mPairing) return;
 	this->mPairing = false;
 
@@ -274,10 +257,6 @@ void BluetoothDevice::pairingFinished(bool success) {
 
 	emit this->pairingChanged();
 	this->refresh();
-
-	const bool connectAfter = this->mConnectAfterPair;
-	this->mConnectAfterPair = false;
-	if (success && connectAfter) this->connect();
 }
 
 void BluetoothDevice::forget() {

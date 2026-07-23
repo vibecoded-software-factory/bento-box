@@ -1,3 +1,0 @@
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/wayland/quickshell-mac-wayland_autogen/include/../EWIEGA46WW/moc_screencopy.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/wayland/quickshell-mac-wayland_autogen/include/../EWIEGA46WW/moc_toplevel.cpp.json
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/mac/wayland/quickshell-mac-wayland_autogen/include/../EWIEGA46WW/moc_wayland.cpp.json

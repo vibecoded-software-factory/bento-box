@@ -1,2 +1,0 @@
-/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/src/widgets/.qsb/shaders/cliprect.frag.qsb: \
-  /Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/widgets/shaders/cliprect.frag

@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/">
-    <file alias="/qt/qml/Quickshell/Services/Pam">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Services/Pam</file>
-
-  </qresource>
-</RCC>

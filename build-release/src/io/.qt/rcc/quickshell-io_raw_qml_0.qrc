@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/Quickshell/Io/">
-    <file alias="FileView.qml">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/io/FileView.qml</file>
-  </qresource>
-</RCC>
-

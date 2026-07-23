@@ -1,6 +1,7 @@
 #include "player.hpp"
 
 #include <qdatetime.h>
+#include <qdebug.h>
 #include <qstring.h>
 #include <qvariant.h>
 
@@ -114,5 +115,17 @@ void MprisPlayer::togglePlaying() { this->mIpc->sendCommand(2); }
 void MprisPlayer::stop() { this->mIpc->sendCommand(3); }
 void MprisPlayer::next() { this->mIpc->sendCommand(4); }
 void MprisPlayer::previous() { this->mIpc->sendCommand(5); }
+
+void MprisPlayer::setVolume(qreal volume) {
+	qWarning() << "MprisPlayer.volume is not settable through MediaRemote; ignoring" << volume;
+}
+
+void MprisPlayer::setLoopState(MprisLoopState::Enum loopState) {
+	qWarning() << "MprisPlayer.loopState is not settable through MediaRemote; ignoring" << loopState;
+}
+
+void MprisPlayer::setShuffle(bool shuffle) {
+	qWarning() << "MprisPlayer.shuffle is not settable through MediaRemote; ignoring" << shuffle;
+}
 
 } // namespace qs::mac::mpris

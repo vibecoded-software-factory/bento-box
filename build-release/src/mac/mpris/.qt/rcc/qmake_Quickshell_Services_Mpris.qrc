@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/Quickshell/Services/Mpris">
-    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Services/Mpris/qmldir</file>
-  </qresource>
-</RCC>
-

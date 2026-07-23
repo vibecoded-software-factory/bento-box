@@ -1,8 +1,0 @@
-module Quickshell.Nigiri
-linktarget quickshell-mac-nigiriplugin
-optional plugin quickshell-mac-nigiriplugin
-classname Quickshell_NigiriPlugin
-typeinfo quickshell-mac-nigiri.qmltypes
-depends QtQuick
-prefer :/qt/qml/Quickshell/Nigiri/
-

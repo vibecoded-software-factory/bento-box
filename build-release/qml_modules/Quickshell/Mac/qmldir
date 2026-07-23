@@ -1,8 +1,0 @@
-module Quickshell.Mac
-linktarget quickshell-macplugin
-optional plugin quickshell-macplugin
-classname Quickshell_MacPlugin
-typeinfo quickshell-mac.qmltypes
-depends QtQuick
-prefer :/qt/qml/Quickshell/Mac/
-

@@ -66,6 +66,9 @@ class BluetoothDevice: public QObject {
 	Q_OBJECT;
 	// clang-format off
 	Q_PROPERTY(QString address READ address NOTIFY addressChanged);
+	/// BlueZ-style object path derived from the address, so the shell's
+	/// daemon-pairing path (DMSService.bluetoothPair) has a device token.
+	Q_PROPERTY(QString dbusPath READ dbusPath NOTIFY addressChanged);
 	/// Human readable name. Writable on Linux; a no-op on macOS.
 	Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged);
 	Q_PROPERTY(QString deviceName READ deviceName NOTIFY nameChanged);
@@ -97,6 +100,7 @@ public:
 	Q_DISABLE_COPY_MOVE(BluetoothDevice);
 
 	[[nodiscard]] QString address() const { return this->mAddress; }
+	[[nodiscard]] QString dbusPath() const;
 	[[nodiscard]] QString name() const { return this->mName; }
 	void setName(const QString& /*name*/) {} // no-op: macOS owns device names
 	[[nodiscard]] QString deviceName() const { return this->mName; }
@@ -144,8 +148,6 @@ signals:
 	void batteryChanged();
 
 private:
-	void startPairing(bool connectAfter);
-
 	void* mDevice; // IOBluetoothDevice* (retained)
 	BluetoothAdapter* mAdapter;
 	QString mAddress;
@@ -154,7 +156,6 @@ private:
 	BluetoothDeviceState::Enum mState = BluetoothDeviceState::Disconnected;
 	bool mPaired = true;
 	bool mPairing = false;
-	bool mConnectAfterPair = false;
 	bool mBatteryAvailable = false;
 	qreal mBattery = 0.0;
 	void* mPair = nullptr;         // IOBluetoothDevicePair* while pairing (retained)

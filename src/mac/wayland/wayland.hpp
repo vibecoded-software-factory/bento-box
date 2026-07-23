@@ -2,6 +2,7 @@
 
 #include <QtQuick/qquickitem.h>
 #include <qcolor.h>
+#include <qdebug.h>
 #include <qobject.h>
 #include <qpointer.h>
 #include <qqmlintegration.h>
@@ -221,6 +222,8 @@ public:
 	void setEnabled(bool enabled) {
 		if (this->mEnabled == enabled) return;
 		this->mEnabled = enabled;
+		if (enabled)
+			qWarning() << "ShortcutInhibitor: compositor shortcuts are not inhibitable on macOS";
 		emit this->enabledChanged();
 	}
 	[[nodiscard]] QObject* window() const { return this->mWindow; }
@@ -263,6 +266,10 @@ public:
 	void setLocked(bool locked) {
 		if (this->mLocked == locked) return;
 		this->mLocked = locked;
+		// `locked` is the client's REQUESTED state (upstream semantics);
+		// `secure` stays false - nothing locks here, macOS owns the lock
+		// screen (the shell locks via its custom locker action).
+		if (locked) qWarning() << "WlSessionLock: no session-lock surface on macOS; secure stays false";
 		emit this->lockedChanged();
 	}
 	[[nodiscard]] bool secure() const { return false; }
