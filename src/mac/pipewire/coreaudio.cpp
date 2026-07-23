@@ -38,6 +38,29 @@ bool readChannelVolume(AudioObjectID id, bool input, UInt32 element, Float32* ou
 	return AudioObjectGetPropertyData(id, &addr, 0, nullptr, &size, out) == noErr;
 }
 
+// The active sub-devices of an AGGREGATE device; empty for ordinary ones.
+// An aggregate (e.g. a speakers+loopback stack built for an audio
+// visualizer) carries NO volume control itself - not on the master element,
+// not per channel - the controls live on the real devices underneath. Both
+// the system volume keys and a naive scalar read report nothing for them,
+// which left the shell's volume at a lying 0%.
+QList<quint32> subDevices(AudioObjectID id) {
+	AudioObjectPropertyAddress addr = {
+	    kAudioAggregateDevicePropertyActiveSubDeviceList,
+	    kAudioObjectPropertyScopeGlobal,
+	    kAudioObjectPropertyElementMain
+	};
+	if (!AudioObjectHasProperty(id, &addr)) return {};
+	UInt32 size = 0;
+	if (AudioObjectGetPropertyDataSize(id, &addr, 0, nullptr, &size) != noErr || size == 0) {
+		return {};
+	}
+	QList<quint32> ids(static_cast<qsizetype>(size / sizeof(AudioObjectID)), 0);
+	if (ids.isEmpty()) return {};
+	if (AudioObjectGetPropertyData(id, &addr, 0, nullptr, &size, ids.data()) != noErr) return {};
+	return ids;
+}
+
 } // namespace
 
 QList<quint32> allDevices() {
@@ -114,9 +137,22 @@ float volume(quint32 id, bool input, bool* ok) {
 			counted++;
 		}
 	}
-	if (counted == 0) return 0.0;
-	if (ok != nullptr) *ok = true;
-	return sum / counted;
+	if (counted > 0) {
+		if (ok != nullptr) *ok = true;
+		return sum / counted;
+	}
+
+	// Aggregate: report the first sub-device that has a real control (the
+	// speakers; a loopback sub exposes none).
+	for (auto sub: subDevices(id)) {
+		bool subOk = false;
+		float value = volume(sub, input, &subOk);
+		if (subOk) {
+			if (ok != nullptr) *ok = true;
+			return value;
+		}
+	}
+	return 0.0;
 }
 
 bool setVolume(quint32 id, bool input, float volume) {
@@ -143,6 +179,12 @@ bool setVolume(quint32 id, bool input, float volume) {
 			any = true;
 		}
 	}
+	if (any) return true;
+
+	// Aggregate: fan the write out to every sub-device that takes it.
+	for (auto sub: subDevices(id)) {
+		any = setVolume(sub, input, volume) || any;
+	}
 	return any;
 }
 
@@ -150,7 +192,18 @@ bool muted(quint32 id, bool input, bool* ok) {
 	if (ok != nullptr) *ok = false;
 	AudioObjectPropertyAddress addr =
 	    {kAudioDevicePropertyMute, scopeFor(input), kAudioObjectPropertyElementMain};
-	if (!AudioObjectHasProperty(id, &addr)) return false;
+	if (!AudioObjectHasProperty(id, &addr)) {
+		// Aggregate: the mute control lives on the sub-devices.
+		for (auto sub: subDevices(id)) {
+			bool subOk = false;
+			bool value = muted(sub, input, &subOk);
+			if (subOk) {
+				if (ok != nullptr) *ok = true;
+				return value;
+			}
+		}
+		return false;
+	}
 	UInt32 value = 0;
 	UInt32 size = sizeof(value);
 	if (AudioObjectGetPropertyData(id, &addr, 0, nullptr, &size, &value) != noErr) return false;
@@ -165,7 +218,12 @@ bool setMuted(quint32 id, bool input, bool muted) {
 	if (!AudioObjectHasProperty(id, &addr)
 	    || AudioObjectIsPropertySettable(id, &addr, &settable) != noErr || !settable)
 	{
-		return false;
+		// Aggregate: fan out to the sub-devices.
+		bool any = false;
+		for (auto sub: subDevices(id)) {
+			any = setMuted(sub, input, muted) || any;
+		}
+		return any;
 	}
 	UInt32 value = muted ? 1 : 0;
 	return AudioObjectSetPropertyData(id, &addr, 0, nullptr, sizeof(value), &value) == noErr;
