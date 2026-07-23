@@ -51,12 +51,29 @@ NigiriIpc::NigiriIpc() {
 	// (measured on macOS: the socket read ConnectedState but isOpen() was still
 	// false, and the subscribe write returned -1).
 	QObject::connect(&this->mEventSocket, &QLocalSocket::connected, this, [this]() {
+		qCDebug(logNigiri) << "event socket connected to" << socketPath() << "- subscribing";
+		// A reconnect inherits the dead connection's half-read line in the
+		// reader's buffer; re-attaching the device starts it clean.
 		this->mEventReader.setDevice(&this->mEventSocket);
 		// Subscribe. nigiri replays the current state right after, so the model
 		// is populated before the first live change.
 		this->mEventSocket.write("event-stream\n");
 		this->mEventSocket.flush();
 	});
+
+	// The compositor can be down at login (start order) or restart at any
+	// time; either way the socket lands in UnconnectedState and nothing else
+	// would re-open it. Retry forever on a slow heartbeat, the panel side's
+	// pattern. On reconnect nigiri replays the full state and applyWindows /
+	// applyWorkspaces prune whatever went stale.
+	this->mReconnectTimer.setInterval(3000);
+	QObject::connect(&this->mReconnectTimer, &QTimer::timeout, this, [this]() {
+		if (this->mEventSocket.state() == QLocalSocket::UnconnectedState) {
+			this->connectToNigiri();
+		}
+	});
+	this->mReconnectTimer.start();
+
 	this->connectToNigiri();
 }
 
@@ -66,7 +83,8 @@ void NigiriIpc::connectToNigiri() {
 
 void NigiriIpc::onEventSocketState(QLocalSocket::LocalSocketState state) {
 	if (state == QLocalSocket::UnconnectedState) {
-		qCDebug(logNigiri) << "event socket disconnected from" << socketPath();
+		qCDebug(logNigiri) << "event socket disconnected from" << socketPath()
+		                   << "- will retry";
 	}
 }
 

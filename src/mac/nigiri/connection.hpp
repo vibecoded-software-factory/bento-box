@@ -4,6 +4,7 @@
 #include <qlocalsocket.h>
 #include <qobject.h>
 #include <qproperty.h>
+#include <qtimer.h>
 #include <qtmetamacros.h>
 
 #include "../../core/model.hpp"
@@ -65,6 +66,11 @@ private:
 
 	QLocalSocket mEventSocket;
 	StreamReader mEventReader;
+	// Re-attaches to the compositor when it isn't up yet or restarts. The
+	// event socket drops to UnconnectedState either way, and nothing else
+	// would ever re-open it; on reconnect nigiri replays the full state and
+	// the reconcile prunes anything stale.
+	QTimer mReconnectTimer;
 	ObjectModel<NigiriWorkspace> mWorkspaces {this};
 	ObjectModel<NigiriWindow> mWindows {this};
 
