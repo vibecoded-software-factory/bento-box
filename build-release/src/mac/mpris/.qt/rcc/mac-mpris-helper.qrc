@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/mac/mpris">
-    <file alias="mediaremote-adapter.pl">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/src/mac/mpris/mediaremote-adapter/bin/mediaremote-adapter.pl</file>
-  </qresource>
-</RCC>
-

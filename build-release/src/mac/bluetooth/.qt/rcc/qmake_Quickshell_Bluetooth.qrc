@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/Quickshell/Bluetooth">
-    <file alias="qmldir">/Users/lucassilvestri/Downloads/GitHub/vibecoded-software-factory/bento-box/build-release/qml_modules/Quickshell/Bluetooth/qmldir</file>
-  </qresource>
-</RCC>
-
