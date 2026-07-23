@@ -261,18 +261,39 @@ void BluetoothDevice::pairingFinished(bool success) {
 
 void BluetoothDevice::forget() {
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
-	// There is no public unpair; `remove` has lived in IOBluetoothDevice for
-	// many releases and is what blueutil calls. The next refresh prunes the
-	// device once it is gone from pairedDevices.
+	// There is no public unpair. The framework's private `remove` (blueutil's
+	// call) works on older macOS; current releases gate unpairing behind a
+	// bluetoothd entitlement and silently ignore it (verified: remove and
+	// forceRemove both return a CoreBluetooth coordinator and the pairing
+	// stays). Attempt it and log the truth either way - the shell stays in
+	// charge of its own UX, so no OS UI is opened from here. Surfacing the
+	// failure as an in-shell toast needs the daemon's bluez-agent channel
+	// (DMSService.bluetoothRemove carries an error callback); tracked in the
+	// parity audit.
 	SEL removeSel = NSSelectorFromString(@"remove");
 	if ([device respondsToSelector:removeSel]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 		[device performSelector:removeSel];
 #pragma clang diagnostic pop
-	} else {
-		NSLog(@"[bento] bluetooth: IOBluetoothDevice.remove unavailable; cannot unpair");
 	}
+
+	NSString* address = [device addressString];
+	dispatch_after(
+	    dispatch_time(DISPATCH_TIME_NOW, (int64_t) (1.5 * NSEC_PER_SEC)),
+	    dispatch_get_main_queue(),
+	    ^{
+		    for (IOBluetoothDevice* paired in [IOBluetoothDevice pairedDevices]) {
+			    if (![[paired addressString] isEqualToString:address]) continue;
+			    NSLog(
+			        @"[bento] bluetooth: unpair of %@ ignored by the OS "
+			        @"(entitlement-gated on this macOS)",
+			        address
+			    );
+			    return;
+		    }
+	    }
+	);
 }
 
 void BluetoothDevice::setBatteryInfo(bool available, qreal level) {
