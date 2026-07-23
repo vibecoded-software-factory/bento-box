@@ -167,7 +167,11 @@ private:
 	qreal mTimeout = 0;
 };
 
-///! Idle inhibitor. Inert stub (a real backing would prevent display sleep).
+///! Idle inhibitor. Prevents the display from sleeping while enabled.
+/// On Wayland this is zwp_idle_inhibit for a visible surface; on macOS it
+/// holds a power-management assertion (the same mechanism as `caffeinate
+/// -d`), released on disable or teardown. The `window` association is
+/// accepted for compatibility; the inhibit is driven by `enabled` alone.
 class IdleInhibitor: public QObject {
 	Q_OBJECT;
 	Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged);
@@ -176,12 +180,11 @@ class IdleInhibitor: public QObject {
 
 public:
 	explicit IdleInhibitor(QObject* parent = nullptr): QObject(parent) {}
+	~IdleInhibitor() override;
+	Q_DISABLE_COPY_MOVE(IdleInhibitor);
+
 	[[nodiscard]] bool enabled() const { return this->mEnabled; }
-	void setEnabled(bool enabled) {
-		if (this->mEnabled == enabled) return;
-		this->mEnabled = enabled;
-		emit this->enabledChanged();
-	}
+	void setEnabled(bool enabled);
 	[[nodiscard]] QObject* window() const { return this->mWindow; }
 	void setWindow(QObject* window) {
 		if (this->mWindow == window) return;
@@ -196,6 +199,9 @@ signals:
 private:
 	bool mEnabled = false;
 	QObject* mWindow = nullptr;
+	// IOPMAssertionID; 0 is kIOPMNullAssertionID (typed loosely so the
+	// header stays IOKit-free).
+	quint32 mAssertion = 0;
 };
 
 ///! Keyboard-shortcuts inhibitor. Inert stub - on Wayland it stops the

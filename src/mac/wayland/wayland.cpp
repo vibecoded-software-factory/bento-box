@@ -1,5 +1,6 @@
 #include "wayland.hpp"
 
+#include <IOKit/pwr_mgt/IOPMLib.h>
 #include <qobject.h>
 #include <qvariant.h>
 
@@ -73,6 +74,42 @@ void WlrLayershell::setMargins(Margins margins) {
 	this->mMargins = margins;
 	if (this->mPanel) this->mPanel->setProperty("margins", QVariant::fromValue(margins));
 	emit this->marginsChanged();
+}
+
+// The macOS idle inhibit: a display-sleep power assertion, held while
+// enabled. kIOPMAssertionTypePreventUserIdleDisplaySleep matches the Wayland
+// semantic (a visible inhibiting surface keeps the output awake) and shows
+// up attributed to this process in `pmset -g assertions`.
+void IdleInhibitor::setEnabled(bool enabled) {
+	if (this->mEnabled == enabled) return;
+	this->mEnabled = enabled;
+
+	if (enabled && this->mAssertion == kIOPMNullAssertionID) {
+		IOPMAssertionID assertion = kIOPMNullAssertionID;
+		if (IOPMAssertionCreateWithName(
+		        kIOPMAssertionTypePreventUserIdleDisplaySleep,
+		        kIOPMAssertionLevelOn,
+		        CFSTR("Shell idle inhibit"),
+		        &assertion
+		    )
+		    == kIOReturnSuccess)
+		{
+			this->mAssertion = assertion;
+		}
+	} else if (!enabled && this->mAssertion != kIOPMNullAssertionID) {
+		IOPMAssertionRelease(this->mAssertion);
+		this->mAssertion = kIOPMNullAssertionID;
+	}
+
+	emit this->enabledChanged();
+}
+
+IdleInhibitor::~IdleInhibitor() {
+	// An inhibitor must never outlive its owner - a destroyed toggle that
+	// left the display insomniac would be undebuggable from the outside.
+	if (this->mAssertion != kIOPMNullAssertionID) {
+		IOPMAssertionRelease(this->mAssertion);
+	}
 }
 
 } // namespace qs::mac::wayland
