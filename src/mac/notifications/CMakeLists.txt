@@ -10,6 +10,6 @@ qt_add_qml_module(quickshell-mac-notifications
 
 install_qml_module(quickshell-mac-notifications)
 
-target_link_libraries(quickshell-mac-notifications PRIVATE Qt::Quick)
+target_link_libraries(quickshell-mac-notifications PRIVATE Qt::Quick Qt::Network)
 
 target_link_libraries(quickshell PRIVATE quickshell-mac-notificationsplugin)
