@@ -235,3 +235,21 @@ QtMultimedia installed).
 5. **API-2 (IdleMonitor real) + DPR-13 (sleep/wake)** — idle automation cluster.
 6. **DPR-2 (network)** — largest daemon work, plan first.
 7. Everything 🟡 in batches by owner; decision items (API-1/5/6, DPR-14) need the user.
+
+
+### RETRO — false-positive retrospective (2026-07-24, agent-verified by building the real Go daemon on macOS)
+
+> The real Go DMS daemon (DankMaterialShell/core, apiVersion 28) BUILDS and RUNS
+> on macOS with 5 trivial darwin stubs (brightness/native, trayrecovery/suspend,
+> trash/mounts, wayland/shm/fd, matugen/signal). Live socket query showed it
+> natively serves: plugins, browser, theme.auto, wallpaper, sysupdate, location.
+> CONFIRMED still-justified (NOT false positives): bento-box fork (quickshell has
+> zero macOS support, hard-blocked by required libdrm), nigiri (real niri is
+> Linux/Wayland-only), the 4 Swift daemon capabilities brightness/gamma/
+> freedesktop/bluetooth (the Go daemon advertises them but they are HOLLOW on
+> macOS - no /dev/i2c, no wlroots, no D-Bus), and every glue shim.
+
+- [ ] **RETRO-1** 🔴 Build `dms-cli-darwin` (fork of DankMaterialShell/core + the 5 darwin stubs) and adopt the REAL Go daemon on macOS for the portable capabilities — subsumes DPR-3 (location), DPR-4 (wallpaper), DPR-5 (mime/browser), DPR-6 (themes), DPR-7 (theme.auto), DPR-10 (sysupdate) AND gives the real `dms` CLI (matugen queue -> BIN-2, keybinds -> BIN-3, config -> BIN-12). Delete dms-darwin/Plugins.swift (the daemon serves plugins natively - single cleanest false positive).
+- [ ] **RETRO-2** 🟠 Decide daemon coexistence: the real Go daemon is HOLLOW on brightness/gamma/bluetooth/freedesktop on macOS (Swift dms-darwin serves those for real). Either run two daemons split by capability (and suppress the Go daemon's hollow caps so the shell does not query dead channels), OR port the 4 native backends into Go `_darwin.go` files (one-daemon endgame, larger). Blocks a clean RETRO-1 rollout.
+- [ ] **RETRO-3** 🟡 Reconcile apiVersion: Swift dms-darwin advertises 9, the real Go daemon is 28. Adopting the real daemon unlocks apiVersion-28-gated DMS features (several DPR/BIN items are gated).
+- [x] **RETRO-4** 🟢 CONFIRMED JUSTIFIED (no action): bento-box fork, nigiri, the 4 macOS-native Swift capabilities (brightness/gamma/freedesktop/bluetooth), and all glue shims — agent-verified genuinely needed, not false positives. DONE 2026-07-24 (retro closed this question).
