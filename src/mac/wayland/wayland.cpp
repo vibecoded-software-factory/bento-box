@@ -1,5 +1,7 @@
 #include "wayland.hpp"
 
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreGraphics/CoreGraphics.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #include <qobject.h>
 #include <qvariant.h>
@@ -121,6 +123,90 @@ IdleInhibitor::~IdleInhibitor() {
 	// left the display insomniac would be undebuggable from the outside.
 	if (this->mAssertion != kIOPMNullAssertionID) {
 		IOPMAssertionRelease(this->mAssertion);
+	}
+}
+
+// Wayland's ext-idle-notify-v1 has the compositor fire a notification once no
+// input has arrived for `timeout`, and a "resumed" event on the next input.
+// macOS has no such push API, so the monitor samples the system-wide idle
+// clock (CGEventSourceSecondsSinceLastEventType, the same value `ioreg
+// HIDIdleTime` and `pmset` read) once a second and crosses the boundary
+// itself. One second is well under any real DMS timeout (min lock/sleep
+// timers are tens of seconds) and is what the desktop-idle daemons on macOS
+// poll at.
+IdleMonitor::IdleMonitor(QObject* parent): QObject(parent) {
+	this->mPollTimer.setInterval(1000);
+	QObject::connect(&this->mPollTimer, &QTimer::timeout, this, &IdleMonitor::poll);
+	this->rearm();
+}
+
+void IdleMonitor::rearm() {
+	bool active = this->mEnabled && this->mTimeout > 0;
+	if (active) {
+		if (!this->mPollTimer.isActive()) this->mPollTimer.start();
+		// Sample once promptly so a monitor armed on an already-idle session
+		// reports without waiting a full interval - but via the event loop,
+		// not synchronously: rearm() runs from QML property setters during
+		// component construction, before onIsIdleChanged is connected, so a
+		// synchronous flip here would be emitted into the void and the state
+		// would then look unchanged to every later poll.
+		QTimer::singleShot(0, this, &IdleMonitor::poll);
+	} else {
+		this->mPollTimer.stop();
+		// Inert monitor is never idle: upstream destroys the notification
+		// when disabled, and IdleService gates its handlers on enabled but
+		// still expects isIdle to fall back to false.
+		if (this->mIsIdle) {
+			this->mIsIdle = false;
+			emit this->isIdleChanged();
+		}
+	}
+}
+
+bool IdleMonitor::inhibited() {
+	// PreventUserIdleDisplaySleep / NoDisplaySleep are exactly the assertions
+	// our IdleInhibitor (and `caffeinate -d`, media playback, etc.) raise.
+	// While one is held the display would never idle-sleep, so a Wayland
+	// idle-notify honoring inhibitors must not fire either.
+	CFDictionaryRef assertions = nullptr;
+	if (IOPMCopyAssertionsStatus(&assertions) != kIOReturnSuccess || assertions == nullptr) {
+		return false;
+	}
+
+	auto held = [&](CFStringRef type) {
+		auto* value = static_cast<CFNumberRef>(CFDictionaryGetValue(assertions, type));
+		int count = 0;
+		if (value != nullptr) CFNumberGetValue(value, kCFNumberIntType, &count);
+		return count > 0;
+	};
+
+	bool result =
+	    held(kIOPMAssertionTypePreventUserIdleDisplaySleep) || held(kIOPMAssertionTypeNoDisplaySleep);
+	CFRelease(assertions);
+	return result;
+}
+
+void IdleMonitor::poll() {
+	if (!this->mEnabled || this->mTimeout <= 0) return;
+
+	if (this->mRespectInhibitors && IdleMonitor::inhibited()) {
+		// Treated as continuous activity: an inhibited session resumes.
+		if (this->mIsIdle) {
+			this->mIsIdle = false;
+			emit this->isIdleChanged();
+		}
+		return;
+	}
+
+	double idleSeconds = CGEventSourceSecondsSinceLastEventType(
+	    kCGEventSourceStateCombinedSessionState,
+	    kCGAnyInputEventType
+	);
+
+	bool nowIdle = idleSeconds >= this->mTimeout;
+	if (nowIdle != this->mIsIdle) {
+		this->mIsIdle = nowIdle;
+		emit this->isIdleChanged();
 	}
 }
 

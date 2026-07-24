@@ -9,6 +9,7 @@
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 #include <qstring.h>
+#include <qtimer.h>
 #include <qtmetamacros.h>
 #include <qtypes.h>
 
@@ -169,25 +170,28 @@ class IdleMonitor: public QObject {
 	QML_ELEMENT;
 
 public:
-	explicit IdleMonitor(QObject* parent = nullptr): QObject(parent) {}
+	explicit IdleMonitor(QObject* parent = nullptr);
 
 	[[nodiscard]] bool enabled() const { return this->mEnabled; }
 	void setEnabled(bool enabled) {
 		if (this->mEnabled == enabled) return;
 		this->mEnabled = enabled;
+		this->rearm();
 		emit this->enabledChanged();
 	}
-	[[nodiscard]] bool isIdle() const { return false; }
+	[[nodiscard]] bool isIdle() const { return this->mIsIdle; }
 	[[nodiscard]] bool respectInhibitors() const { return this->mRespectInhibitors; }
 	void setRespectInhibitors(bool value) {
 		if (this->mRespectInhibitors == value) return;
 		this->mRespectInhibitors = value;
+		this->rearm();
 		emit this->respectInhibitorsChanged();
 	}
 	[[nodiscard]] qreal timeout() const { return this->mTimeout; }
 	void setTimeout(qreal timeout) {
 		if (this->mTimeout == timeout) return;
 		this->mTimeout = timeout;
+		this->rearm();
 		emit this->timeoutChanged();
 	}
 
@@ -197,11 +201,26 @@ signals:
 	void timeoutChanged();
 	void respectInhibitorsChanged();
 
+private slots:
+	// Sample the OS idle clock and flip isIdle across the timeout boundary.
+	void poll();
+
 private:
+	// (Re)configure the poll timer after any input property changes and
+	// reset the idle state when the monitor goes inert (disabled/timeout<=0),
+	// matching upstream where clearing the monitor drops isIdle to false.
+	void rearm();
+	// True while an idle-sleep power assertion is held by any process (our
+	// own IdleInhibitor, caffeinate, a video app...). Wayland's monitor is
+	// suppressed by idle inhibitors; respectInhibitors maps that to here.
+	static bool inhibited();
+
 	// Upstream defaults BOTH to true (idle_notify/monitor.hpp:69-71).
 	bool mEnabled = true;
 	bool mRespectInhibitors = true;
 	qreal mTimeout = 0;
+	bool mIsIdle = false;
+	QTimer mPollTimer;
 };
 
 ///! Idle inhibitor. Prevents the display from sleeping while enabled.
