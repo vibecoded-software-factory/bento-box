@@ -119,11 +119,38 @@ caught and prevented all of it:
     it, never offer to show it — show it. This rule has been violated
     twice before and the user was rightly angry both times.
 
+## Port-project strategy (decided 2026-07-24)
+
+The `dms`-CLI and companion tools split three ways. Match the fix to the kind:
+
+- **Already macOS-native upstream → install the real binary.** `dgop` is
+  officially cross-platform and ships signed `dgop-darwin-*` release
+  binaries (BIN-1). Always check this FIRST: `gh release view -R
+  AvengeMedia/<tool>` for a `*-darwin-*` asset before porting or shimming.
+- **Genuinely Linux/Wayland-coupled → a real port project** (the bento-box
+  model), in Go where it lets us reuse upstream's schema types verbatim:
+  - `dsearch` (danksearch): Linux-only releases → `dsearch-darwin` (mdfind-
+    backed) — BIN-7.
+  - `dcal` (dankcalendar): Linux/FreeBSD-only releases → `dankcal-darwin`
+    (EventKit-backed, speaks dcal's socket protocol) — BIN-8.
+  - the `dms` CLI's `matugen queue` / `keybinds` / `config` (live in
+    `DankMaterialShell/core`, deeply Wayland-coupled, won't build on darwin)
+    → `dms-cli-darwin`, a slim Go module importing the PORTABLE upstream
+    packages (`core/internal/{matugen,keybinds,dank16,config}`) and swapping
+    the Linux bits — BIN-2/3/12.
+- **Trivial OS adapters → glue shims in `install.sh`** (not tools, 3-line
+  wrappers): `xdg-open`->open, `gsettings color-scheme`->osascript,
+  `notify-send`->osascript, `getent`->dscl, `blur check`->unsupported,
+  `color pick`->nigiri, trash->Finder. Already done: BIN-9/11/13/15/16/17.
+
+Owners in the checklist below are pre-port; they shift to the port repos as
+those are created (matugen/keybinds -> dms-cli-darwin, etc.).
+
 ## Checklist
 
 ### BIN — missing binaries & glue-shim gaps (owner: dms-darwin/Glue, ~/.local/bin)
 
-- [x] **BIN-1** 🔴 DONE 2026-07-24 (native dgop shim: the real dgop is Linux-only [reads /proc,/sys, not gopsutil] so it CANNOT build on macOS - the shim emits dgop's exact JSON schema from macOS sources [Mach host CPU ticks via ctypes with dgop's cursor for instantaneous per-core usage, sysctl, vm_stat, ps, df, netstat, system_profiler], all system tools by absolute path so btop/homebrew coreutils can't shadow them. Every module verified vs OS ground truth [memory==hw.memsize, loadavg==uptime, procs cpu/rss/user==ps -r, threads==top, diskmounts==df]. Live: agent restarted, the 'dgop is not installed' warning is gone. Honest limits documented in-shim: CPU/GPU temp need root->0; cumulative disk I/O has no clean macOS counter->empty [rates 0]; per-proc CPU is ps lifetime-avg. dms-darwin PR #14.) — `dgop` missing — the entire system-monitor surface is dead: ProcessList modal (all 4 tabs), CPU/RAM/temp/GPU/disk/network bar widgets, ControlCenter disk pills, DankDash system tiles, desktop system-monitor widget (~25 census-broken files). `DgopService.qml:716` probes `command -v dgop` (absent from every launchd PATH dir); guarded, so UIs show empty instead of erroring. Fix: build dgop (Go, gopsutil — darwin-portable) into `~/.local/bin`, or shim it over ps/sysctl/vm_stat emitting dgop's JSON. [EXE+API+ENV+FTR]
+- [x] **BIN-1** 🔴 DONE 2026-07-24 (REAL dgop binary, not a shim: dgop is officially cross-platform now ['macos: initial macos support' commits] and ships signed macOS release binaries [dgop-darwin-arm64/amd64]. install.sh downloads the pinned release, sha256-verified, to ~/.local/bin/dgop. Strictly better than the interim Python shim it replaced: real disk I/O, CPU frequency [4056MHz], correct boottime string format, per-core detail, native cursors - and canonical by definition. dms-darwin PR #15. NOTE: a first-pass Python shim was shipped then superseded once we found dgop builds/ships for macOS.) — `dgop` missing — the entire system-monitor surface is dead: ProcessList modal (all 4 tabs), CPU/RAM/temp/GPU/disk/network bar widgets, ControlCenter disk pills, DankDash system tiles, desktop system-monitor widget (~25 census-broken files). `DgopService.qml:716` probes `command -v dgop` (absent from every launchd PATH dir); guarded, so UIs show empty instead of erroring. Fix: build dgop (Go, gopsutil — darwin-portable) into `~/.local/bin`, or shim it over ps/sysctl/vm_stat emitting dgop's JSON. [EXE+API+ENV+FTR]
 - [ ] **BIN-2** 🔴 `matugen` missing AND `dms matugen queue/preview/check` unported — dynamic Material-You wallpaper theming (DMS's flagship) never generates colors. `Theme.qml:148` probes matugen (absent); `Theme.qml:1682` drives it only through the dms CLI. Fix: install matugen (Rust, builds on macOS) + add the `dms matugen` subcommands to the shim. [EXE+API+ENV+FTR]
 - [ ] **BIN-3** 🔴 `dms keybinds show/set/remove/reset` unported — keybinds cheatsheet and Settings editor broken; live log shows `Failed to parse binds: SyntaxError` ×7 per session. `KeybindsService.qml:337-572`. Fix: shim `keybinds show niri` by parsing `~/.config/niri/config.kdl` into the Go CLI's JSON shape (or add `nigiri keybinds --json` and forward); set/remove/reset edit the same file. [API+ENV+FTR]
 - [ ] **BIN-4** 🟠 No CLI-launchable terminal and `TERMINAL` unset — launcher "run in terminal", desktop entries with Terminal=true, and Mux (tmux) attach/create silently exec a nonexistent binary (probes ghostty/kitty/foot/alacritty/wezterm/konsole/gnome-terminal/xterm: all absent; tmux itself IS present). `SessionData.qml:40-54`, `SessionService.qml:250-256`, `MuxService.qml:43`. Fix: install a CLI-launchable terminal (ghostty/kitty have macOS builds) or ship a wrapper shim (`open -na Ghostty --args -e ...` / osascript Terminal.app) + set TERMINAL in the launchd plist. [EXE+ENV]
