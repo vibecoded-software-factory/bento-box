@@ -1,5 +1,8 @@
 #pragma once
 
+#include <qjsonobject.h>
+#include <qlocalserver.h>
+#include <qlocalsocket.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
@@ -13,21 +16,26 @@
 #include "../../core/reload.hpp"
 #include "../../core/retainable.hpp"
 
-// The macOS notifications stub.
+// The macOS notifications backend.
 //
-// The Linux service works by making the shell the freedesktop notification
-// SERVER, so every app's notification is delivered to it. macOS has no
-// equivalent: notifications are owned by the system Notification Center and
-// there is NO public API for a third-party app to receive another app's
-// notifications - Apple blocks it by design (DistributedNotificationCenter,
-// NSWorkspace and notification service extensions all fail for this). The only
-// route is scraping macOS's private Notification Center SQLite database, which
-// needs Full Disk Access and breaks every OS release.
+// The Linux service makes the shell the freedesktop notification SERVER, so
+// every app's notification is delivered to it. macOS owns notifications in the
+// system Notification Center and offers NO public API for a third-party app to
+// receive ANOTHER app's notifications (DistributedNotificationCenter,
+// NSWorkspace and notification-service extensions all fail for this; the only
+// route to others' notifications is scraping the private Notification Center
+// SQLite DB, which needs Full Disk Access and breaks every OS release - not
+// done here).
 //
-// So this module exists only to provide the `Quickshell.Services.Notifications`
-// QML surface so a shell that imports it binds without error;
-// `trackedNotifications` is always empty. An app can still post its OWN
-// notifications through the system, but that is not what this service models.
+// What CAN be delivered is every notification that flows through OUR path:
+// `notify-send`. DMS raises its own alerts that way (battery, portal errors),
+// and any app/script on the box can too. So this NotificationServer listens on
+// a local socket (/tmp/dms-notifications.sock); the notify-send shim hands each
+// notification to it as one JSON line, and it drives the same
+// `Quickshell.Services.Notifications` surface the Linux server does - real
+// popups and a real notification center, for everything launched through
+// notify-send. Native macOS apps posting straight to the system center are the
+// only thing left out, and nothing public can change that.
 namespace qs::mac::notifications {
 
 ///! The urgency level of a notification.
@@ -63,7 +71,10 @@ public:
 };
 
 ///! An action that can be taken on a notification.
-/// Provided for API compatibility only; never instantiated on macOS.
+/// Provided for API compatibility. notify-send is fire-and-forget (the caller
+/// has already detached), so there is no channel to deliver ActionInvoked back
+/// to it; actions are not populated for socket-delivered notifications rather
+/// than shown as buttons that do nothing.
 class NotificationAction: public QObject {
 	Q_OBJECT;
 	// clang-format off
@@ -84,11 +95,11 @@ signals:
 	void textChanged();
 };
 
+class NotificationServer;
+
 ///! A notification.
-/// The macOS counterpart of the Linux `Notification`. Provided for API
-/// compatibility only - macOS cannot deliver other apps' notifications, so
-/// `NotificationServer.trackedNotifications` is always empty and this type is
-/// never instantiated.
+/// The macOS counterpart of the Linux `Notification`, populated from a
+/// notify-send delivery over the server socket.
 class Notification
     : public QObject
     , public Retainable {
@@ -116,31 +127,33 @@ class Notification
 	QML_ELEMENT;
 	QML_UNCREATABLE("Notifications must be acquired from a NotificationServer");
 
+	friend class NotificationServer;
+
 public:
 	explicit Notification(QObject* parent = nullptr): QObject(parent) {}
 
-	[[nodiscard]] quint32 id() const { return 0; }
-	[[nodiscard]] bool isTracked() const { return false; }
-	void setTracked(bool /*tracked*/) {}
+	[[nodiscard]] quint32 id() const { return this->mId; }
+	[[nodiscard]] bool isTracked() const { return this->mTracked; }
+	void setTracked(bool tracked);
 	[[nodiscard]] bool isLastGeneration() const { return false; }
-	[[nodiscard]] qreal expireTimeout() const { return 0.0; }
-	[[nodiscard]] QString appName() const { return {}; }
-	[[nodiscard]] QString appIcon() const { return {}; }
-	[[nodiscard]] QString summary() const { return {}; }
-	[[nodiscard]] QString body() const { return {}; }
-	[[nodiscard]] NotificationUrgency::Enum urgency() const { return NotificationUrgency::Normal; }
+	[[nodiscard]] qreal expireTimeout() const { return this->mExpireTimeout; }
+	[[nodiscard]] QString appName() const { return this->mAppName; }
+	[[nodiscard]] QString appIcon() const { return this->mAppIcon; }
+	[[nodiscard]] QString summary() const { return this->mSummary; }
+	[[nodiscard]] QString body() const { return this->mBody; }
+	[[nodiscard]] NotificationUrgency::Enum urgency() const { return this->mUrgency; }
 	[[nodiscard]] QList<NotificationAction*> actions() const { return {}; }
 	[[nodiscard]] bool hasActionIcons() const { return false; }
 	[[nodiscard]] bool resident() const { return false; }
-	[[nodiscard]] bool isTransient() const { return false; }
-	[[nodiscard]] QString desktopEntry() const { return {}; }
-	[[nodiscard]] QString image() const { return {}; }
+	[[nodiscard]] bool isTransient() const { return this->mTransient; }
+	[[nodiscard]] QString desktopEntry() const { return this->mDesktopEntry; }
+	[[nodiscard]] QString image() const { return this->mImage; }
 	[[nodiscard]] bool hasInlineReply() const { return false; }
 	[[nodiscard]] QString inlineReplyPlaceholder() const { return {}; }
-	[[nodiscard]] QVariantMap hints() const { return {}; }
+	[[nodiscard]] QVariantMap hints() const { return this->mHints; }
 
-	Q_INVOKABLE void expire() {}
-	Q_INVOKABLE void dismiss() {}
+	Q_INVOKABLE void expire();
+	Q_INVOKABLE void dismiss();
 	Q_INVOKABLE void sendInlineReply(const QString& /*replyText*/) {}
 
 signals:
@@ -165,13 +178,28 @@ signals:
 	void hasInlineReplyChanged();
 	void inlineReplyPlaceholderChanged();
 	void hintsChanged();
+
+private:
+	NotificationServer* mServer = nullptr;
+	quint32 mId = 0;
+	bool mTracked = false;
+	qreal mExpireTimeout = -1.0;
+	QString mAppName;
+	QString mAppIcon;
+	QString mSummary;
+	QString mBody;
+	NotificationUrgency::Enum mUrgency = NotificationUrgency::Normal;
+	bool mTransient = false;
+	QString mDesktopEntry;
+	QString mImage;
+	QVariantMap mHints;
 };
 
 ///! Notification server.
-/// The macOS counterpart of the Linux `NotificationServer`. The capability
-/// flags are honored as plain storage, but `trackedNotifications` is always
-/// empty - macOS delivers no other-app notifications to a third-party process
-/// (see the module comment).
+/// The macOS counterpart of the Linux `NotificationServer`: it listens on a
+/// local socket for notify-send deliveries and tracks them, so the shell's
+/// popups and notification center light up for everything launched through
+/// notify-send.
 class NotificationServer: public PostReloadHook {
 	Q_OBJECT;
 	// clang-format off
@@ -191,12 +219,14 @@ class NotificationServer: public PostReloadHook {
 	// clang-format on
 	QML_NAMED_ELEMENT(NotificationServer);
 
+	friend class Notification;
+
 public:
-	explicit NotificationServer(QObject* parent = nullptr): PostReloadHook(parent) {}
-	// Nothing to re-emit on macOS: the tracked list is always empty (see the
-	// module comment) - the hook exists so `reloadableId` and reload wiring
-	// behave like upstream's PostReloadHook server.
-	void onPostReload() override {}
+	explicit NotificationServer(QObject* parent = nullptr);
+
+	// Start listening once the reload settles, mirroring upstream's server
+	// which binds its name in the post-reload hook.
+	void onPostReload() override;
 
 	[[nodiscard]] bool keepOnReload() const { return this->mKeepOnReload; }
 	void setKeepOnReload(bool v) {
@@ -252,8 +282,8 @@ public:
 	}
 
 signals:
-	// Emitted when a notification arrives. Never fires on macOS (nothing to
-	// receive), but a shell binds `onNotification` to it, so it must exist.
+	// Emitted when a notification arrives. A shell binds `onNotification` and
+	// sets `tracked = true` to keep it; an untracked one is dropped.
 	void notification(qs::mac::notifications::Notification* notification);
 
 	void keepOnReloadChanged();
@@ -275,6 +305,20 @@ private:
 		field = value;
 		emit(this->*signal)();
 	}
+
+	// Bind the local socket (idempotent - safe to call again after a reload).
+	void startListening();
+	void onNewConnection();
+	void readFrom(QLocalSocket* socket);
+	// Parse one JSON delivery, build (or replace) a Notification and offer it.
+	void deliver(const QJsonObject& json);
+	// Called by Notification::setTracked to add/remove it from the model.
+	void setNotificationTracked(Notification* notification, bool tracked);
+	// Called by Notification::dismiss/expire.
+	void closeNotification(Notification* notification, NotificationCloseReason::Enum reason);
+
+	QLocalServer* mSocketServer = nullptr;
+	quint32 mNextId = 1;
 
 	bool mKeepOnReload = true;
 	bool mPersistenceSupported = false;
