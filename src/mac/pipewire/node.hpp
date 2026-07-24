@@ -10,8 +10,10 @@
 namespace qs::mac::pipewire {
 
 ///! An audio channel position.
-/// A subset of PipeWire's channel positions - the ones macOS audio devices
-/// actually report. Values match PipeWire's for the shared channels.
+/// PipeWire's full SPA channel enum, value for value (spa/param/audio/raw.h;
+/// upstream node.hpp:33-84). macOS devices only ever report the first few,
+/// but the whole vocabulary resolves so any shell code compiled against
+/// upstream's names works here.
 class PwAudioChannel: public QObject {
 	Q_OBJECT;
 	QML_ELEMENT;
@@ -28,6 +30,47 @@ public:
 		LowFrequencyEffects = 6,
 		SideLeft = 7,
 		SideRight = 8,
+		FrontLeftCenter = 9,
+		FrontRightCenter = 10,
+		RearCenter = 11,
+		RearLeft = 12,
+		RearRight = 13,
+		TopCenter = 14,
+		TopFrontLeft = 15,
+		TopFrontCenter = 16,
+		TopFrontRight = 17,
+		TopRearLeft = 18,
+		TopRearCenter = 19,
+		TopRearRight = 20,
+		RearLeftCenter = 21,
+		RearRightCenter = 22,
+		FrontLeftWide = 23,
+		FrontRightWide = 24,
+		LowFrequencyEffects2 = 25,
+		FrontLeftHigh = 26,
+		FrontCenterHigh = 27,
+		FrontRightHigh = 28,
+		TopFrontLeftCenter = 29,
+		TopFrontRightCenter = 30,
+		TopSideLeft = 31,
+		TopSideRight = 32,
+		LowFrequencyEffectsLeft = 33,
+		LowFrequencyEffectsRight = 34,
+		BottomCenter = 35,
+		BottomLeftCenter = 36,
+		BottomRightCenter = 37,
+		/// The start of the aux channel range.
+		///
+		/// Values between AuxRangeStart and AuxRangeEnd are valid.
+		AuxRangeStart = 0x1000,
+		/// The end of the aux channel range.
+		///
+		/// Values between AuxRangeStart and AuxRangeEnd are valid.
+		AuxRangeEnd = 0x1fff,
+		/// The end of the custom channel range.
+		///
+		/// Values starting at CustomRangeStart are valid.
+		CustomRangeStart = 0x10000,
 	};
 	Q_ENUM(Enum);
 
@@ -134,7 +177,10 @@ class PwNode: public QObject {
 	/// The type of this node.
 	Q_PROPERTY(qs::mac::pipewire::PwNodeType::Flags type READ type CONSTANT);
 	/// The property set present on the node, as key-value pairs.
-	Q_PROPERTY(QVariantMap properties READ properties CONSTANT);
+	/// NOTIFYs like upstream (qml.hpp:307) - on macOS the set is built once
+	/// at device discovery and only changes if the device is rediscovered,
+	/// but bindings must re-evaluate when it does.
+	Q_PROPERTY(QVariantMap properties READ properties NOTIFY propertiesChanged);
 	/// Extra information present only if the node sends or receives audio.
 	Q_PROPERTY(qs::mac::pipewire::PwNodeAudio* audio READ audio CONSTANT);
 	/// True if the node is fully bound and ready to use. Always true on macOS.
@@ -167,6 +213,7 @@ public:
 	}
 
 signals:
+	void propertiesChanged();
 	void readyChanged();
 
 private:

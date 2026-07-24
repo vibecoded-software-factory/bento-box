@@ -34,13 +34,16 @@ class ScreencopyView: public QQuickItem {
 	Q_PROPERTY(bool hasContent READ hasContent NOTIFY hasContentChanged);
 	/// Size of the source image.
 	Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged);
+	/// If nonzero, the width and height constraints set for this property will constrain those
+	/// dimensions of the ScreencopyView's implicit size, maintaining the image's aspect ratio.
+	Q_PROPERTY(QSizeF constraintSize READ constraintSize WRITE setConstraintSize NOTIFY constraintSizeChanged);
 	// clang-format on
 	QML_ELEMENT;
 
 public:
 	explicit ScreencopyView(QQuickItem* parent = nullptr);
 
-	/// Capture a single frame.
+	/// Capture a single frame. Has no effect if @@live is true.
 	Q_INVOKABLE void captureFrame();
 
 	[[nodiscard]] QObject* captureSource() const { return this->mCaptureSource; }
@@ -51,13 +54,21 @@ public:
 	void setLive(bool live);
 	[[nodiscard]] bool hasContent() const { return !this->mFrame.isNull(); }
 	[[nodiscard]] QSize sourceSize() const { return this->mFrame.size(); }
+	[[nodiscard]] QSizeF constraintSize() const { return this->mConstraintSize; }
+	void setConstraintSize(QSizeF constraintSize);
 
 signals:
+	/// The stream has ended. On macOS this fires when the capture source is
+	/// destroyed while @@live is true (the ScreenCaptureKit analogue of the
+	/// compositor ending the video stream).
+	void stopped();
+
 	void captureSourceChanged();
 	void paintCursorChanged();
 	void liveChanged();
 	void hasContentChanged();
 	void sourceSizeChanged();
+	void constraintSizeChanged();
 
 protected:
 	QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
@@ -67,11 +78,16 @@ private:
 	// completion lands back on the main thread via onFrame.
 	void requestCapture();
 	void onFrame(const QImage& frame);
+	// Upstream's implicit-size rule, verbatim (view.cpp:17-30): source size
+	// scaled into the constraint keeping aspect; single-axis constraints use
+	// upstream's exact arithmetic, odd as the width-only branch reads.
+	void updateImplicitSize();
 
 	QPointer<QObject> mCaptureSource;
 	bool mPaintCursor = false;
 	bool mLive = false;
 	QImage mFrame;
+	QSizeF mConstraintSize;
 	bool mFrameDirty = false;
 	QTimer mRefresh;
 	// Guards stale async completions: bumped on every source change so a

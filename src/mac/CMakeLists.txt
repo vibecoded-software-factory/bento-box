@@ -16,7 +16,7 @@ install_qml_module(quickshell-mac)
 add_library(quickshell-mac-init OBJECT init.cpp)
 
 target_link_libraries(quickshell-mac PRIVATE Qt::Quick "-framework AppKit")
-target_link_libraries(quickshell-mac-init PRIVATE Qt::Quick Qt::Qml)
+target_link_libraries(quickshell-mac-init PRIVATE Qt::Quick Qt::Qml quickshell-mac-wayland)
 
 # No qs_module_pch here: the shared "large" PCH is C++-only, and this target has
 # an Objective-C++ translation unit (bridge.mm) whose PCH variant does not

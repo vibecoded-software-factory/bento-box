@@ -1,6 +1,7 @@
 qt_add_library(quickshell-mac-upower STATIC
 	device.cpp
 	service.cpp
+	powerprofiles.mm
 )
 
 qt_add_qml_module(quickshell-mac-upower
@@ -16,6 +17,7 @@ target_link_libraries(quickshell-mac-upower PRIVATE
 	Qt::Quick
 	"-framework IOKit"
 	"-framework CoreFoundation"
+	"-framework Foundation"
 )
 
 target_link_libraries(quickshell PRIVATE quickshell-mac-upowerplugin)

@@ -151,7 +151,9 @@ void BluetoothDevice::refresh() {
 	auto qname = name != nil ? QString::fromNSString(name) : address;
 	if (qname != this->mName) {
 		this->mName = qname;
-		emit this->nameChanged();
+		emit this->deviceNameChanged();
+		// `name` shows the device name only while no alias overrides it.
+		if (this->mAlias.isEmpty()) emit this->nameChanged();
 	}
 
 	auto icon = iconForDevice(device);
@@ -164,6 +166,8 @@ void BluetoothDevice::refresh() {
 	if (paired != this->mPaired) {
 		this->mPaired = paired;
 		emit this->pairedChanged();
+		// bonded reads the same flag with upstream's own NOTIFY name.
+		emit this->bondedChanged();
 	}
 
 	// Only settle to Connected/Disconnected here; a transient Connecting /
@@ -173,11 +177,18 @@ void BluetoothDevice::refresh() {
 	{
 		auto state =
 		    [device isConnected] ? BluetoothDeviceState::Connected : BluetoothDeviceState::Disconnected;
-		if (state != this->mState) {
-			this->mState = state;
-			emit this->stateChanged();
-		}
+		this->transitionState(state);
 	}
+}
+
+void BluetoothDevice::transitionState(BluetoothDeviceState::Enum state) {
+	if (state == this->mState) return;
+	auto wasConnected = this->connected();
+	this->mState = state;
+	emit this->stateChanged();
+	// `connected` carries its own NOTIFY upstream (device.hpp:79,170): the
+	// boolean flips only on the Connected boundary, not on every transient.
+	if (this->connected() != wasConnected) emit this->connectedChanged();
 }
 
 // Settle a transient Connecting/Disconnecting to the real connection state
@@ -191,10 +202,7 @@ void BluetoothDevice::settleState() {
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
 	auto real =
 	    [device isConnected] ? BluetoothDeviceState::Connected : BluetoothDeviceState::Disconnected;
-	if (this->mState != real) {
-		this->mState = real;
-		emit this->stateChanged();
-	}
+	this->transitionState(real);
 	// Also refresh name/icon/battery; the state read there is now a no-op
 	// since mState is no longer transient.
 	this->refresh();
@@ -202,6 +210,17 @@ void BluetoothDevice::settleState() {
 
 void BluetoothDevice::setConnected(bool connected) {
 	connected ? this->connect() : this->disconnect();
+}
+
+void BluetoothDevice::setName(const QString& name) {
+	// Upstream's alias contract (device.hpp:61-66): a write sets an alias,
+	// an empty string falls back to the device-provided name. macOS has no
+	// public persistent alias store, so the alias is session-local -
+	// documented on the property.
+	if (name == this->mAlias) return;
+	auto before = this->name();
+	this->mAlias = name;
+	if (this->name() != before) emit this->nameChanged();
 }
 
 QString BluetoothDevice::dbusPath() const {
@@ -218,8 +237,7 @@ void BluetoothDevice::connect() {
 	// No pair-on-connect: upstream connect() calls a bare Device1.Connect()
 	// and surfaces the error if the device is unpaired. Pairing is a separate
 	// action (pair(), or the daemon's bluetooth channel).
-	this->mState = BluetoothDeviceState::Connecting;
-	emit this->stateChanged();
+	this->transitionState(BluetoothDeviceState::Connecting);
 
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
 	// openConnection blocks, so run it off the main thread and settle back.
@@ -326,8 +344,7 @@ void BluetoothDevice::setBatteryInfo(bool available, qreal level) {
 
 void BluetoothDevice::disconnect() {
 	if (this->mState == BluetoothDeviceState::Disconnected) return;
-	this->mState = BluetoothDeviceState::Disconnecting;
-	emit this->stateChanged();
+	this->transitionState(BluetoothDeviceState::Disconnecting);
 
 	auto* device = (__bridge IOBluetoothDevice*) this->mDevice;
 	dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
@@ -337,6 +354,18 @@ void BluetoothDevice::disconnect() {
 }
 
 // === BluetoothAdapter ===
+
+void BluetoothAdapter::setDiscoverableTimeout(quint32 timeout) {
+	if (timeout == this->mDiscoverableTimeout) return;
+	this->mDiscoverableTimeout = timeout;
+	emit this->discoverableTimeoutChanged();
+}
+
+void BluetoothAdapter::setPairableTimeout(quint32 timeout) {
+	if (timeout == this->mPairableTimeout) return;
+	this->mPairableTimeout = timeout;
+	emit this->pairableTimeoutChanged();
+}
 
 void BluetoothAdapter::setInfo(
     const QString& name,
@@ -348,16 +377,23 @@ void BluetoothAdapter::setInfo(
 		emit this->nameChanged();
 	}
 	this->mAddress = address;
-	if (state != this->mState) {
-		this->mState = state;
-		emit this->stateChanged();
-	}
+	this->transitionState(state);
+}
+
+void BluetoothAdapter::transitionState(BluetoothAdapterState::Enum state) {
+	if (state == this->mState) return;
+	auto wasEnabled = this->enabled();
+	this->mState = state;
+	emit this->stateChanged();
+	// `enabled` carries its own NOTIFY upstream (adapter.hpp:65,137).
+	if (this->enabled() != wasEnabled) emit this->enabledChanged();
 }
 
 void BluetoothAdapter::setEnabled(bool enabled) {
 	IOBluetoothPreferenceSetControllerPowerState(enabled ? 1 : 0);
-	this->mState = enabled ? BluetoothAdapterState::Enabling : BluetoothAdapterState::Disabling;
-	emit this->stateChanged();
+	this->transitionState(
+	    enabled ? BluetoothAdapterState::Enabling : BluetoothAdapterState::Disabling
+	);
 }
 
 void BluetoothAdapter::setDiscovering(bool discovering) {

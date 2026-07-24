@@ -14,8 +14,12 @@ install_qml_module(quickshell-mac-wayland)
 
 # The toplevel bridge consumes the compositor IPC's window model; the
 # screencopy view captures via ScreenCaptureKit.
+# quickshell-mac provides MacPanelWindow, the base of this module's real
+# WlrLayershell window; quickshell-mac links back for the PanelWindow overlay
+# (static archives, resolved at the final link).
 target_link_libraries(quickshell-mac-wayland PRIVATE
 	Qt::Quick
+	quickshell-mac
 	quickshell-mac-nigiri
 	"-framework ScreenCaptureKit"
 	"-framework IOKit"

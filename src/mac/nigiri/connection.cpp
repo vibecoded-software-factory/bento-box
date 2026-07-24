@@ -57,6 +57,13 @@ NigiriIpc::NigiriIpc() {
 		this->mEventReader.setDevice(&this->mEventSocket);
 		// Subscribe. nigiri replays the current state right after, so the model
 		// is populated before the first live change.
+		//
+		// DIALECT CONTRACT: this is the legacy bare-word form ("event-stream"),
+		// a documented nigiri extension kept for bento (NiriProtocol.swift:9-13)
+		// while DMS speaks niri's real JSON on the same socket - nigiri answers
+		// each line in the dialect it arrived in. The bare words here and in
+		// dispatch()/panel_window.cpp (action reserve-zone) are load-bearing:
+		// nigiri must not drop them until bento migrates to the JSON forms.
 		this->mEventSocket.write("event-stream\n");
 		this->mEventSocket.flush();
 	});
@@ -83,8 +90,7 @@ void NigiriIpc::connectToNigiri() {
 
 void NigiriIpc::onEventSocketState(QLocalSocket::LocalSocketState state) {
 	if (state == QLocalSocket::UnconnectedState) {
-		qCDebug(logNigiri) << "event socket disconnected from" << socketPath()
-		                   << "- will retry";
+		qCDebug(logNigiri) << "event socket disconnected from" << socketPath() << "- will retry";
 	}
 }
 
@@ -122,8 +128,27 @@ void NigiriIpc::handleEvent(const QString& name, const QJsonObject& data) {
 		// while it was away. Reconcile: upsert what is present, prune the rest.
 		this->applyWindows(data.value("windows").toArray());
 	} else if (name == "WorkspaceActivated") {
-		auto* ws = this->findWorkspaceById(data.value("id").toInt(), false);
-		if (ws != nullptr) this->bFocusedWorkspace = ws;
+		// niri's event-stream contract (niri-ipc EventStreamState): the
+		// workspace with this id becomes active on its output and every other
+		// workspace on that output goes inactive; when `focused` is set, focus
+		// moves with it. nigiri happens to follow this event with a full
+		// WorkspacesChanged snapshot today, but niri upstream does NOT - the
+		// flags must be derived from this event alone or they would go stale
+		// the day nigiri drops the redundant snapshot.
+		auto id = data.value("id").toInt();
+		auto focused = data.value("focused").toBool();
+		auto* target = this->findWorkspaceById(id, false);
+		if (target != nullptr) {
+			// Single output today (PORT.md M2): every workspace is a sibling of
+			// the target, so exactly one stays active.
+			for (auto* object: this->mWorkspaces.values()) {
+				auto* ws = qobject_cast<NigiriWorkspace*>(object);
+				if (ws == nullptr) continue;
+				ws->bindableActive().setValue(ws == target);
+				if (focused) ws->bindableFocused().setValue(ws == target);
+			}
+			if (focused) this->bFocusedWorkspace = target;
+		}
 	} else if (name == "WindowOpenedOrChanged") {
 		auto window = data.value("window").toObject();
 		auto* w = this->findWindowById(window.value("id").toInt(), true);
@@ -245,6 +270,7 @@ void NigiriIpc::dispatch(const QString& action) {
 		qCDebug(logNigiri) << "dispatch could not reach nigiri:" << action;
 		return;
 	}
+	// Legacy bare-word dialect - see the DIALECT CONTRACT note in the ctor.
 	socket.write(QStringLiteral("action %1\n").arg(action).toUtf8());
 	socket.flush();
 	socket.waitForBytesWritten(200);

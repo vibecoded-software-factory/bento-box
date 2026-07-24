@@ -7,18 +7,56 @@
 
 namespace qs::mac::pipewire {
 
-QString PwAudioChannel::toString(PwAudioChannel::Enum channel) {
-	switch (channel) {
+QString PwAudioChannel::toString(PwAudioChannel::Enum value) {
+	// Upstream's, string for string (node.cpp:40-88) - including "N/A" and
+	// the 1-based Aux/Custom range formatting.
+	switch (value) {
 	case Unknown: return "Unknown";
-	case NA: return "NA";
+	case NA: return "N/A";
 	case Mono: return "Mono";
+	case FrontCenter: return "Front Center";
 	case FrontLeft: return "Front Left";
 	case FrontRight: return "Front Right";
-	case FrontCenter: return "Front Center";
+	case FrontLeftCenter: return "Front Left Center";
+	case FrontRightCenter: return "Front Right Center";
+	case FrontLeftWide: return "Front Left Wide";
+	case FrontRightWide: return "Front Right Wide";
+	case FrontCenterHigh: return "Front Center High";
+	case FrontLeftHigh: return "Front Left High";
+	case FrontRightHigh: return "Front Right High";
 	case LowFrequencyEffects: return "Low Frequency Effects";
+	case LowFrequencyEffects2: return "Low Frequency Effects 2";
+	case LowFrequencyEffectsLeft: return "Low Frequency Effects Left";
+	case LowFrequencyEffectsRight: return "Low Frequency Effects Right";
 	case SideLeft: return "Side Left";
 	case SideRight: return "Side Right";
-	default: return "Unknown";
+	case RearCenter: return "Rear Center";
+	case RearLeft: return "Rear Left";
+	case RearRight: return "Rear Right";
+	case RearLeftCenter: return "Rear Left Center";
+	case RearRightCenter: return "Rear Right Center";
+	case TopCenter: return "Top Center";
+	case TopFrontCenter: return "Top Front Center";
+	case TopFrontLeft: return "Top Front Left";
+	case TopFrontRight: return "Top Front Right";
+	case TopFrontLeftCenter: return "Top Front Left Center";
+	case TopFrontRightCenter: return "Top Front Right Center";
+	case TopSideLeft: return "Top Side Left";
+	case TopSideRight: return "Top Side Right";
+	case TopRearCenter: return "Top Rear Center";
+	case TopRearLeft: return "Top Rear Left";
+	case TopRearRight: return "Top Rear Right";
+	case BottomCenter: return "Bottom Center";
+	case BottomLeftCenter: return "Bottom Left Center";
+	case BottomRightCenter: return "Bottom Right Center";
+	default:
+		if (value >= AuxRangeStart && value <= AuxRangeEnd) {
+			return QString("Aux %1").arg(value - AuxRangeStart + 1);
+		} else if (value >= CustomRangeStart) {
+			return QString("Custom %1").arg(value - CustomRangeStart + 1);
+		} else {
+			return "Unknown";
+		}
 	}
 }
 

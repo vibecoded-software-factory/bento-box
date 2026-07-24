@@ -13,23 +13,31 @@
 #include <qtypes.h>
 
 #include "../core/doc.hpp"
+#include "../core/generation.hpp"
 #include "../core/util.hpp"
 #include "../window/panelinterface.hpp"
 #include "../window/proxywindow.hpp"
 
 namespace qs::mac {
 
+class MacPanelStack;
+
 // The macOS PanelWindow backend. Mirrors the X11 XPanelWindow: a
 // ProxyWindowBase that pins an ordinary QQuickWindow to a screen edge
 // according to anchors + margins, and reconfigures the native NSWindow (level,
 // all-Spaces behaviour, non-activating) through the AppKit bridge.
 //
-// What is NOT here, deliberately: a compositor exclusion zone. wlroots and X11
-// reserve space so maximized windows avoid the panel; macOS exposes no public
-// API for that (only the system Dock and menu bar reserve space). The
-// exclusiveZone / exclusionMode properties exist because the PanelWindow
-// interface requires them, but they do not move other windows on macOS. See
-// updateExclusion.
+// Exclusion zones, honestly split by who can honor them:
+// - OWN-PROCESS panels stack against each other's zones with X11's pure
+//   intra-process loop (x11/panel_window.cpp:246-266, mirrored in
+//   updateDimensions + MacPanelStack): a same-layer, same-screen panel below
+//   this one shrinks the screen geometry this one is placed in.
+// - OTHER APPS' windows are moved by the compositor: the zone is sent to
+//   nigiri over its control socket (updateReservation), the macOS stand-in
+//   for a wl_layer surface's exclusive zone.
+// - macOS itself exposes no public reservation API (only the system Dock and
+//   menu bar reserve space), so with no compositor listening the panel just
+//   draws without reserved space.
 class MacPanelWindow: public ProxyWindowBase {
 	QSDOC_BASECLASS(PanelWindowInterface);
 	Q_OBJECT;
@@ -57,14 +65,13 @@ public:
 	// so without this every transparent shell surface ate the clicks meant
 	// for whatever sits underneath (bar buttons, dismiss zones, apps).
 	void onPolished() override;
-	// Watches the owning interface for the dynamic properties the Wayland shim
-	// writes (bentoExclusiveKeyboard, bentoDesktopBackground). Shells flip
-	// keyboardFocus while the window stays visible, so a visibility signal
-	// alone would miss the change.
-	bool eventFilter(QObject* watched, QEvent* event) override;
 
+	// Virtual so the Quickshell.Wayland WlrLayershell subclass can intercept
+	// writes with upstream's layer/keyboardFocus conversions - upstream's
+	// WaylandPanelInterface routes these to WlrLayershell the same way
+	// (wlr_layershell.cpp:136-146).
 	[[nodiscard]] bool aboveWindows() const { return this->bAboveWindows; }
-	void setAboveWindows(bool aboveWindows) { this->bAboveWindows = aboveWindows; }
+	virtual void setAboveWindows(bool aboveWindows) { this->bAboveWindows = aboveWindows; }
 
 	[[nodiscard]] Anchors anchors() const { return this->bAnchors; }
 	void setAnchors(Anchors anchors) { this->bAnchors = anchors; }
@@ -84,7 +91,17 @@ public:
 	void setMargins(Margins margins) { this->bMargins = margins; }
 
 	[[nodiscard]] bool focusable() const { return this->bFocusable; }
-	void setFocusable(bool focusable) { this->bFocusable = focusable; }
+	virtual void setFocusable(bool focusable) { this->bFocusable = focusable; }
+
+	// Layer-vocabulary flags, driven by the Quickshell.Wayland WlrLayershell
+	// subclass. A shell's Background (wallpaper) surface is suppressed on
+	// macOS (the OS owns the desktop); an Exclusive keyboard panel takes and
+	// yields app focus (macOS has no compositor keyboard grab).
+	void setDesktopBackground(bool desktopBackground);
+	void setExclusiveKeyboard(bool exclusiveKeyboard);
+	// Overlay = upstream WlrLayer.Overlay: renders over fullscreen apps
+	// (pop-up-menu level + FullScreenAuxiliary), where Top stays below them.
+	void setOverlay(bool overlay);
 
 signals:
 	QSDOC_HIDE void anchorsChanged();
@@ -96,16 +113,22 @@ signals:
 
 private slots:
 	void updateDimensionsSlot() { this->updateDimensions(); }
+	void updatePanelStack();
 
 private:
 	void updateScreen();
-	void updateDimensions();
+	void updateDimensions(bool propagate = true);
 	void updateAboveWindows();
 	void updateFocusable();
 	void applyNativeConfig();
 	void updateReservation();
 
 	QPointer<QScreen> mTrackedScreen = nullptr;
+	bool mDesktopBackground = false;
+	bool mExclusiveKeyboard = false;
+	bool mOverlay = false;
+	// Set by MacPanelStack when the panel is added to its generation's stack.
+	EngineGeneration* engineGeneration = nullptr;
 	// The frame updateDimensions last computed from anchors + margins - the
 	// panel's true target, independent of any window-server clamp applied to
 	// the native frame while the window was still at the normal level.
@@ -146,6 +169,8 @@ private:
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bcExclusiveZone, updateReservation, onValueChanged);
 	QS_BINDING_SUBSCRIBE_METHOD(MacPanelWindow, bcExclusionEdge, updateReservation, onValueChanged);
 	// clang-format on
+
+	friend class MacPanelStack;
 };
 
 class MacPanelInterface: public PanelWindowInterface {
@@ -154,6 +179,13 @@ class MacPanelInterface: public PanelWindowInterface {
 public:
 	explicit MacPanelInterface(QObject* parent = nullptr);
 
+protected:
+	// For subclasses that back the panel with a MacPanelWindow subclass -
+	// the Quickshell.Wayland overlay passes a WlrLayershell, mirroring
+	// upstream's WaylandPanelInterface owning a WlrLayershell window.
+	MacPanelInterface(MacPanelWindow* panel, QObject* parent);
+
+public:
 	void onReload(QObject* oldInstance) override;
 
 	[[nodiscard]] ProxyWindowBase* proxyWindow() const override;

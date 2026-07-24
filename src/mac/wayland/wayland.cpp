@@ -6,24 +6,29 @@
 
 namespace qs::mac::wayland {
 
-WlrLayershell::WlrLayershell(QObject* parent): QObject(parent), mPanel(parent) {}
-
 WlrLayershell* WlrLayershell::qmlAttachedProperties(QObject* object) {
-	return new WlrLayershell(object);
+	// Upstream: the attached object IS the WlrLayershell window backing the
+	// PanelWindow, and null for anything else (wlr_layershell.cpp:163-169).
+	if (auto* iface = qobject_cast<qs::mac::MacPanelInterface*>(object)) {
+		return qobject_cast<WlrLayershell*>(iface->proxyWindow());
+	}
+	return nullptr;
 }
 
 void WlrLayershell::setLayer(WlrLayer::Enum layer) {
 	if (this->mLayer == layer) return;
 	this->mLayer = layer;
-	if (this->mPanel) {
-		// The Background layer is a shell's wallpaper. macOS owns the desktop, so
-		// the panel backend suppresses that surface (invisible + click-through)
-		// rather than drawing it over the user's windows. Flag it before
-		// aboveWindows, whose change reapplies the native config and must see it.
-		this->mPanel->setProperty("bentoDesktopBackground", layer == WlrLayer::Background);
-		// Top/Overlay float above ordinary windows; Background/Bottom do not.
-		this->mPanel->setProperty("aboveWindows", layer >= WlrLayer::Top);
-	}
+	// The Background layer is a shell's wallpaper. macOS owns the desktop, so
+	// the panel backend suppresses that surface (invisible + click-through)
+	// rather than drawing it over the user's windows. Flag it before
+	// aboveWindows, whose change reapplies the native config and must see it.
+	this->setDesktopBackground(layer == WlrLayer::Background);
+	// Overlay renders over fullscreen apps (upstream's Overlay semantics);
+	// Top floats above ordinary windows but below fullscreen ones.
+	this->setOverlay(layer == WlrLayer::Overlay);
+	// Top/Overlay float above ordinary windows; Background/Bottom do not
+	// (upstream: aboveWindows() == layer > Bottom, wlr_layershell.cpp:136).
+	this->MacPanelWindow::setAboveWindows(layer > WlrLayer::Bottom);
 	emit this->layerChanged();
 }
 
@@ -36,44 +41,24 @@ void WlrLayershell::setNamespace(const QString& ns) {
 void WlrLayershell::setKeyboardFocus(WlrKeyboardFocus::Enum focus) {
 	if (this->mKeyboardFocus == focus) return;
 	this->mKeyboardFocus = focus;
-	if (this->mPanel) {
-		this->mPanel->setProperty("focusable", focus != WlrKeyboardFocus::None);
-		// Exclusive is a keyboard GRAB on Wayland - the compositor routes keys
-		// to the surface no matter what. macOS routes keys only to the active
-		// app's key window, so the panel backend must actively take (and later
-		// give back) app focus for these panels. OnDemand panels get focus the
-		// macOS-native way: when clicked.
-		this->mPanel->setProperty("bentoExclusiveKeyboard", focus == WlrKeyboardFocus::Exclusive);
-	}
+	// Exclusive is a keyboard GRAB on Wayland - the compositor routes keys
+	// to the surface no matter what. macOS routes keys only to the active
+	// app's key window, so the panel backend must actively take (and later
+	// give back) app focus for these panels. OnDemand panels get focus the
+	// macOS-native way: when clicked.
+	this->setExclusiveKeyboard(focus == WlrKeyboardFocus::Exclusive);
+	this->MacPanelWindow::setFocusable(focus != WlrKeyboardFocus::None);
 	emit this->keyboardFocusChanged();
 }
 
-// NO equality guard on the exclusion setters: the shim's own initial value (0)
-// is not what the panel holds (the panel defaults to ExclusionMode::Auto,
-// which RESERVES space computed from anchors+size). A shell writing
-// `WlrLayershell.exclusiveZone: 0` to opt out of reservation used to hit the
-// guard and never reach the panel - leaving a hidden 480px slideout silently
-// reserving its whole width and squeezing the compositor's tiling area. Every
-// explicit write must reach the panel, equal-looking or not.
-void WlrLayershell::setExclusiveZone(qint32 zone) {
-	bool changed = this->mExclusiveZone != zone;
-	this->mExclusiveZone = zone;
-	if (this->mPanel) this->mPanel->setProperty("exclusiveZone", zone);
-	if (changed) emit this->exclusiveZoneChanged();
+void WlrLayershell::setAboveWindows(bool aboveWindows) {
+	// Upstream's conversion, verbatim (wlr_layershell.cpp:138-140).
+	this->setLayer(aboveWindows ? WlrLayer::Top : WlrLayer::Bottom);
 }
 
-void WlrLayershell::setExclusionMode(int mode) {
-	bool changed = this->mExclusionMode != mode;
-	this->mExclusionMode = mode;
-	if (this->mPanel) this->mPanel->setProperty("exclusionMode", mode);
-	if (changed) emit this->exclusionModeChanged();
-}
-
-void WlrLayershell::setMargins(Margins margins) {
-	if (this->mMargins == margins) return;
-	this->mMargins = margins;
-	if (this->mPanel) this->mPanel->setProperty("margins", QVariant::fromValue(margins));
-	emit this->marginsChanged();
+void WlrLayershell::setFocusable(bool focusable) {
+	// Upstream's conversion, verbatim (wlr_layershell.cpp:144-146).
+	this->setKeyboardFocus(focusable ? WlrKeyboardFocus::OnDemand : WlrKeyboardFocus::None);
 }
 
 // The macOS idle inhibit: a display-sleep power assertion, held while
@@ -83,8 +68,37 @@ void WlrLayershell::setMargins(Margins margins) {
 void IdleInhibitor::setEnabled(bool enabled) {
 	if (this->mEnabled == enabled) return;
 	this->mEnabled = enabled;
+	this->updateAssertion();
+	emit this->enabledChanged();
+}
 
-	if (enabled && this->mAssertion == kIOPMNullAssertionID) {
+void IdleInhibitor::setWindow(QObject* window) {
+	if (this->mWindow == window) return;
+	if (this->mWindow != nullptr) QObject::disconnect(this->mWindow, nullptr, this, nullptr);
+	this->mWindow = window;
+	if (window != nullptr) {
+		// The panel's visibility drives the inhibit like upstream's surface
+		// lifetime does; runtime connect so any window interface works.
+		QObject::connect(window, SIGNAL(visibleChanged()), this, SLOT(updateAssertion()));
+		QObject::connect(window, &QObject::destroyed, this, &IdleInhibitor::updateAssertion);
+	}
+	this->updateAssertion();
+	emit this->windowChanged();
+}
+
+bool IdleInhibitor::windowEligible() const {
+	// Upstream: "Must be set to a non null value to enable the inhibitor",
+	// and the inhibit lives only while the window has a surface - the macOS
+	// reading is "set and visible".
+	if (this->mWindow == nullptr) return false;
+	auto visible = this->mWindow->property("visible");
+	return !visible.isValid() || visible.toBool();
+}
+
+void IdleInhibitor::updateAssertion() {
+	bool shouldHold = this->mEnabled && this->windowEligible();
+
+	if (shouldHold && this->mAssertion == kIOPMNullAssertionID) {
 		IOPMAssertionID assertion = kIOPMNullAssertionID;
 		if (IOPMAssertionCreateWithName(
 		        kIOPMAssertionTypePreventUserIdleDisplaySleep,
@@ -96,12 +110,10 @@ void IdleInhibitor::setEnabled(bool enabled) {
 		{
 			this->mAssertion = assertion;
 		}
-	} else if (!enabled && this->mAssertion != kIOPMNullAssertionID) {
+	} else if (!shouldHold && this->mAssertion != kIOPMNullAssertionID) {
 		IOPMAssertionRelease(this->mAssertion);
 		this->mAssertion = kIOPMNullAssertionID;
 	}
-
-	emit this->enabledChanged();
 }
 
 IdleInhibitor::~IdleInhibitor() {
@@ -110,6 +122,18 @@ IdleInhibitor::~IdleInhibitor() {
 	if (this->mAssertion != kIOPMNullAssertionID) {
 		IOPMAssertionRelease(this->mAssertion);
 	}
+}
+
+BackgroundEffect* BackgroundEffect::qmlAttachedProperties(QObject* object) {
+	// Values are stored so bindings hold; there is no ext-background-effect-v1
+	// on macOS to forward them to.
+	return new BackgroundEffect(object);
+}
+
+void BackgroundEffect::setBlurRegion(PendingRegion* region) {
+	if (region == this->mBlurRegion) return;
+	this->mBlurRegion = region;
+	emit this->blurRegionChanged();
 }
 
 } // namespace qs::mac::wayland

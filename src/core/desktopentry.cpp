@@ -1,4 +1,8 @@
 #include "desktopentry.hpp"
+
+#ifdef Q_OS_MACOS
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 #include <algorithm>
 #include <utility>
 
@@ -350,9 +354,101 @@ DesktopEntryScanner::DesktopEntryScanner(DesktopEntryManager* manager): manager(
 	this->setAutoDelete(true);
 }
 
+#ifdef Q_OS_MACOS
+// PORTABLE DIVERGENCE FROM UPSTREAM (listed in PORT.md's ledger, and
+// macOS-forced): the XDG scan below finds nothing on a stock Mac, leaving
+// DesktopEntries - which the shell's launcher, dock and icons lean on -
+// permanently empty. macOS's equivalent of .desktop files are .app bundles,
+// so scan the standard application directories and synthesize one entry per
+// bundle through the SAME ParsedDesktopEntryData pipeline the XDG parser
+// feeds: id = the bundle identifier (what the compositor reports as app_id,
+// so byId() matches toplevels), name = the bundle display name, icon = the
+// absolute path of the bundle's .icns (QIcon::fromTheme falls back to
+// QIcon(path) for absolute paths, and Qt's icns plugin renders it; apps
+// using asset-catalog icons get an empty icon rather than a fake), exec =
+// `open <bundle path>`. XDG entries still win on id conflicts.
+static void scanMacApplications(QList<ParsedDesktopEntryData>& entries) {
+	auto appDirs = QStringList {
+	    "/Applications",
+	    "/Applications/Utilities",
+	    "/System/Applications",
+	    "/System/Applications/Utilities",
+	    QDir::homePath() + "/Applications",
+	};
+
+	for (const auto& dirPath: appDirs) {
+		auto dir = QDir(dirPath);
+		if (!dir.exists()) continue;
+
+		// AllEntries+Hidden+System + isDir(): system apps like Safari live
+		// behind a SYMLINK into the OS cryptex (/Applications/Safari.app ->
+		// ../System/Cryptexes/...) that carries the hidden attribute, so
+		// plain QDir::Dirs never surfaces it (ls does). QFileInfo::isDir()
+		// follows the link; the .app suffix keeps ordinary hidden files out.
+		auto filters = QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System;
+		for (const auto& info: dir.entryInfoList(filters)) {
+			if (!info.isDir() || !info.fileName().endsWith(".app")) continue;
+			auto bundlePath = info.absoluteFilePath();
+
+			auto url = CFURLCreateWithFileSystemPath(
+			    kCFAllocatorDefault,
+			    bundlePath.toCFString(),
+			    kCFURLPOSIXPathStyle,
+			    true
+			);
+			if (url == nullptr) continue;
+			auto bundle = CFBundleCreate(kCFAllocatorDefault, url);
+			CFRelease(url);
+			if (bundle == nullptr) continue;
+
+			auto data = ParsedDesktopEntryData();
+
+			// The id is the bundle identifier: nigiri reports it as the
+			// window app_id, so DesktopEntries.byId(toplevel.appId) works.
+			auto identifier = CFBundleGetIdentifier(bundle);
+			if (identifier == nullptr) {
+				CFRelease(bundle);
+				continue;
+			}
+			data.id = QString::fromCFString(identifier);
+
+			auto infoString = [&](CFStringRef key) -> QString {
+				auto value = CFBundleGetValueForInfoDictionaryKey(bundle, key);
+				if (value == nullptr || CFGetTypeID(value) != CFStringGetTypeID()) return {};
+				return QString::fromCFString(static_cast<CFStringRef>(value));
+			};
+
+			data.name = infoString(CFSTR("CFBundleDisplayName"));
+			if (data.name.isEmpty()) data.name = infoString(kCFBundleNameKey);
+			if (data.name.isEmpty()) data.name = info.fileName().chopped(4);
+
+			auto iconFile = infoString(CFSTR("CFBundleIconFile"));
+			if (!iconFile.isEmpty()) {
+				if (!iconFile.endsWith(".icns")) iconFile += ".icns";
+				auto iconPath = bundlePath + "/Contents/Resources/" + iconFile;
+				if (QFileInfo::exists(iconPath)) data.icon = iconPath;
+			}
+
+			data.execString = "open \"" + bundlePath + "\"";
+			data.command = {"open", bundlePath};
+			data.entries = {{"Type", "Application"}, {"Name", data.name}};
+
+			CFRelease(bundle);
+			entries.append(std::move(data));
+		}
+	}
+}
+#endif
+
 void DesktopEntryScanner::run() {
 	const auto& desktopPaths = DesktopEntryManager::desktopPaths();
 	auto scanResults = QList<ParsedDesktopEntryData>();
+
+#ifdef Q_OS_MACOS
+	// First, so an XDG-provided .desktop with the same id (scanned below)
+	// replaces the synthesized one - user overrides keep working.
+	scanMacApplications(scanResults);
+#endif
 
 	for (const auto& path: desktopPaths | std::views::reverse) {
 		auto file = QFileInfo(path);

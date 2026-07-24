@@ -130,6 +130,7 @@ void Pipewire::update() {
 		this->mListenedSink = newSink != nullptr ? outId : 0;
 		if (this->mListenedSink != 0) this->setDeviceVolumeListeners(outId, false, true);
 		emit this->defaultAudioSinkChanged();
+		emit this->defaultConfiguredAudioSinkChanged();
 	}
 
 	auto inId = coreaudio::defaultDevice(true);
@@ -141,6 +142,7 @@ void Pipewire::update() {
 		this->mListenedSource = newSource != nullptr ? inId : 0;
 		if (this->mListenedSource != 0) this->setDeviceVolumeListeners(inId, true, true);
 		emit this->defaultAudioSourceChanged();
+		emit this->defaultConfiguredAudioSourceChanged();
 	}
 
 	if (!this->mReady) {

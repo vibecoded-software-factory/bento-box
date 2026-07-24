@@ -1,4 +1,5 @@
 #include "panel_window.hpp"
+#include <map>
 
 #include <qcoreevent.h>
 #include <qnamespace.h>
@@ -12,6 +13,7 @@
 #include <qtypes.h>
 #include <unistd.h>
 
+#include "../core/generation.hpp"
 #include "../core/qmlscreen.hpp"
 #include "../core/types.hpp"
 #include "../window/panelinterface.hpp"
@@ -28,6 +30,65 @@ QString nextReservationId() {
 }
 } // namespace
 
+// Upstream X11's XPanelStack, verbatim (x11/panel_window.cpp:26-80): the
+// per-generation list of visible panels, in creation order, that the
+// same-edge stacking loop in updateDimensions walks.
+class MacPanelStack {
+public:
+	static MacPanelStack* instance() {
+		static MacPanelStack* stack = nullptr; // NOLINT
+
+		if (stack == nullptr) {
+			stack = new MacPanelStack();
+		}
+
+		return stack;
+	}
+
+	[[nodiscard]] const QList<MacPanelWindow*>& panels(MacPanelWindow* panel) {
+		return this->mPanels[EngineGeneration::findObjectGeneration(panel)];
+	}
+
+	void addPanel(MacPanelWindow* panel) {
+		panel->engineGeneration = EngineGeneration::findObjectGeneration(panel);
+		auto& panels = this->mPanels[panel->engineGeneration];
+		if (!panels.contains(panel)) {
+			panels.push_back(panel);
+		}
+	}
+
+	void removePanel(MacPanelWindow* panel) {
+		if (!panel->engineGeneration) return;
+
+		auto& panels = this->mPanels[panel->engineGeneration];
+		if (panels.removeOne(panel)) {
+			if (panels.isEmpty()) {
+				this->mPanels.erase(panel->engineGeneration);
+			}
+
+			// from the bottom up, update all panels
+			for (auto* panel: panels) {
+				panel->updateDimensions();
+			}
+		}
+	}
+
+	void updateLowerDimensions(MacPanelWindow* exclude) {
+		if (!exclude->engineGeneration) return;
+		auto& panels = this->mPanels[exclude->engineGeneration];
+
+		// update all panels lower than the one we start from
+		auto found = false;
+		for (auto* panel: panels) {
+			if (panel == exclude) found = true;
+			else if (found) panel->updateDimensions(false);
+		}
+	}
+
+private:
+	std::map<EngineGeneration*, QList<MacPanelWindow*>> mPanels;
+};
+
 MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {
 	this->mReservationId = nextReservationId();
 
@@ -36,9 +97,13 @@ MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {
 	// reserves nothing.
 	this->bcExclusionEdge.setBinding([this] { return this->bAnchors.value().exclusionEdge(); });
 
-	// niri/wlroots/X11's exclusive-zone rule, verbatim: Ignore reserves
-	// nothing, Normal reserves the set amount, Auto reserves the panel's own
-	// size on the anchored axis plus that edge's margins.
+	// Upstream X11's exclusive-zone rule, verbatim (x11/panel_window.cpp:
+	// 102-113): Ignore reserves nothing (0), Normal reserves the set amount,
+	// Auto reserves the panel's own size on the anchored axis plus BOTH of
+	// that axis' margins. (The Wayland backend differs: Ignore is -1 and
+	// Auto adds only the reverse-edge margin, wlr_layershell.cpp:18-35 -
+	// this port follows the X11 backend, the one that also computes zones
+	// client-side.)
 	this->bcExclusiveZone.setBinding([this]() -> qint32 {
 		switch (this->bExclusionMode.value()) {
 		case ExclusionMode::Ignore: return 0;
@@ -59,6 +124,9 @@ MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {
 }
 
 MacPanelWindow::~MacPanelWindow() {
+	// Upstream removes the panel from the stack in the destructor too - the
+	// remaining panels re-place themselves without this one's zone.
+	MacPanelStack::instance()->removePanel(this);
 	// Give the space back - a panel that goes away must not leave the layout
 	// permanently shrunk.
 	sendCompositorMessage(QStringLiteral("action clear-zone %1").arg(this->mReservationId));
@@ -111,12 +179,16 @@ void MacPanelWindow::connectWindow() {
 	    &MacPanelWindow::applyNativeConfig
 	);
 
-	// The Wayland shim communicates through dynamic properties on the owning
-	// interface (our parent). Watch them: a shell flips keyboardFocus on an
-	// already-visible modal, and that change must reapply the native config.
-	if (this->parent() != nullptr) {
-		this->parent()->installEventFilter(this);
-	}
+	// Stack membership follows visibility, like upstream's updatePanelStack
+	// (x11/panel_window.cpp:133-152, 319-325): only visible panels occupy a
+	// slot in the same-edge stacking order.
+	QObject::connect(
+	    this->window,
+	    &QQuickWindow::visibleChanged,
+	    this,
+	    &MacPanelWindow::updatePanelStack
+	);
+	this->updatePanelStack();
 
 	this->applyNativeConfig();
 	// Send the initial reservation now that the panel is configured; later
@@ -147,20 +219,8 @@ void MacPanelWindow::onPolished() {
 	this->ProxyWindowBase::onPolished();
 	if (this->window != nullptr) {
 		qs::mac::applyInputMask(this->window, this->window->mask(), this->mask() != nullptr);
-		qs::mac::assertPanelLevel(this->window, this->bAboveWindows.value());
+		qs::mac::assertPanelLevel(this->window, this->bAboveWindows.value(), this->mOverlay);
 	}
-}
-
-bool MacPanelWindow::eventFilter(QObject* watched, QEvent* event) {
-	if (watched == this->parent() && event->type() == QEvent::DynamicPropertyChange) {
-		auto* change = static_cast<QDynamicPropertyChangeEvent*>(event); // NOLINT
-		if (change->propertyName() == "bentoExclusiveKeyboard"
-		    || change->propertyName() == "bentoDesktopBackground")
-		{
-			this->applyNativeConfig();
-		}
-	}
-	return false;
 }
 
 void MacPanelWindow::trySetWidth(qint32 implicitWidth) {
@@ -208,16 +268,55 @@ void MacPanelWindow::updateScreen() {
 }
 
 // Pin the window to the tracked screen per anchors + margins. Pure Qt, and the
+void MacPanelWindow::updatePanelStack() {
+	if (this->window != nullptr && this->window->isVisible()) {
+		MacPanelStack::instance()->addPanel(this);
+	} else {
+		MacPanelStack::instance()->removePanel(this);
+	}
+	// Membership changed: this panel's own placement must account for the
+	// zones now below it.
+	this->updateDimensions();
+}
+
 // same rule as X11's XPanelWindow::updateDimensions minus the compositor
 // exclusion loop (macOS has no cross-window exclusion; see the class comment):
 //   - two opposite anchors force that dimension to the screen's, insetting by
 //     the two margins;
 //   - one anchor pins to that edge at the implicit size;
 //   - no anchor on an axis centres on it.
-void MacPanelWindow::updateDimensions() {
+void MacPanelWindow::updateDimensions(bool propagate) {
 	if (this->window == nullptr || this->mTrackedScreen == nullptr) return;
 
 	auto screenGeometry = this->mTrackedScreen->geometry();
+
+	// Upstream X11's own-process stacking loop, verbatim (x11/panel_window.
+	// cpp:245-266): shrink the screen by the exclusive zones of same-layer,
+	// same-screen panels below this one, so same-edge panels stack instead
+	// of overlapping. This needs no compositor - it is pure bookkeeping over
+	// this process' own panels.
+	if (this->bExclusionMode != ExclusionMode::Ignore) {
+		for (auto* panel: MacPanelStack::instance()->panels(this)) {
+			// we only care about windows below us
+			if (panel == this) break;
+
+			// we only care about windows in the same layer
+			if (panel->bAboveWindows != this->bAboveWindows) continue;
+
+			if (panel->mTrackedScreen != this->mTrackedScreen) continue;
+
+			auto edge = panel->bcExclusionEdge.value();
+			auto exclusiveZone = panel->bcExclusiveZone.value();
+
+			screenGeometry.adjust(
+			    edge == Qt::LeftEdge ? exclusiveZone : 0,
+			    edge == Qt::TopEdge ? exclusiveZone : 0,
+			    edge == Qt::RightEdge ? -exclusiveZone : 0,
+			    edge == Qt::BottomEdge ? -exclusiveZone : 0
+			);
+		}
+	}
+
 	auto geometry = QRect();
 
 	auto anchors = this->bAnchors.value();
@@ -263,6 +362,10 @@ void MacPanelWindow::updateDimensions() {
 	// menu-bar strip when it ran while the window was still at the normal
 	// level (see assertPanelFrame); push the intended frame through natively.
 	assertPanelFrame(this->window, geometry);
+
+	// A zone change here moves every panel stacked above it (upstream
+	// x11/panel_window.cpp:398).
+	if (propagate) MacPanelStack::instance()->updateLowerDimensions(this);
 }
 
 void MacPanelWindow::updateAboveWindows() {
@@ -281,6 +384,26 @@ void MacPanelWindow::updateFocusable() {
 	this->window->setFlag(Qt::WindowDoesNotAcceptFocus, !this->bFocusable);
 }
 
+void MacPanelWindow::setOverlay(bool overlay) {
+	if (this->mOverlay == overlay) return;
+	this->mOverlay = overlay;
+	this->applyNativeConfig();
+}
+
+void MacPanelWindow::setDesktopBackground(bool desktopBackground) {
+	if (this->mDesktopBackground == desktopBackground) return;
+	this->mDesktopBackground = desktopBackground;
+	this->applyNativeConfig();
+}
+
+void MacPanelWindow::setExclusiveKeyboard(bool exclusiveKeyboard) {
+	// A shell flips keyboardFocus on an already-visible modal; the change must
+	// reapply the native config even though visibility did not change.
+	if (this->mExclusiveKeyboard == exclusiveKeyboard) return;
+	this->mExclusiveKeyboard = exclusiveKeyboard;
+	this->applyNativeConfig();
+}
+
 void MacPanelWindow::applyNativeConfig() {
 	if (this->window == nullptr) return;
 	// Deferred: Qt applies its own window flags (and thus level) during show;
@@ -288,20 +411,17 @@ void MacPanelWindow::applyNativeConfig() {
 	// win instead of being overwritten by Qt's flag application.
 	auto* window = this->window;
 	auto above = this->bAboveWindows.value();
-	// The WlrLayershell shim flags a shell's background (wallpaper) layer with a
-	// dynamic property on the PanelWindow (our parent), since the layer vocabulary
-	// is not part of the core PanelWindow interface. A background layer is
-	// suppressed on macOS - the OS owns the desktop.
-	auto background =
-	    this->parent() != nullptr && this->parent()->property("bentoDesktopBackground").toBool();
+	// A shell's background (wallpaper) layer is suppressed on macOS - the OS
+	// owns the desktop. Driven by the WlrLayershell window subclass.
+	auto background = this->mDesktopBackground;
 	// A Wayland exclusive keyboard grab (launcher, modal): macOS only routes
 	// keys to the active app's key window, so showing such a panel must take
 	// app focus and hiding it must give focus back. Driven from here because
 	// applyNativeConfig already runs on every visibility change.
-	auto exclusiveKeyboard =
-	    this->parent() != nullptr && this->parent()->property("bentoExclusiveKeyboard").toBool();
-	QTimer::singleShot(0, this, [this, window, above, background, exclusiveKeyboard]() {
-		qs::mac::configurePanelWindow(window, above, background);
+	auto exclusiveKeyboard = this->mExclusiveKeyboard;
+	auto overlay = this->mOverlay;
+	QTimer::singleShot(0, this, [this, window, above, background, exclusiveKeyboard, overlay]() {
+		qs::mac::configurePanelWindow(window, above, background, overlay);
 		// The panel was shown (and possibly clamped out of the menu-bar strip)
 		// before this deferred config raised its level; re-assert the intended
 		// frame now that the level permits the true screen edge.
@@ -370,8 +490,12 @@ void MacPanelWindow::updateReservation() {
 // MacPanelInterface
 
 MacPanelInterface::MacPanelInterface(QObject* parent)
+    : MacPanelInterface(new MacPanelWindow(), parent) {}
+
+MacPanelInterface::MacPanelInterface(MacPanelWindow* panel, QObject* parent)
     : PanelWindowInterface(parent)
-    , panel(new MacPanelWindow(this)) {
+    , panel(panel) {
+	panel->setParent(this);
 	this->connectSignals();
 
 	// clang-format off

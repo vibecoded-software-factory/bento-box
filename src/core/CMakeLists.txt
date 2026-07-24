@@ -62,6 +62,9 @@ install_qml_module(quickshell-core)
 target_link_libraries(quickshell-core PRIVATE Qt::Quick Qt::QuickPrivate Qt::Widgets quickshell-build)
 if (NOT APPLE)
 	target_link_libraries(quickshell-core PRIVATE PkgConfig::libdrm)
+else()
+	# CFBundle for the .app scan in desktopentry.cpp (see PORT.md's ledger).
+	target_link_libraries(quickshell-core PRIVATE "-framework CoreFoundation")
 endif()
 
 qs_module_pch(quickshell-core SET large)

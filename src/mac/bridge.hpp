@@ -24,7 +24,7 @@ namespace qs::mac {
 // Quickshell.Mac.Desktop). Called after the native window exists and whenever
 // the layer/level inputs change. A no-op (logged once) if the QWindow has no
 // native handle yet.
-void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground);
+void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground, bool overlay);
 
 // Re-assert the panel's intended frame on the native NSWindow.
 //
@@ -70,7 +70,7 @@ void clearInputMask(QWindow* window);
 // the bar - flipping the z-order (and therefore which window receives a
 // click) nondeterministically. Called from every polish pass to win that
 // race within a frame.
-void assertPanelLevel(QWindow* window, bool aboveWindows);
+void assertPanelLevel(QWindow* window, bool aboveWindows, bool overlay);
 
 // Give app focus back after an exclusive-keyboard panel hides or is torn
 // down: reactivate the app remembered by takeKeyboardForPanel. A no-op unless

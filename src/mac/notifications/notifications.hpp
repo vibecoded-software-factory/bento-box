@@ -10,6 +10,8 @@
 
 #include "../../core/doc.hpp"
 #include "../../core/model.hpp"
+#include "../../core/reload.hpp"
+#include "../../core/retainable.hpp"
 
 // The macOS notifications stub.
 //
@@ -87,7 +89,9 @@ signals:
 /// compatibility only - macOS cannot deliver other apps' notifications, so
 /// `NotificationServer.trackedNotifications` is always empty and this type is
 /// never instantiated.
-class Notification: public QObject {
+class Notification
+    : public QObject
+    , public Retainable {
 	Q_OBJECT;
 	// clang-format off
 	Q_PROPERTY(quint32 id READ id CONSTANT);
@@ -140,6 +144,11 @@ public:
 	Q_INVOKABLE void sendInlineReply(const QString& /*replyText*/) {}
 
 signals:
+	/// Sent when a notification has been closed.
+	///
+	/// The notification object will be destroyed as soon as all signal handlers exit.
+	void closed(qs::mac::notifications::NotificationCloseReason::Enum reason);
+
 	void trackedChanged();
 	void expireTimeoutChanged();
 	void appNameChanged();
@@ -163,7 +172,7 @@ signals:
 /// flags are honored as plain storage, but `trackedNotifications` is always
 /// empty - macOS delivers no other-app notifications to a third-party process
 /// (see the module comment).
-class NotificationServer: public QObject {
+class NotificationServer: public PostReloadHook {
 	Q_OBJECT;
 	// clang-format off
 	Q_PROPERTY(bool keepOnReload READ keepOnReload WRITE setKeepOnReload NOTIFY keepOnReloadChanged);
@@ -183,7 +192,11 @@ class NotificationServer: public QObject {
 	QML_NAMED_ELEMENT(NotificationServer);
 
 public:
-	explicit NotificationServer(QObject* parent = nullptr): QObject(parent) {}
+	explicit NotificationServer(QObject* parent = nullptr): PostReloadHook(parent) {}
+	// Nothing to re-emit on macOS: the tracked list is always empty (see the
+	// module comment) - the hook exists so `reloadableId` and reload wiring
+	// behave like upstream's PostReloadHook server.
+	void onPostReload() override {}
 
 	[[nodiscard]] bool keepOnReload() const { return this->mKeepOnReload; }
 	void setKeepOnReload(bool v) {

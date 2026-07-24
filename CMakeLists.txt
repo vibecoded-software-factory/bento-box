@@ -58,7 +58,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 else()
 	boption(USE_JEMALLOC "Use jemalloc" ON)
 endif()
-boption(CRASH_HANDLER "Crash Handling" ON)
+# The crash reporter relaunches the binary via /proc/self/exe, which does
+# not exist on macOS: the handler perror()s and _exit()s, leaving the forked
+# coredump child behind - worse than no handler. Off by default on APPLE
+# (see PORT.md); Linux keeps upstream's default.
+if (APPLE)
+	boption(CRASH_HANDLER "Crash Handling" OFF)
+else()
+	boption(CRASH_HANDLER "Crash Handling" ON)
+endif()
 boption(SOCKETS "Unix Sockets" ON)
 boption(WAYLAND "Wayland" ON)
 boption(WAYLAND_WLR_LAYERSHELL "  Wlroots Layer-Shell" ON REQUIRES WAYLAND)

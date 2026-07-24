@@ -71,23 +71,55 @@ class MprisPlayer: public QObject {
 	Q_PROPERTY(bool canRaise READ default NOTIFY canRaiseChanged BINDABLE bindableCanRaise);
 
 	Q_PROPERTY(qs::mac::mpris::MprisPlaybackState::Enum playbackState READ default WRITE setPlaybackState NOTIFY playbackStateChanged BINDABLE bindablePlaybackState);
-	Q_PROPERTY(bool isPlaying READ isPlaying WRITE setPlaying NOTIFY playbackStateChanged);
+	Q_PROPERTY(bool isPlaying READ isPlaying WRITE setPlaying NOTIFY isPlayingChanged);
 
 	Q_PROPERTY(qreal position READ position WRITE setPosition NOTIFY positionChanged);
 	Q_PROPERTY(bool positionSupported READ default NOTIFY positionSupportedChanged BINDABLE bindablePositionSupported);
-	Q_PROPERTY(qreal length READ default NOTIFY lengthChanged BINDABLE bindableLength);
+	// Like upstream (player.hpp:141-144): the value of `position` when the
+	// player never reported a duration. Custom READ instead of upstream's
+	// BINDABLE so the fallback stays live; lengthChanged still notifies.
+	Q_PROPERTY(qreal length READ length NOTIFY lengthChanged);
 	Q_PROPERTY(bool lengthSupported READ default NOTIFY lengthSupportedChanged BINDABLE bindableLengthSupported);
 
 	Q_PROPERTY(QVariantMap metadata READ default NOTIFY metadataChanged BINDABLE bindableMetadata);
+	// Opaque per-player track counter, incremented on every track change -
+	// upstream's uniqueId contract (player.hpp:159-163, player.cpp:308).
+	Q_PROPERTY(quint32 uniqueId READ default NOTIFY uniqueIdChanged BINDABLE bindableUniqueId);
 	Q_PROPERTY(QString trackTitle READ default NOTIFY trackTitleChanged BINDABLE bindableTrackTitle);
 	Q_PROPERTY(QString trackArtist READ default NOTIFY trackArtistChanged BINDABLE bindableTrackArtist);
+	// Deprecated upstream alias of trackArtist - same bindable, same NOTIFY.
+	Q_PROPERTY(QString trackArtists READ default NOTIFY trackArtistChanged BINDABLE bindableTrackArtist);
 	Q_PROPERTY(QString trackAlbum READ default NOTIFY trackAlbumChanged BINDABLE bindableTrackAlbum);
+	// "" if none was provided - MediaRemote's payload has no album artist,
+	// so this is always the upstream-sanctioned empty fallback.
+	Q_PROPERTY(QString trackAlbumArtist READ default NOTIFY trackAlbumArtistChanged BINDABLE bindableTrackAlbumArtist);
 	Q_PROPERTY(QString trackArtUrl READ default NOTIFY trackArtUrlChanged BINDABLE bindableTrackArtUrl);
 
-	// Unsupported on macOS/MediaRemote - present for binding compatibility,
-	// their *Supported flag is false and writes are ignored.
+	// Rate reads live from the payload's playbackRate. Writes carry
+	// upstream's guard verbatim: only values within [minRate, maxRate], and
+	// MPRIS defaults BOTH to 1.0 when the player does not advertise a range
+	// - which MediaRemote never does - so exactly the writes upstream would
+	// accept from such a player are accepted here (routed to the adapter's
+	// `speed` command).
+	Q_PROPERTY(qreal rate READ rate WRITE setRate NOTIFY rateChanged);
+	Q_PROPERTY(qreal minRate READ default NOTIFY minRateChanged BINDABLE bindableMinRate);
+	Q_PROPERTY(qreal maxRate READ default NOTIFY maxRateChanged BINDABLE bindableMaxRate);
+	// MediaRemote has no fullscreen control: canSetFullscreen is false and
+	// the write refuses with upstream's own message (player.cpp:444-448).
+	Q_PROPERTY(bool fullscreen READ fullscreen WRITE setFullscreen NOTIFY fullscreenChanged);
+	Q_PROPERTY(bool canSetFullscreen READ default NOTIFY canSetFullscreenChanged BINDABLE bindableCanSetFullscreen);
+	// Unadvertised (MediaRemote exposes neither) - empty lists, like an
+	// MPRIS player that does not implement the properties.
+	Q_PROPERTY(QList<QString> supportedUriSchemes READ default NOTIFY supportedUriSchemesChanged BINDABLE bindableSupportedUriSchemes);
+	Q_PROPERTY(QList<QString> supportedMimeTypes READ default NOTIFY supportedMimeTypesChanged BINDABLE bindableSupportedMimeTypes);
+
+	// Volume stays unsupported (MediaRemote exposes no per-player volume);
+	// present for binding compatibility, volumeSupported false, write ignored.
 	Q_PROPERTY(qreal volume READ volume WRITE setVolume NOTIFY volumeChanged);
 	Q_PROPERTY(bool volumeSupported READ default NOTIFY volumeSupportedChanged BINDABLE bindableVolumeSupported);
+	// Loop and shuffle are REAL: read from the adapter stream's repeatMode/
+	// shuffleMode, written through the vendored adapter's repeat/shuffle
+	// commands (MRMediaRemoteSetRepeatMode/SetShuffleMode).
 	Q_PROPERTY(qs::mac::mpris::MprisLoopState::Enum loopState READ loopState WRITE setLoopState NOTIFY loopStateChanged);
 	Q_PROPERTY(bool loopSupported READ default NOTIFY loopSupportedChanged BINDABLE bindableLoopSupported);
 	Q_PROPERTY(bool shuffle READ shuffle WRITE setShuffle NOTIFY shuffleChanged);
@@ -113,6 +145,15 @@ public:
 
 	[[nodiscard]] qreal position() const;
 	void setPosition(qreal position);
+	[[nodiscard]] qreal length() const;
+
+	[[nodiscard]] qreal rate() const { return this->bRate.value(); }
+	void setRate(qreal rate);
+	[[nodiscard]] bool fullscreen() const { return this->bFullscreen.value(); }
+	void setFullscreen(bool fullscreen);
+	// Opens the uri with the player's own app (NSWorkspace targeted open) -
+	// the MPRIS OpenUri semantic.
+	Q_INVOKABLE void openUri(const QString& uri);
 
 	Q_INVOKABLE void play();
 	Q_INVOKABLE void pause();
@@ -120,8 +161,11 @@ public:
 	Q_INVOKABLE void togglePlaying();
 	Q_INVOKABLE void next();
 	Q_INVOKABLE void previous();
-	// Present for API compatibility; MediaRemote offers no seek/raise/quit.
-	Q_INVOKABLE void seek(qreal /*offset*/) {}
+	// Seek is REAL: the vendored adapter's `seek` sets an absolute elapsed
+	// time (MRMediaRemoteSetElapsedTime), so setPosition maps directly and
+	// seek(offset) is position + offset, upstream's relative form.
+	Q_INVOKABLE void seek(qreal offset);
+	// Present for API compatibility; MediaRemote offers no raise/quit.
 	Q_INVOKABLE void raise() {}
 	Q_INVOKABLE void quit() {}
 
@@ -140,7 +184,17 @@ public:
 		return &this->bPlaybackState;
 	}
 	[[nodiscard]] QBindable<bool> bindablePositionSupported() { return &this->bPositionSupported; }
-	[[nodiscard]] QBindable<qreal> bindableLength() { return &this->bLength; }
+	[[nodiscard]] QBindable<quint32> bindableUniqueId() { return &this->bUniqueId; }
+	[[nodiscard]] QBindable<QString> bindableTrackAlbumArtist() { return &this->bTrackAlbumArtist; }
+	[[nodiscard]] QBindable<qreal> bindableMinRate() { return &this->bMinRate; }
+	[[nodiscard]] QBindable<qreal> bindableMaxRate() { return &this->bMaxRate; }
+	[[nodiscard]] QBindable<bool> bindableCanSetFullscreen() { return &this->bCanSetFullscreen; }
+	[[nodiscard]] QBindable<QList<QString>> bindableSupportedUriSchemes() {
+		return &this->bSupportedUriSchemes;
+	}
+	[[nodiscard]] QBindable<QList<QString>> bindableSupportedMimeTypes() {
+		return &this->bSupportedMimeTypes;
+	}
 	[[nodiscard]] QBindable<bool> bindableLengthSupported() { return &this->bLengthSupported; }
 	[[nodiscard]] QBindable<QVariantMap> bindableMetadata() { return &this->bMetadata; }
 	[[nodiscard]] QBindable<QString> bindableTrackTitle() { return &this->bTrackTitle; }
@@ -164,6 +218,20 @@ public:
 
 signals:
 	void trackChanged();
+	// After the track properties updated, upstream's ordering
+	// (player.hpp:351, player.cpp:319): trackChanged fires before the
+	// update, postTrackChanged after.
+	void postTrackChanged();
+	void isPlayingChanged();
+	void uniqueIdChanged();
+	void trackAlbumArtistChanged();
+	void rateChanged();
+	void minRateChanged();
+	void maxRateChanged();
+	void fullscreenChanged();
+	void canSetFullscreenChanged();
+	void supportedUriSchemesChanged();
+	void supportedMimeTypesChanged();
 	void identityChanged();
 	void desktopEntryChanged();
 	void canControlChanged();
@@ -215,13 +283,24 @@ private:
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, MprisPlaybackState::Enum, bPlaybackState, &MprisPlayer::playbackStateChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bPositionSupported, &MprisPlayer::positionSupportedChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, qreal, bLength, &MprisPlayer::lengthChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, quint32, bUniqueId, &MprisPlayer::uniqueIdChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QString, bTrackAlbumArtist, &MprisPlayer::trackAlbumArtistChanged);
+	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MprisPlayer, qreal, bRate, 1, &MprisPlayer::rateChanged);
+	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MprisPlayer, qreal, bMinRate, 1, &MprisPlayer::minRateChanged);
+	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MprisPlayer, qreal, bMaxRate, 1, &MprisPlayer::maxRateChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bFullscreen, &MprisPlayer::fullscreenChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bCanSetFullscreen, &MprisPlayer::canSetFullscreenChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QList<QString>, bSupportedUriSchemes, &MprisPlayer::supportedUriSchemesChanged);
+	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QList<QString>, bSupportedMimeTypes, &MprisPlayer::supportedMimeTypesChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bLengthSupported, &MprisPlayer::lengthSupportedChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QVariantMap, bMetadata, &MprisPlayer::metadataChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QString, bTrackTitle, &MprisPlayer::trackTitleChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QString, bTrackArtist, &MprisPlayer::trackArtistChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QString, bTrackAlbum, &MprisPlayer::trackAlbumChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, QString, bTrackArtUrl, &MprisPlayer::trackArtUrlChanged);
-	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, qreal, bVolume, &MprisPlayer::volumeChanged);
+	// Upstream defaults volume to 1.0 when volumeSupported is false
+	// (player.hpp:145,455) - 0.0 read as "muted" by shells.
+	Q_OBJECT_BINDABLE_PROPERTY_WITH_ARGS(MprisPlayer, qreal, bVolume, 1, &MprisPlayer::volumeChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bVolumeSupported, &MprisPlayer::volumeSupportedChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, MprisLoopState::Enum, bLoopState, &MprisPlayer::loopStateChanged);
 	Q_OBJECT_BINDABLE_PROPERTY(MprisPlayer, bool, bLoopSupported, &MprisPlayer::loopSupportedChanged);
