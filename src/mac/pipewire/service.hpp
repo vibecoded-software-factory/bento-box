@@ -34,12 +34,15 @@ class Pipewire: public QObject {
 	Q_PROPERTY(qs::mac::pipewire::PwNode* defaultAudioSink READ defaultAudioSink NOTIFY defaultAudioSinkChanged);
 	/// The default audio source (input) or `null`.
 	Q_PROPERTY(qs::mac::pipewire::PwNode* defaultAudioSource READ defaultAudioSource NOTIFY defaultAudioSourceChanged);
-	/// The preferred default audio sink. On macOS this is the same as
-	/// @@defaultAudioSink; setting it changes the system default output device.
-	Q_PROPERTY(qs::mac::pipewire::PwNode* preferredDefaultAudioSink READ defaultAudioSink WRITE setPreferredDefaultAudioSink NOTIFY defaultAudioSinkChanged);
-	/// The preferred default audio source. On macOS this is the same as
-	/// @@defaultAudioSource; setting it changes the system default input device.
-	Q_PROPERTY(qs::mac::pipewire::PwNode* preferredDefaultAudioSource READ defaultAudioSource WRITE setPreferredDefaultAudioSource NOTIFY defaultAudioSourceChanged);
+	/// The preferred default audio sink. Upstream this is a HINT pipewire may
+	/// not honor; macOS's set-default is imperative and immediate, so there is
+	/// no pending state and the configured value always equals
+	/// @@defaultAudioSink - but it NOTIFYs through its own signal (upstream
+	/// qml.hpp:115: defaultConfiguredAudioSinkChanged) so handlers attach.
+	Q_PROPERTY(qs::mac::pipewire::PwNode* preferredDefaultAudioSink READ defaultAudioSink WRITE setPreferredDefaultAudioSink NOTIFY defaultConfiguredAudioSinkChanged);
+	/// The input counterpart of @@preferredDefaultAudioSink, same macOS
+	/// no-pending-state mapping.
+	Q_PROPERTY(qs::mac::pipewire::PwNode* preferredDefaultAudioSource READ defaultAudioSource WRITE setPreferredDefaultAudioSource NOTIFY defaultConfiguredAudioSourceChanged);
 	/// True once the initial device sync has completed.
 	Q_PROPERTY(bool ready READ isReady NOTIFY readyChanged);
 	// clang-format on
@@ -71,6 +74,10 @@ public:
 signals:
 	void defaultAudioSinkChanged();
 	void defaultAudioSourceChanged();
+	// The configured-preference signals, upstream's names: on macOS actual
+	// and configured move together, so these fire alongside the two above.
+	void defaultConfiguredAudioSinkChanged();
+	void defaultConfiguredAudioSourceChanged();
 	void readyChanged();
 
 private:

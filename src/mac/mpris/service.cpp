@@ -15,6 +15,7 @@
 #include <qstringlist.h>
 #include <qtimer.h>
 
+#include "identity.hpp"
 #include "player.hpp"
 
 namespace qs::mac::mpris {
@@ -227,13 +228,22 @@ void MprisIpc::applySnapshot(const QByteArray& line) {
 	QVariantMap snapshot;
 	auto bundleId = payload.value("bundleIdentifier").toString();
 	snapshot["bundleId"] = bundleId;
-	snapshot["app"] = bundleId;
+	// identity is the HUMAN name ("Spotify"), like MPRIS Identity upstream;
+	// the raw bundle id stays available as dbusName.
+	snapshot["app"] = humanIdentityForBundleId(bundleId);
 	snapshot["title"] = payload.value("title").toString();
 	snapshot["artist"] = payload.value("artist").toString();
 	snapshot["album"] = payload.value("album").toString();
 	snapshot["playing"] = payload.value("playing").toBool();
 	snapshot["art"] = this->writeArtwork(payload);
 	if (payload.contains("duration")) snapshot["duration"] = payload.value("duration").toDouble();
+	if (payload.contains("playbackRate"))
+		snapshot["playbackRate"] = payload.value("playbackRate").toDouble();
+	if (payload.contains("contentItemIdentifier"))
+		snapshot["trackId"] = payload.value("contentItemIdentifier").toString();
+	if (payload.contains("repeatMode")) snapshot["repeatMode"] = payload.value("repeatMode").toInt();
+	if (payload.contains("shuffleMode"))
+		snapshot["shuffleMode"] = payload.value("shuffleMode").toInt();
 	if (payload.contains("elapsedTime"))
 		snapshot["elapsed"] = payload.value("elapsedTime").toDouble();
 	// The adapter emits an ISO-8601 timestamp for when elapsedTime was true;
@@ -250,10 +260,12 @@ void MprisIpc::applySnapshot(const QByteArray& line) {
 	if (isNew) this->mPlayers.insertObject(this->mPlayer);
 }
 
-void MprisIpc::sendCommand(int command) {
+void MprisIpc::sendCommand(int command) { this->sendAdapter({"send", QString::number(command)}); }
+
+void MprisIpc::sendAdapter(const QStringList& args) {
 	if (loaderPath().isEmpty() || frameworkPath().isEmpty()) return;
-	// One-shot: the entitled perl runs the adapter's `send` and exits.
-	QProcess::startDetached(PERL, this->adapterArgs({"send", QString::number(command)}));
+	// One-shot: the entitled perl runs the adapter subcommand and exits.
+	QProcess::startDetached(PERL, this->adapterArgs(args));
 }
 
 } // namespace qs::mac::mpris

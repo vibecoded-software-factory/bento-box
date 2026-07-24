@@ -76,7 +76,12 @@ static NSWindow* nsWindowFor(QWindow* window) {
 	return view.window;
 }
 
-void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackground) {
+void configurePanelWindow(
+    QWindow* window,
+    bool aboveWindows,
+    bool desktopBackground,
+    bool overlay
+) {
 	NSWindow* nsWindow = nsWindowFor(window);
 	if (nsWindow == nil) {
 		static bool warned = false;
@@ -89,10 +94,15 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 
 	// On every Space, and pinned there across Space switches - a layer surface
 	// belongs to the output, not to a workspace. ignoresCycle keeps it out of
-	// Cmd-` window cycling.
-	nsWindow.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
-	                            | NSWindowCollectionBehaviorStationary
-	                            | NSWindowCollectionBehaviorIgnoresCycle;
+	// Cmd-` window cycling. An Overlay layer additionally joins fullscreen
+	// Spaces (FullScreenAuxiliary) - upstream's "usually renders over
+	// fullscreen windows" - while Top deliberately does not, matching
+	// upstream's "below fullscreen windows" for the Top layer.
+	NSWindowCollectionBehavior behavior = NSWindowCollectionBehaviorCanJoinAllSpaces
+	                                    | NSWindowCollectionBehaviorStationary
+	                                    | NSWindowCollectionBehaviorIgnoresCycle;
+	if (overlay) behavior |= NSWindowCollectionBehaviorFullScreenAuxiliary;
+	nsWindow.collectionBehavior = behavior;
 
 	if (desktopBackground) {
 		// A shell's wallpaper layer. macOS draws the desktop itself, so this
@@ -124,12 +134,17 @@ void configurePanelWindow(QWindow* window, bool aboveWindows, bool desktopBackgr
 		bentoInstallInactiveHoverWorkaround(view);
 	}
 
-	// Above ordinary windows sits at the status-bar level (over normal windows,
-	// below the system menu bar and Mission Control) - the closest macOS analogue
-	// to WlrLayer.Top. Qt's WindowStaysOnTopHint already lifts it to the floating
-	// level; this overrides that with the level the panel actually wants. Below
-	// sits just under the normal level.
-	nsWindow.level = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
+	// The WlrLayer ladder, in NSWindow levels: Overlay sits at the pop-up-menu
+	// level (above the status level, still below the screen saver) and joins
+	// fullscreen Spaces - upstream's over-fullscreen semantics. Top sits at
+	// the status-bar level (over normal windows, below the system menu bar and
+	// Mission Control) - upstream's below-fullscreen Top. Qt's
+	// WindowStaysOnTopHint already lifts the window to the floating level;
+	// this overrides it with the level the panel actually wants. Below sits
+	// just under the normal level.
+	nsWindow.level = overlay      ? NSPopUpMenuWindowLevel
+	               : aboveWindows ? NSStatusWindowLevel
+	                              : (NSNormalWindowLevel - 1);
 }
 
 namespace {
@@ -259,10 +274,12 @@ void clearInputMask(QWindow* window) {
 	inputMasks().remove(nsWindow);
 }
 
-void assertPanelLevel(QWindow* window, bool aboveWindows) {
+void assertPanelLevel(QWindow* window, bool aboveWindows, bool overlay) {
 	NSWindow* nsWindow = nsWindowFor(window);
 	if (nsWindow == nil) return;
-	NSWindowLevel target = aboveWindows ? NSStatusWindowLevel : (NSNormalWindowLevel - 1);
+	NSWindowLevel target = overlay      ? NSPopUpMenuWindowLevel
+	                     : aboveWindows ? NSStatusWindowLevel
+	                                    : (NSNormalWindowLevel - 1);
 	if (nsWindow.level != target) nsWindow.level = target;
 }
 

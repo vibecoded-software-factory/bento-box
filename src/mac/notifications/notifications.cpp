@@ -9,7 +9,7 @@ QString NotificationUrgency::toString(NotificationUrgency::Enum value) {
 	case Low: return "Low";
 	case Normal: return "Normal";
 	case Critical: return "Critical";
-	default: return "Unknown";
+	default: return "Invalid notification urgency";
 	}
 }
 
@@ -18,7 +18,7 @@ QString NotificationCloseReason::toString(NotificationCloseReason::Enum value) {
 	case Expired: return "Expired";
 	case Dismissed: return "Dismissed";
 	case CloseRequested: return "CloseRequested";
-	default: return "Unknown";
+	default: return "Invalid notification close reason";
 	}
 }
 

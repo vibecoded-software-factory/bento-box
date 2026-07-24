@@ -5,6 +5,7 @@ add_subdirectory(mediaremote-adapter)
 qt_add_library(quickshell-mac-mpris STATIC
 	player.cpp
 	service.cpp
+	identity.mm
 )
 
 # The perl loader for the adapter framework, embedded so it ships inside the
@@ -31,6 +32,10 @@ target_compile_definitions(quickshell-mac-mpris PRIVATE
 	BENTO_MRA_FRAMEWORK_PATH="$<TARGET_BUNDLE_DIR:MediaRemoteAdapter>"
 )
 
-target_link_libraries(quickshell-mac-mpris PRIVATE Qt::Quick)
+target_link_libraries(quickshell-mac-mpris PRIVATE
+	Qt::Quick
+	"-framework AppKit"
+	"-framework Foundation"
+)
 
 target_link_libraries(quickshell PRIVATE quickshell-mac-mprisplugin)

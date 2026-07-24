@@ -58,18 +58,23 @@ Q_ENUM_NS(Enum);
 class SystemTrayItem: public QObject {
 	Q_OBJECT;
 	// clang-format off
-	Q_PROPERTY(QString id READ id CONSTANT);
-	Q_PROPERTY(QString title READ title CONSTANT);
-	Q_PROPERTY(qs::mac::systemtray::Status::Enum status READ status CONSTANT);
-	Q_PROPERTY(qs::mac::systemtray::Category::Enum category READ category CONSTANT);
-	Q_PROPERTY(QString icon READ icon CONSTANT);
-	Q_PROPERTY(QString tooltipTitle READ tooltipTitle CONSTANT);
-	Q_PROPERTY(QString tooltipDescription READ tooltipDescription CONSTANT);
-	Q_PROPERTY(bool hasMenu READ hasMenu CONSTANT);
-	Q_PROPERTY(bool onlyMenu READ onlyMenu CONSTANT);
-	// The Linux service exposes a DBusMenuHandle here; macOS has no equivalent,
-	// so the property is present (for binding compatibility) but always null.
-	Q_PROPERTY(QObject* menu READ menu CONSTANT);
+	// NOTIFY topology matches upstream (item.hpp:105-121, 154-165) even
+	// though no instance ever exists: handlers named after upstream's
+	// signals must resolve.
+	Q_PROPERTY(QString id READ id NOTIFY idChanged);
+	Q_PROPERTY(QString title READ title NOTIFY titleChanged);
+	Q_PROPERTY(qs::mac::systemtray::Status::Enum status READ status NOTIFY statusChanged);
+	Q_PROPERTY(qs::mac::systemtray::Category::Enum category READ category NOTIFY categoryChanged);
+	Q_PROPERTY(QString icon READ icon NOTIFY iconChanged);
+	Q_PROPERTY(QString tooltipTitle READ tooltipTitle NOTIFY tooltipTitleChanged);
+	Q_PROPERTY(QString tooltipDescription READ tooltipDescription NOTIFY tooltipDescriptionChanged);
+	Q_PROPERTY(bool hasMenu READ hasMenu NOTIFY hasMenuChanged);
+	Q_PROPERTY(bool onlyMenu READ onlyMenu NOTIFY onlyMenuChanged);
+	// The Linux service exposes a DBusMenuHandle here; macOS has no dbusmenu,
+	// so the property is present (typed QObject* as the closest honest
+	// stand-in for the handle type) but always null. NOTIFYs hasMenuChanged
+	// exactly like upstream (item.hpp:119).
+	Q_PROPERTY(QObject* menu READ menu NOTIFY hasMenuChanged);
 	// clang-format on
 	QML_NAMED_ELEMENT(SystemTrayItem);
 	QML_UNCREATABLE("SystemTrayItems can only be acquired from SystemTray");
@@ -92,6 +97,21 @@ public:
 	Q_INVOKABLE void secondaryActivate() {}
 	Q_INVOKABLE void scroll(qint32 delta, bool horizontal) const;
 	Q_INVOKABLE void display(QObject* parentWindow, qint32 relativeX, qint32 relativeY);
+
+signals:
+	/// Upstream emits this once the item is fully initialized; no macOS
+	/// instance ever exists, so it never fires here.
+	void ready();
+
+	void idChanged();
+	void titleChanged();
+	void iconChanged();
+	void statusChanged();
+	void categoryChanged();
+	void tooltipTitleChanged();
+	void tooltipDescriptionChanged();
+	void hasMenuChanged();
+	void onlyMenuChanged();
 };
 
 ///! System tray.

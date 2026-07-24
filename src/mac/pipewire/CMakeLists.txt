@@ -2,6 +2,7 @@ qt_add_library(quickshell-mac-pipewire STATIC
 	coreaudio.cpp
 	node.cpp
 	service.cpp
+	link.cpp
 )
 
 qt_add_qml_module(quickshell-mac-pipewire

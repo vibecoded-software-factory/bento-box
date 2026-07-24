@@ -6,6 +6,7 @@
 #include "../core/plugin.hpp"
 #include "../windowmanager/windowmanager.hpp"
 #include "panel_window.hpp"
+#include "wayland/wayland.hpp"
 
 namespace {
 
@@ -18,7 +19,15 @@ class MacPlugin: public QsEnginePlugin {
 	bool applies() override { return QGuiApplication::platformName() == "cocoa"; }
 
 	void registerTypes() override {
-		qmlRegisterType<qs::mac::MacPanelInterface>("Quickshell._CocoaOverlay", 1, 0, "PanelWindow");
+		// The WlrLayershell-backed interface, so the Quickshell.Wayland
+		// attached object resolves to the backing window on every PanelWindow
+		// (upstream registers its WaylandPanelInterface the same way).
+		qmlRegisterType<qs::mac::wayland::WaylandPanelInterface>(
+		    "Quickshell._CocoaOverlay",
+		    1,
+		    0,
+		    "PanelWindow"
+		);
 
 		qmlRegisterModuleImport(
 		    "Quickshell",

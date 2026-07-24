@@ -30,6 +30,9 @@ public:
 	// Send a MediaRemote transport command (0 play, 1 pause, 2 toggle, 3 stop,
 	// 4 next, 5 previous) through a one-shot entitled helper.
 	void sendCommand(int command);
+	// Run any adapter subcommand one-shot through the entitled perl
+	// (seek/shuffle/repeat/speed - same path sendCommand's `send` takes).
+	void sendAdapter(const QStringList& args);
 
 private slots:
 	void onStreamData();

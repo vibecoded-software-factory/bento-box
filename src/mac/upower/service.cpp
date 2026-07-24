@@ -140,10 +140,20 @@ void UPower::refresh() {
 				onBattery = psState == QString::fromUtf8(kIOPSBatteryPowerValue);
 				qreal pct = max > 0 ? static_cast<qreal>(current) / max : 0.0;
 
+				// UPower's ladder, from what IOKit can actually attest:
+				// IsCharged is the explicit FullyCharged signal; on AC while
+				// neither charging nor charged the battery is being HELD
+				// below full (optimized charging) - UPower's PendingCharge,
+				// not FullyCharged as previously claimed. An empty battery
+				// still discharging is Empty. PendingDischarge has no macOS
+				// signal and stays unreachable.
+				auto charged = cfBool(desc, CFSTR(kIOPSIsChargedKey));
 				UPowerDeviceState::Enum state;
 				if (charging) state = UPowerDeviceState::Charging;
-				else if (onBattery) state = UPowerDeviceState::Discharging;
-				else state = UPowerDeviceState::FullyCharged;
+				else if (onBattery)
+					state = pct <= 0.01 ? UPowerDeviceState::Empty : UPowerDeviceState::Discharging;
+				else if (charged || pct >= 0.99) state = UPowerDeviceState::FullyCharged;
+				else state = UPowerDeviceState::PendingCharge;
 
 				snapshot["type"] = UPowerDeviceType::Battery;
 				snapshot["powerSupply"] = true;

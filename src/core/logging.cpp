@@ -309,6 +309,10 @@ void LogManager::init(
     const QString& rules,
     const QString& prefix
 ) {
+	static bool alreadyInitialized = false;
+	if (alreadyInitialized) return;
+	alreadyInitialized = true;
+
 	auto* instance = LogManager::instance();
 	instance->colorLogs = color;
 	instance->timestampLogs = timestamp;
@@ -490,12 +494,14 @@ void ThreadLogging::initFs() {
 		delete detailedFile;
 		detailedFile = nullptr;
 	} else {
+		// Designators in Darwin's declaration order (l_start first there);
+		// same fields, silences -Wreorder-init-list on macOS.
 		struct flock lock = {
-		    .l_type = F_WRLCK,
-		    .l_whence = SEEK_SET,
 		    .l_start = 0,
 		    .l_len = 0,
 		    .l_pid = 0,
+		    .l_type = F_WRLCK,
+		    .l_whence = SEEK_SET,
 		};
 
 		if (fcntl(detailedFile->handle(), F_SETLK, &lock) != 0) { // NOLINT
@@ -994,12 +1000,13 @@ bool LogReader::continueReading() {
 }
 
 void LogFollower::FcntlWaitThread::run() {
+	// Darwin declaration order, see above.
 	struct flock lock = {
-	    .l_type = F_RDLCK, // won't block other read locks when we take it
-	    .l_whence = SEEK_SET,
 	    .l_start = 0,
 	    .l_len = 0,
 	    .l_pid = 0,
+	    .l_type = F_RDLCK, // won't block other read locks when we take it
+	    .l_whence = SEEK_SET,
 	};
 
 	auto r = fcntl(this->follower->reader->file->handle(), F_SETLKW, &lock); // NOLINT

@@ -69,6 +69,12 @@ void Socket::onSocketError(QLocalSocket::LocalSocketError error) {
 	qCWarning(logSocket) << "Socket error for" << this << error;
 	emit this->error(error);
 
+	// PORTABLE DIVERGENCE FROM UPSTREAM (the only one in src/io) - an
+	// upstream bug that exists on Linux too, fixed here because bento's
+	// nigiri event socket depends on redialing a restarting compositor.
+	// Destined for an upstream PR; documented in PORT.md, and expected to
+	// conflict (then dissolve) on rebase once upstream takes it.
+	//
 	// A FAILED connection attempt (server absent/refusing while it restarts)
 	// never emits disconnected() - the socket was never connected - so nothing
 	// cleaned up the dead QLocalSocket. It stayed parked in this->socket,
