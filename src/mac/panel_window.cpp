@@ -1,4 +1,5 @@
 #include "panel_window.hpp"
+#include <algorithm>
 #include <map>
 
 #include <qcoreevent.h>
@@ -97,16 +98,23 @@ MacPanelWindow::MacPanelWindow(QObject* parent): ProxyWindowBase(parent) {
 	// reserves nothing.
 	this->bcExclusionEdge.setBinding([this] { return this->bAnchors.value().exclusionEdge(); });
 
-	// Upstream X11's exclusive-zone rule, verbatim (x11/panel_window.cpp:
-	// 102-113): Ignore reserves nothing (0), Normal reserves the set amount,
-	// Auto reserves the panel's own size on the anchored axis plus BOTH of
-	// that axis' margins. (The Wayland backend differs: Ignore is -1 and
-	// Auto adds only the reverse-edge margin, wlr_layershell.cpp:18-35 -
-	// this port follows the X11 backend, the one that also computes zones
-	// client-side.)
+	// The zone's VALUE carries the wlr-layer-shell meaning, because that is the
+	// contract the shells binding this API are written against, and on macOS
+	// this class is the one that positions the surface. Per the protocol
+	// (wlr-layer-shell-unstable-v1.xml, set_exclusive_zone): a NEGATIVE zone
+	// means "do not move me to accommodate other surfaces, extend to the edges
+	// I am anchored to", 0 means "move me clear of other surfaces' zones", and
+	// a positive zone reserves that much. So Ignore is -1 like the Wayland
+	// backend (wlr_layershell.cpp:18-21), NOT X11's 0: X11 feeds the value to a
+	// _NET_WM_STRUT_PARTIAL, which cannot be negative, so that backend never
+	// had to represent "do not move me" at all. updateDimensions reads the SIGN
+	// to decide whether to stack, which is what makes a shell's
+	// `exclusiveZone: -1` behave here the way it does under a compositor.
+	// Auto still follows X11 (BOTH margins on the anchored axis) where the
+	// Wayland backend adds only the reverse-edge margin; not reconciled here.
 	this->bcExclusiveZone.setBinding([this]() -> qint32 {
 		switch (this->bExclusionMode.value()) {
-		case ExclusionMode::Ignore: return 0;
+		case ExclusionMode::Ignore: return -1;
 		case ExclusionMode::Normal: return this->bExclusiveZone;
 		case ExclusionMode::Auto:
 			auto edge = this->bcExclusionEdge.value();
@@ -290,12 +298,20 @@ void MacPanelWindow::updateDimensions(bool propagate) {
 
 	auto screenGeometry = this->mTrackedScreen->geometry();
 
-	// Upstream X11's own-process stacking loop, verbatim (x11/panel_window.
-	// cpp:245-266): shrink the screen by the exclusive zones of same-layer,
-	// same-screen panels below this one, so same-edge panels stack instead
-	// of overlapping. This needs no compositor - it is pure bookkeeping over
-	// this process' own panels.
-	if (this->bExclusionMode != ExclusionMode::Ignore) {
+	// Upstream X11's own-process stacking loop (x11/panel_window.cpp:245-266):
+	// shrink the screen by the exclusive zones of same-layer, same-screen
+	// panels below this one, so same-edge panels stack instead of overlapping.
+	// This needs no compositor - it is pure bookkeeping over this process' own
+	// panels.
+	//
+	// The GATE is the protocol's, not X11's: a surface whose zone is negative
+	// asked not to be moved for anyone else's zone, so it keeps the whole
+	// screen. X11 gates on `mode != Ignore`, which cannot see the difference -
+	// a shell that writes `exclusiveZone: -1` leaves the mode at Normal
+	// (wlr_layershell.hpp:148-151), and under a compositor that -1 reaches the
+	// wire and the surface is left alone. Gating on the mode moved every such
+	// surface down by the bar's zone instead.
+	if (this->bcExclusiveZone.value() >= 0) {
 		for (auto* panel: MacPanelStack::instance()->panels(this)) {
 			// we only care about windows below us
 			if (panel == this) break;
@@ -306,7 +322,10 @@ void MacPanelWindow::updateDimensions(bool propagate) {
 			if (panel->mTrackedScreen != this->mTrackedScreen) continue;
 
 			auto edge = panel->bcExclusionEdge.value();
-			auto exclusiveZone = panel->bcExclusiveZone.value();
+			// A negative zone reserves nothing - it is the "do not move me"
+			// signal, not a reservation. Without the clamp it would GROW the
+			// screen rect by a pixel per such panel below us.
+			auto exclusiveZone = std::max(0, panel->bcExclusiveZone.value());
 
 			screenGeometry.adjust(
 			    edge == Qt::LeftEdge ? exclusiveZone : 0,
