@@ -104,6 +104,21 @@ void configurePanelWindow(
 	if (overlay) behavior |= NSWindowCollectionBehaviorFullScreenAuxiliary;
 	nsWindow.collectionBehavior = behavior;
 
+	// No system drop shadow. macOS derives a window's shadow from the alpha
+	// mask of its surface, and on a borderless transparent window it keeps the
+	// shape captured at the FIRST paint - -[NSWindow invalidateShadow] has not
+	// reliably rebuilt it since 10.12 (rdar://27121204). A panel whose QML
+	// draws a rounded rectangle inside a square surface therefore wears the
+	// SQUARE shadow for the rest of its life: a dark band with 90-degree outer
+	// corners hugging the rounded body, which is what every popout, dash and
+	// modal here was framed with.
+	//
+	// Nothing is lost by dropping it. A wlr-layer-shell surface has no
+	// compositor-drawn shadow either, so upstream never had one, and the shell
+	// draws its own in QML (DankCommon's elevation shader) with the correct
+	// rounded geometry.
+	nsWindow.hasShadow = NO;
+
 	if (desktopBackground) {
 		// A shell's wallpaper layer. macOS draws the desktop itself, so this
 		// surface has no place: it can only sit over the user's windows and hide
