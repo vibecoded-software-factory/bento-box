@@ -117,6 +117,15 @@ void configurePanelWindow(
 	// compositor-drawn shadow either, so upstream never had one, and the shell
 	// draws its own in QML (DankCommon's elevation shader) with the correct
 	// rounded geometry.
+	//
+	// Removing this one makes the shell's OWN elevation shadow visible for the
+	// first time - it was always drawn, just dominated. That second shadow is
+	// NOT a bug and must not be "fixed" here: it follows the rounded corners
+	// and is a user setting (m3ElevationEnabled and friends). The cheap way to
+	// tell them apart when a report comes in: profile the pixels across the
+	// panel boundary. The window shadow leaves a band DARKER THAN BOTH the
+	// backdrop and the panel's fill; the elevation shadow only ever falls off
+	// monotonically between them. See port-docs/MACOS-SHADOWS-AND-ELEVATION.md.
 	nsWindow.hasShadow = NO;
 
 	if (desktopBackground) {
