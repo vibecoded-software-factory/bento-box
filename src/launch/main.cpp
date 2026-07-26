@@ -67,6 +67,13 @@ void checkCrashRelaunch(char** argv, QCoreApplication* coreApplication) {
 			launch({.configPath = info.instance.configPath}, argv, coreApplication);
 		}
 	}
+#else
+	// Both parameters exist only for the relaunch call above, which is compiled
+	// out without the crash handler - and CRASH_HANDLER is a supported build
+	// option (off by default on macOS, where the reporter's /proc/self/exe
+	// relaunch cannot work). Without this the build is not warning-free.
+	Q_UNUSED(argv);
+	Q_UNUSED(coreApplication);
 #endif
 }
 
