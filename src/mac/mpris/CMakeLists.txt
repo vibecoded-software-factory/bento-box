@@ -1,5 +1,6 @@
 # MediaRemoteAdapter.framework: the compiled MediaRemote bridge, loaded at
-# runtime by the entitled system perl (see mediaremote-adapter/VENDOR.md).
+# runtime by the entitled system perl (vendored - see the adapter's own
+# CMakeLists for its origin and what was taken).
 add_subdirectory(mediaremote-adapter)
 
 qt_add_library(quickshell-mac-mpris STATIC
