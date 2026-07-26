@@ -1,6 +1,12 @@
-# Builds MediaRemoteAdapter.framework from the vendored ungive/mediaremote-adapter
-# sources (BSD 3-Clause, see LICENSE / VENDOR.md). Slimmed to the framework
-# target only - the upstream test client is not built.
+# Builds MediaRemoteAdapter.framework from vendored sources.
+#
+#   Source:   https://github.com/ungive/mediaremote-adapter
+#   Revision: 3ac3d4bdf862c7b5399b4fba4df5689f5c38609a
+#   License:  BSD 3-Clause - see LICENSE in this directory (kept verbatim)
+#
+# Only the framework sources, the public header and the perl loader (bin/) are
+# vendored; upstream's test client and build files are dropped in favour of
+# this slim file, which builds the framework target alone.
 #
 # The framework is loaded at runtime by the entitled system perl, which is what
 # lets it reach Apple's restricted MediaRemote framework and, unlike the
