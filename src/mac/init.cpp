@@ -5,6 +5,7 @@
 
 #include "../core/plugin.hpp"
 #include "../windowmanager/windowmanager.hpp"
+#include "compositor.hpp"
 #include "panel_window.hpp"
 #include "wayland/wayland.hpp"
 
@@ -17,6 +18,11 @@ class MacPlugin: public QsEnginePlugin {
 	QList<QString> dependencies() override { return {"window"}; }
 
 	bool applies() override { return QGuiApplication::platformName() == "cocoa"; }
+
+	// Before the QML root exists, and so before any shell can probe for the
+	// compositor. init() rather than registerTypes() because this orders
+	// startup, it does not register anything - and plugin init() runs first.
+	void init() override { qs::mac::awaitCompositorSocket(); }
 
 	void registerTypes() override {
 		// The WlrLayershell-backed interface, so the Quickshell.Wayland
