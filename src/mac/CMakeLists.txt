@@ -15,7 +15,9 @@ install_qml_module(quickshell-mac)
 
 add_library(quickshell-mac-init OBJECT init.cpp)
 
-target_link_libraries(quickshell-mac PRIVATE Qt::Quick "-framework AppKit")
+# QuartzCore: the background blur masks its NSVisualEffectView with a
+# CAShapeLayer built from the blur region (bridge.mm).
+target_link_libraries(quickshell-mac PRIVATE Qt::Quick "-framework AppKit" "-framework QuartzCore")
 target_link_libraries(quickshell-mac-init PRIVATE Qt::Quick Qt::Qml quickshell-mac-wayland)
 
 # No qs_module_pch here: the shared "large" PCH is C++-only, and this target has

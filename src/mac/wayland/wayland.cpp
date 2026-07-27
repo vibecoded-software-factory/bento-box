@@ -4,7 +4,13 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #include <qobject.h>
+#include <qquickwindow.h>
+#include <qregion.h>
 #include <qvariant.h>
+#include <qwindow.h>
+
+#include "../../window/windowinterface.hpp"
+#include "../bridge.hpp"
 
 namespace qs::mac::wayland {
 
@@ -211,15 +217,110 @@ void IdleMonitor::poll() {
 }
 
 BackgroundEffect* BackgroundEffect::qmlAttachedProperties(QObject* object) {
-	// Values are stored so bindings hold; there is no ext-background-effect-v1
-	// on macOS to forward them to.
-	return new BackgroundEffect(object);
+	// Upstream's resolution, unchanged (wayland/background_effect/qml.cpp:26):
+	// a shell attaches to either the proxy window or the interface in front of
+	// it, and both have to reach the same backing window.
+	auto* proxyWindow = qobject_cast<ProxyWindowBase*>(object);
+
+	if (proxyWindow == nullptr) {
+		if (auto* iface = qobject_cast<WindowInterface*>(object)) {
+			proxyWindow = iface->proxyWindow();
+		}
+	}
+
+	if (proxyWindow == nullptr) return nullptr;
+	return new BackgroundEffect(proxyWindow);
+}
+
+BackgroundEffect::BackgroundEffect(ProxyWindowBase* window)
+    : QObject(nullptr)
+    , proxyWindow(window) {
+	QObject::connect(
+	    this->proxyWindow,
+	    &ProxyWindowBase::windowConnected,
+	    this,
+	    &BackgroundEffect::onWindowConnected
+	);
+
+	QObject::connect(
+	    this->proxyWindow,
+	    &QObject::destroyed,
+	    this,
+	    &BackgroundEffect::onProxyWindowDestroyed
+	);
+
+	// A shell that attaches after the window is already up gets no
+	// windowConnected, so cover that entry too.
+	if (this->proxyWindow->backingWindow() != nullptr) this->onWindowConnected();
 }
 
 void BackgroundEffect::setBlurRegion(PendingRegion* region) {
 	if (region == this->mBlurRegion) return;
+
+	if (this->mBlurRegion != nullptr) {
+		QObject::disconnect(this->mBlurRegion, nullptr, this, nullptr);
+	}
+
 	this->mBlurRegion = region;
+
+	if (region != nullptr) {
+		QObject::connect(region, &QObject::destroyed, this, &BackgroundEffect::onBlurRegionDestroyed);
+		QObject::connect(region, &PendingRegion::changed, this, &BackgroundEffect::updateBlurRegion);
+	}
+
 	emit this->blurRegionChanged();
+	this->updateBlurRegion();
+}
+
+void BackgroundEffect::onBlurRegionDestroyed() {
+	this->mBlurRegion = nullptr;
+	emit this->blurRegionChanged();
+	this->updateBlurRegion();
+}
+
+void BackgroundEffect::onProxyWindowDestroyed() {
+	this->proxyWindow = nullptr;
+	this->mBlurRegion = nullptr;
+}
+
+void BackgroundEffect::onWindowConnected() {
+	auto* window = this->proxyWindow->backingWindow();
+	if (window == nullptr) return;
+
+	// A hidden surface blurs nothing, and the native view only exists once the
+	// window has a handle - so both edges have to re-run this. UniqueConnection
+	// because a window can be reconnected across a reload.
+	QObject::connect(
+	    window,
+	    &QWindow::visibleChanged,
+	    this,
+	    &BackgroundEffect::updateBlurRegion,
+	    Qt::UniqueConnection
+	);
+
+	QObject::connect(
+	    this->proxyWindow,
+	    &ProxyWindowBase::polished,
+	    this,
+	    &BackgroundEffect::updateBlurRegion,
+	    Qt::UniqueConnection
+	);
+
+	this->updateBlurRegion();
+}
+
+void BackgroundEffect::updateBlurRegion() {
+	if (this->proxyWindow == nullptr) return;
+	auto* window = this->proxyWindow->backingWindow();
+	if (window == nullptr) return;
+
+	// A null region is the shell asking for the blur to go away, and so is an
+	// invisible window - the native side treats both as "remove it and give the
+	// window its opacity back", so neither needs a separate path here.
+	auto active = this->mBlurRegion != nullptr && window->isVisible();
+	auto region = active ? this->mBlurRegion->build() : QRegion();
+
+	qs::mac::applyBackgroundBlur(window, region, active);
 }
 
 } // namespace qs::mac::wayland

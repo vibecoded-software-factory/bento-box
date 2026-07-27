@@ -1,6 +1,7 @@
 #include "bridge.hpp"
 
 #import <AppKit/AppKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <qhash.h>
 #include <qregion.h>
@@ -327,6 +328,79 @@ void assertPanelFrame(QWindow* window, const QRect& geometry) {
 
 	if (NSEqualRects(nsWindow.frame, target)) return;
 	[nsWindow setFrame:target display:YES];
+}
+
+namespace {
+
+// The blur view per window, so an update reuses one instead of stacking a new
+// NSVisualEffectView under the content on every region change.
+QHash<NSWindow*, NSVisualEffectView*>& blurViews() {
+	static QHash<NSWindow*, NSVisualEffectView*> views; // NOLINT
+	return views;
+}
+
+} // namespace
+
+void applyBackgroundBlur(QWindow* window, const QRegion& region, bool active) {
+	NSWindow* nsWindow = nsWindowFor(window);
+	if (nsWindow == nil) return;
+	NSView* content = nsWindow.contentView;
+	if (content == nil) return;
+
+	NSVisualEffectView* effect = blurViews().value(nsWindow, nil);
+
+	if (!active || region.isEmpty()) {
+		if (effect != nil) {
+			[effect removeFromSuperview];
+			blurViews().remove(nsWindow);
+		}
+		return;
+	}
+
+	// `behindWindow` blending samples what is BEHIND the window, so the window
+	// must stop claiming it is opaque or the window server never composites
+	// anything under it to sample.
+	nsWindow.opaque = NO;
+	nsWindow.backgroundColor = NSColor.clearColor;
+
+	if (effect == nil) {
+		effect = [[NSVisualEffectView alloc] initWithFrame:content.bounds];
+		effect.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+		// HUD rather than a semantic material: the shell picks its own tint in
+		// QML (Theme drops the surface alpha when BlurService.enabled), so the
+		// effect view is asked for blur and as little colour as possible.
+		effect.material = NSVisualEffectMaterialHUDWindow;
+		// Active regardless of app focus. A shell surface is almost never in
+		// the frontmost app, and the default follows window activation, which
+		// would leave the bar un-blurred exactly when it is being looked at.
+		effect.state = NSVisualEffectStateActive;
+		effect.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+		effect.wantsLayer = YES;
+		// Below every sibling: Qt's render view has to draw ON TOP of it.
+		[content addSubview:effect positioned:NSWindowBelow relativeTo:nil];
+		blurViews().insert(nsWindow, effect);
+	}
+
+	effect.frame = content.bounds;
+
+	// Qt hands the region in its own top-left-origin space; an unflipped
+	// NSView counts from the bottom, so each rect is mirrored about the
+	// content height. Using the rects rather than boundingRect is what keeps a
+	// rounded Region's corners - QRegion approximates the curve with a stack of
+	// spans, and the mask reproduces it.
+	CGFloat height = content.bounds.size.height;
+	CGMutablePathRef path = CGPathCreateMutable();
+	for (const auto& rect: region) {
+		CGPathAddRect(
+		    path,
+		    nullptr,
+		    CGRectMake(rect.x(), height - rect.y() - rect.height(), rect.width(), rect.height())
+		);
+	}
+	auto* mask = [CAShapeLayer layer];
+	mask.path = path;
+	CGPathRelease(path);
+	effect.layer.mask = mask;
 }
 
 } // namespace qs::mac

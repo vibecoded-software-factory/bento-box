@@ -64,6 +64,21 @@ void applyInputMask(QWindow* window, const QRegion& region, bool active);
 // Drop any input-mask tracking for this window (teardown path).
 void clearInputMask(QWindow* window);
 
+// Blur whatever is behind a surface, inside `region`.
+//
+// The macOS stand-in for ext-background-effect-v1, which is what a shell binds
+// to blur behind a layer surface. There is no compositor to ask here, so the
+// blur is drawn by the window itself: an NSVisualEffectView in
+// `behindWindow` blending mode sits underneath the Qt content and samples what
+// is behind the window, which is the same result the protocol produces.
+//
+// `region` is in the window's local, top-left-origin Qt coordinates and is
+// flipped here; its rectangles become the effect view's mask, so a rounded
+// Region blurs with rounded corners rather than as its bounding box. Passing
+// an empty region, or active=false, removes the effect and gives the window
+// its opacity back.
+void applyBackgroundBlur(QWindow* window, const QRegion& region, bool active);
+
 // Cheap, idempotent re-assert of the panel's window level. Freshly-shown
 // panels race Qt's own flag application: the deferred full config sometimes
 // loses and the window spends its first frames at Qt's floating level, BELOW
