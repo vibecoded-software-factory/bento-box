@@ -16,7 +16,7 @@ namespace {
 // The notify-send shim connects here and writes one JSON line per
 // notification. A fixed path both sides agree on, like the DMS daemon sockets.
 const QString SOCKET_PATH = QStringLiteral("/tmp/dms-notifications.sock");
-}
+} // namespace
 
 QString NotificationUrgency::toString(NotificationUrgency::Enum value) {
 	switch (value) {
