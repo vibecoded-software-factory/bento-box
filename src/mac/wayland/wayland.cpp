@@ -232,9 +232,7 @@ BackgroundEffect* BackgroundEffect::qmlAttachedProperties(QObject* object) {
 	return new BackgroundEffect(proxyWindow);
 }
 
-BackgroundEffect::BackgroundEffect(ProxyWindowBase* window)
-    : QObject(nullptr)
-    , proxyWindow(window) {
+BackgroundEffect::BackgroundEffect(ProxyWindowBase* window): QObject(nullptr), proxyWindow(window) {
 	QObject::connect(
 	    this->proxyWindow,
 	    &ProxyWindowBase::windowConnected,
