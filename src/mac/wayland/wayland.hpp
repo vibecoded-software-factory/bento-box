@@ -271,17 +271,18 @@ private:
 /// Applies background blur behind a @@Quickshell.QsWindow or subclass,
 /// as an attached object, using the [ext-background-effect-v1] Wayland protocol.
 ///
-/// Inert on macOS: the protocol does not exist here and bento does not wire
-/// the native NSVisualEffectView analogue - @@blurRegion is stored so
-/// bindings hold, but no blur is applied. (Zero DMS consumers today; present
-/// so upstream's full Quickshell.Wayland surface resolves.)
+/// On Wayland the compositor does the blurring, asked over the protocol. macOS
+/// has no such protocol and no compositor to ask, so the window blurs its own
+/// backdrop instead: an `NSVisualEffectView` in `behindWindow` blending mode
+/// sits under the Qt content, masked to @@blurRegion
+/// (`qs::mac::applyBackgroundBlur`). The observable result is the same, which
+/// is what lets a shell written against the protocol work here unchanged.
 ///
 /// [ext-background-effect-v1]: https://wayland.app/protocols/ext-background-effect-v1
 class BackgroundEffect: public QObject {
 	Q_OBJECT;
 	// clang-format off
 	/// Region to blur behind the surface. Set to null to remove blur.
-	/// Stored but never applied on macOS - see the type note.
 	Q_PROPERTY(PendingRegion* blurRegion READ blurRegion WRITE setBlurRegion NOTIFY blurRegionChanged);
 	// clang-format on
 	QML_ELEMENT;
@@ -289,7 +290,7 @@ class BackgroundEffect: public QObject {
 	QML_ATTACHED(BackgroundEffect);
 
 public:
-	explicit BackgroundEffect(QObject* parent = nullptr): QObject(parent) {}
+	explicit BackgroundEffect(ProxyWindowBase* window);
 
 	static BackgroundEffect* qmlAttachedProperties(QObject* object);
 
@@ -299,7 +300,20 @@ public:
 signals:
 	void blurRegionChanged();
 
+private slots:
+	void onWindowConnected();
+	void onProxyWindowDestroyed();
+	void onBlurRegionDestroyed();
+	/// Re-derive the mask and push it to the native view.
+	///
+	/// Driven by the region's own `changed`, by the window's visibility and by
+	/// every polish: a blur region is normally bound to an item's geometry, and
+	/// polish is where that geometry is settled for the frame - the same hook
+	/// the input mask already uses.
+	void updateBlurRegion();
+
 private:
+	ProxyWindowBase* proxyWindow = nullptr;
 	PendingRegion* mBlurRegion = nullptr;
 };
 
