@@ -8,6 +8,7 @@
 #include <qqmlengine.h>
 #include <qquickwindow.h>
 #include <qrect.h>
+#include <qregion.h>
 #include <qscreen.h>
 #include <qtimer.h>
 #include <qtmetamacros.h>
@@ -16,6 +17,7 @@
 
 #include "../core/generation.hpp"
 #include "../core/qmlscreen.hpp"
+#include "../core/region.hpp"
 #include "../core/types.hpp"
 #include "../window/panelinterface.hpp"
 #include "../window/proxywindow.hpp"
@@ -225,10 +227,40 @@ void MacPanelWindow::connectWindow() {
 
 void MacPanelWindow::onPolished() {
 	this->ProxyWindowBase::onPolished();
-	if (this->window != nullptr) {
-		qs::mac::applyInputMask(this->window, this->window->mask(), this->mask() != nullptr);
-		qs::mac::assertPanelLevel(this->window, this->bAboveWindows.value(), this->mOverlay);
+	if (this->window == nullptr) return;
+
+	// The QML `mask` is an INPUT region and nothing else. On Wayland it becomes
+	// wl_surface::set_input_region, which decides what the surface can be
+	// clicked through - it never changes a pixel. Cocoa has no such concept:
+	// QWindow::setMask there is the window's SHAPE, and everything outside it
+	// is clipped away. The base class writes the region straight into
+	// setMask (proxywindow.cpp, ProxyWindowBase::onPolished), so on macOS every
+	// shell that masks itself was also cropping what it drew.
+	//
+	// That is not a theoretical mismatch. DMS masks its OSDs with
+	// `Region { item: bgShadowLayer }` (DankOSD.qml), and bgShadowLayer sits
+	// inside a container that animates `scale` from 0.9 to 1 on show. The region
+	// is resolved through that transform, so it is computed at 0.9 and is never
+	// recomputed when the scale settles - a `scale` change does not dirty the
+	// mask. The window then spent its whole life clipped to a rect 10% smaller
+	// than its content: measured 234px of a 260px card, which cut the rounded
+	// corners off and left the volume slider running into the crop with no
+	// padding. It looked like broken geometry; the geometry was always right.
+	//
+	// So: compute the region ourselves, hand it to the native input-shape
+	// emulation, and leave the window unmasked so it cannot clip. Computed from
+	// our own `mask()` rather than read back from the QWindow, because the base
+	// only writes it when the region changed, while this runs on every polish -
+	// reading back after clearing would report "empty region, mask active" and
+	// make the whole surface click-through.
+	auto region = QRegion();
+	if (auto* pending = this->mask()) {
+		region = pending->applyTo(QRect(0, 0, this->width(), this->height()));
 	}
+
+	qs::mac::applyInputMask(this->window, region, this->mask() != nullptr);
+	this->window->setMask(QRegion());
+	qs::mac::assertPanelLevel(this->window, this->bAboveWindows.value(), this->mOverlay);
 }
 
 void MacPanelWindow::trySetWidth(qint32 implicitWidth) {
