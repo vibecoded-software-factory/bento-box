@@ -89,7 +89,25 @@ void IpcServerConnection::onReadyRead() {
 
 	// async connections reparent
 	if (dynamic_cast<IpcServer*>(this->parent()) != nullptr) {
-		this->deleteLater();
+		// Hand the socket back to Qt to close instead of deleting it here.
+		// deleteLater() destroys the QLocalSocket with whatever the reply left
+		// in its write buffer, and destruction discards it - the client sees the
+		// peer vanish mid-reply, which is a PeerClosedError and no answer at
+		// all. disconnectFromServer() puts the socket in ClosingState instead,
+		// drains the buffer, and only then emits disconnected, where
+		// onDisconnected does the deleteLater.
+		//
+		// Nothing here is macOS-specific, but only macOS shows it: a unix socket
+		// buffer is ~208KB on Linux and a few KB here, so every reply used to
+		// fit in one go and the discard never had anything to discard. `ipc
+		// show` against DMS is far past that - it enumerates every IpcHandler
+		// the shell registers - so it failed every time, while a small shell
+		// answered fine. Reproduced with 60 targets of 12 functions.
+		if (this->socket->state() == QLocalSocket::UnconnectedState) {
+			this->deleteLater();
+		} else {
+			this->socket->disconnectFromServer();
+		}
 	}
 }
 
